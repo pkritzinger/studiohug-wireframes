@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Wireframe Prototype — studio hug feedback system</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --ink: #1a1714;
+      --paper: #f5f1eb;
+      --cream: #ede8df;
+      --accent: #d94f2b;
+      --accent-soft: rgba(217,79,43,0.10);
+      --accent-border: rgba(217,79,43,0.50);
+      --green: #2e7d5e;
+      --muted: #8c8580;
+      --muted2: #b5b0ab;
+      --radius: 4px;
+      --sidebar-w: 360px;
+    }
+    body { font-family: 'DM Mono', monospace; background: var(--paper); color: var(--ink); font-size: 14px; line-height: 1.6; }
+
+    /* ── Feedback zones ── */
+    .fb-zone { position: relative; cursor: crosshair; transition: outline 0.12s, background 0.12s; outline: 2px dashed transparent; }
+    .fb-zone:hover { outline: 2px dashed var(--accent-border); background: var(--accent-soft); }
+    .fb-zone:hover .fb-hint { opacity: 1; }
+    .fb-hint { position: absolute; top: 6px; right: 8px; font-size: 10px; font-family: 'DM Mono', monospace; color: var(--accent); background: white; border: 1px solid var(--accent-border); padding: 2px 8px; border-radius: 20px; pointer-events: none; opacity: 0; transition: opacity 0.12s; white-space: nowrap; z-index: 10; }
+    .fb-has-comment::after { content: attr(data-count); position: absolute; top: 6px; left: 8px; background: var(--accent); color: white; font-size: 9px; font-family: 'DM Mono', monospace; padding: 1px 7px; border-radius: 20px; z-index: 10; }
+
+    /* ── New comment panel ── */
+    #fb-panel { display: none; position: fixed; bottom: 24px; right: 24px; width: 320px; background: white; border: 1.5px solid var(--ink); border-radius: 8px; box-shadow: 4px 4px 0 var(--ink); z-index: 1100; font-family: 'DM Mono', monospace; overflow: hidden; }
+    #fb-panel.open { display: block; animation: slideUp 0.18s ease; }
+    @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .fb-panel-hd { background: var(--ink); color: var(--paper); padding: 10px 14px; display: flex; justify-content: space-between; align-items: flex-start; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+    #fb-panel-section { color: var(--accent); font-size: 10px; margin-top: 2px; }
+    .fb-panel-hd button { background: none; border: none; color: var(--paper); cursor: pointer; font-size: 18px; line-height: 1; }
+    .fb-panel-bd { padding: 14px; }
+    .fb-panel-bd label { display: block; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+    .fb-input { width: 100%; font-family: 'DM Mono', monospace; font-size: 13px; border: 1.5px solid var(--cream); border-radius: var(--radius); padding: 8px 10px; background: var(--paper); color: var(--ink); margin-bottom: 10px; resize: none; transition: border-color 0.12s; }
+    .fb-input:focus { outline: none; border-color: var(--ink); }
+    .fb-btn-primary { width: 100%; background: var(--accent); color: white; border: none; border-radius: var(--radius); padding: 9px; font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.06em; cursor: pointer; text-transform: uppercase; }
+    .fb-btn-primary:hover { opacity: 0.85; }
+    #fb-success { display: none; text-align: center; padding: 20px 14px; font-size: 12px; color: var(--muted); }
+    #fb-success span { display: block; font-size: 24px; margin-bottom: 6px; }
+
+    /* ── Sidebar ── */
+    #fb-sidebar { position: fixed; top: 0; right: 0; width: var(--sidebar-w); height: 100vh; background: white; border-left: 1.5px solid var(--ink); z-index: 999; font-family: 'DM Mono', monospace; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.22s cubic-bezier(.4,0,.2,1); box-shadow: -4px 0 24px rgba(0,0,0,0.08); }
+    #fb-sidebar.open { transform: translateX(0); }
+
+    .sb-header { background: var(--ink); color: var(--paper); padding: 14px 16px; display: flex; justify-content: space-between; align-items: flex-start; flex-shrink: 0; }
+    .sb-header h3 { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; }
+    .sb-header-meta { font-size: 10px; color: var(--muted2); margin-top: 3px; }
+    .sb-header button { background: none; border: none; color: var(--paper); cursor: pointer; font-size: 18px; }
+
+    .sb-tabs { display: flex; border-bottom: 1.5px solid var(--cream); flex-shrink: 0; background: var(--paper); }
+    .sb-tab { flex: 1; padding: 8px 6px; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; text-align: center; cursor: pointer; border: none; background: none; color: var(--muted); border-bottom: 2px solid transparent; transition: color 0.12s, border-color 0.12s; font-family: 'DM Mono', monospace; }
+    .sb-tab.active { color: var(--ink); border-bottom-color: var(--accent); }
+
+    #sb-scroll { flex: 1; overflow-y: auto; padding: 12px; }
+
+    /* Section groups */
+    .sb-group { margin-bottom: 8px; }
+    .sb-group-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; background: var(--cream); border-radius: var(--radius); cursor: pointer; border: 1.5px solid transparent; transition: border-color 0.12s; user-select: none; }
+    .sb-group-header:hover { border-color: var(--ink); }
+    .sb-group-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink); font-weight: 500; }
+    .sb-group-right { display: flex; align-items: center; gap: 8px; }
+    .sb-group-badge { background: var(--accent); color: white; font-size: 9px; padding: 1px 7px; border-radius: 20px; }
+    .sb-chevron { font-size: 10px; color: var(--muted); transition: transform 0.18s; display: inline-block; }
+    .sb-group.collapsed .sb-chevron { transform: rotate(-90deg); }
+    .sb-group-body { padding-top: 6px; }
+    .sb-group.collapsed .sb-group-body { display: none; }
+
+    /* Comment card */
+    .sb-card { background: var(--paper); border: 1.5px solid var(--cream); border-radius: var(--radius); margin-bottom: 6px; overflow: hidden; transition: border-color 0.12s; }
+    .sb-card:hover { border-color: var(--muted2); }
+    .sb-card.editing { border-color: var(--ink); }
+    .sb-card.resolved { opacity: 0.6; }
+
+    .sb-card-main { padding: 10px 12px 8px; }
+    .sb-card-text { font-size: 13px; line-height: 1.55; color: var(--ink); margin-bottom: 6px; white-space: pre-wrap; }
+    .sb-card-meta { font-size: 10px; color: var(--muted); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; }
+    .sb-card-author { font-weight: 500; }
+    .sb-resolved-badge { color: var(--green); font-size: 10px; }
+
+    /* Card action bar */
+    .sb-card-actions { display: flex; border-top: 1px solid var(--cream); }
+    .sb-action { flex: 1; padding: 6px 2px; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.05em; text-transform: uppercase; border: none; background: none; cursor: pointer; color: var(--muted); transition: background 0.1s, color 0.1s; border-right: 1px solid var(--cream); }
+    .sb-action:last-child { border-right: none; }
+    .sb-action:hover { background: var(--cream); color: var(--ink); }
+    .sb-action.danger:hover { background: rgba(217,79,43,0.08); color: var(--accent); }
+
+    /* Inline edit */
+    .sb-edit-area { display: none; padding: 10px 12px; border-top: 1px solid var(--cream); background: white; }
+    .sb-edit-area.open { display: block; }
+    .sb-edit-area textarea { width: 100%; font-family: 'DM Mono', monospace; font-size: 13px; border: 1.5px solid var(--cream); border-radius: var(--radius); padding: 7px 9px; resize: none; background: var(--paper); color: var(--ink); margin-bottom: 8px; }
+    .sb-edit-area textarea:focus { outline: none; border-color: var(--ink); }
+    .sb-edit-actions { display: flex; gap: 6px; }
+    .sb-btn-save { flex: 1; background: var(--ink); color: var(--paper); border: none; border-radius: var(--radius); padding: 6px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; }
+    .sb-btn-cancel { flex: 1; background: none; color: var(--muted); border: 1.5px solid var(--cream); border-radius: var(--radius); padding: 6px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; }
+
+    /* Replies */
+    .sb-replies { border-top: 1px solid var(--cream); }
+    .sb-reply { padding: 8px 12px 8px 20px; border-bottom: 1px solid var(--cream); position: relative; }
+    .sb-reply:last-child { border-bottom: none; }
+    .sb-reply::before { content: ''; position: absolute; left: 10px; top: 0; bottom: 0; width: 2px; background: var(--cream); }
+    .sb-reply-text { font-size: 12px; color: var(--ink); line-height: 1.5; margin-bottom: 4px; white-space: pre-wrap; }
+    .sb-reply-meta { font-size: 10px; color: var(--muted); display: flex; justify-content: space-between; }
+    .sb-reply-del { background: none; border: none; color: var(--muted2); cursor: pointer; font-size: 10px; font-family: 'DM Mono', monospace; }
+    .sb-reply-del:hover { color: var(--accent); }
+
+    /* Reply form */
+    .sb-reply-form { display: none; padding: 8px 12px; border-top: 1px solid var(--cream); background: rgba(46,125,94,0.04); }
+    .sb-reply-form.open { display: block; }
+    .sb-reply-form textarea { width: 100%; font-family: 'DM Mono', monospace; font-size: 12px; border: 1.5px solid var(--cream); border-radius: var(--radius); padding: 6px 8px; resize: none; background: white; color: var(--ink); margin-bottom: 6px; }
+    .sb-reply-form textarea:focus { outline: none; border-color: var(--green); }
+    .sb-reply-form input { width: 100%; font-family: 'DM Mono', monospace; font-size: 11px; border: 1.5px solid var(--cream); border-radius: var(--radius); padding: 5px 8px; background: white; color: var(--ink); margin-bottom: 6px; }
+    .sb-reply-form input:focus { outline: none; border-color: var(--green); }
+    .sb-reply-submit { width: 100%; background: var(--green); color: white; border: none; border-radius: var(--radius); padding: 7px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; }
+    .sb-reply-submit:hover { opacity: 0.88; }
+
+    /* Empty */
+    .sb-empty { text-align: center; color: var(--muted); font-size: 12px; padding: 48px 20px; line-height: 2.2; }
+
+    /* Sidebar footer */
+    .sb-footer { flex-shrink: 0; padding: 12px; border-top: 1.5px solid var(--cream); display: flex; flex-direction: column; gap: 8px; }
+    .sb-footer-btn { display: block; width: 100%; padding: 10px; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: var(--radius); text-align: center; }
+    .sb-footer-btn.dark { background: var(--ink); color: var(--paper); border: none; }
+    .sb-footer-btn.light { background: white; color: var(--ink); border: 1.5px solid var(--ink); }
+    .sb-footer-btn:hover { opacity: 0.85; }
+
+    /* ── Toolbar ── */
+    #fb-toolbar { position: fixed; bottom: 24px; left: 24px; display: flex; gap: 8px; z-index: 1000; }
+    .tb-btn { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 14px; border-radius: 20px; border: 1.5px solid var(--ink); cursor: pointer; background: white; color: var(--ink); box-shadow: 2px 2px 0 var(--ink); transition: transform 0.1s, box-shadow 0.1s; }
+    .tb-btn:hover  { transform: translate(-1px,-1px); box-shadow: 3px 3px 0 var(--ink); }
+    .tb-btn:active { transform: translate(1px,1px);   box-shadow: 1px 1px 0 var(--ink); }
+    #tb-count { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 2px 2px 0 rgba(217,79,43,.35); display: none; }
+
+    .wf-badge { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--paper); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 16px; border-radius: 20px; z-index: 100; opacity: 0.65; pointer-events: none; }
+
+    /* ── Wireframe page ── */
+    .wf-wrapper { max-width: 960px; margin: 0 auto; padding: 0 24px 140px; }
+    .wf-nav { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; border-bottom: 1.5px solid var(--ink); }
+    .wf-logo { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; }
+    .wf-nav-links { display: flex; gap: 28px; list-style: none; }
+    .wf-nav-links a { text-decoration: none; color: var(--ink); font-size: 13px; opacity: 0.6; }
+    .wf-nav-links a:hover { opacity: 1; }
+    .wf-nav-cta { background: var(--ink); color: var(--paper); padding: 8px 18px; border-radius: 2px; font-size: 12px; text-decoration: none; letter-spacing: 0.04em; }
+    .wf-hero { padding: 72px 0 56px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+    .wf-hero-eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin-bottom: 14px; }
+    .wf-hero h1 { font-family: 'Fraunces', serif; font-size: 52px; line-height: 1.1; font-weight: 300; margin-bottom: 20px; }
+    .wf-hero h1 em { font-style: italic; color: var(--accent); }
+    .wf-hero-body { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 28px; }
+    .wf-hero-actions { display: flex; gap: 12px; align-items: center; }
+    .btn-primary { background: var(--ink); color: var(--paper); padding: 12px 24px; border-radius: 2px; font-size: 13px; text-decoration: none; letter-spacing: 0.04em; display: inline-block; }
+    .btn-ghost { color: var(--ink); font-size: 13px; text-decoration: none; border-bottom: 1px solid var(--muted); padding-bottom: 1px; }
+    .wf-hero-visual { background: var(--cream); border: 1.5px solid var(--ink); border-radius: 4px; height: 320px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+    .wf-section-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); border-top: 1.5px solid var(--ink); padding-top: 14px; margin-bottom: 36px; }
+    .wf-features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 64px; }
+    .wf-feature-card { background: var(--cream); border: 1.5px solid transparent; border-radius: 4px; padding: 24px; }
+    .wf-feature-icon { width: 36px; height: 36px; background: var(--ink); border-radius: 2px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .wf-feature-card h3 { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 300; margin-bottom: 8px; }
+    .wf-feature-card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+    .wf-pricing { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 64px; }
+    .wf-price-card { border: 1.5px solid var(--ink); border-radius: 4px; padding: 28px 24px; }
+    .wf-price-card.featured { background: var(--ink); color: var(--paper); }
+    .wf-price-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; opacity: 0.6; }
+    .wf-price-amount { font-family: 'Fraunces', serif; font-size: 36px; font-weight: 300; margin-bottom: 6px; }
+    .wf-price-period { font-size: 11px; opacity: 0.5; margin-bottom: 20px; }
+    .wf-price-features { list-style: none; margin-bottom: 24px; }
+    .wf-price-features li { font-size: 12px; padding: 5px 0; border-bottom: 1px solid rgba(0,0,0,0.06); opacity: 0.8; }
+    .wf-price-card.featured .wf-price-features li { border-color: rgba(255,255,255,0.1); }
+    .wf-btn-plan { display: block; text-align: center; padding: 10px; border-radius: 2px; font-size: 12px; letter-spacing: 0.06em; text-decoration: none; border: 1.5px solid var(--ink); color: var(--ink); }
+    .wf-price-card.featured .wf-btn-plan { border-color: var(--paper); color: var(--paper); }
+    .wf-footer { border-top: 1.5px solid var(--ink); padding: 28px 0; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--muted); }
+  </style>
+</head>
+<body>
+
+<div class="wf-badge">Wireframe v1 — studio hug</div>
+
+<div class="wf-wrapper">
+
+  <nav class="wf-nav fb-zone" data-section="navigation" data-label="Navigation">
+    <div class="fb-hint">+ Feedback</div>
+    <div class="wf-logo">Brand</div>
+    <ul class="wf-nav-links">
+      <li><a href="#">Product</a></li>
+      <li><a href="#">Pricing</a></li>
+      <li><a href="#">About</a></li>
+    </ul>
+    <a href="#" class="wf-nav-cta">Get started</a>
+  </nav>
+
+  <section class="wf-hero fb-zone" data-section="hero" data-label="Hero Section">
+    <div class="fb-hint">+ Feedback</div>
+    <div class="wf-hero-content">
+      <div class="wf-hero-eyebrow">New in 2025</div>
+      <h1>The <em>smarter</em> way to manage your work</h1>
+      <p class="wf-hero-body">Placeholder body text. Describe the core value proposition in two short sentences. Focus on outcome, not features.</p>
+      <div class="wf-hero-actions">
+        <a href="#" class="btn-primary">Start for free</a>
+        <a href="#" class="btn-ghost">See how it works →</a>
+      </div>
+    </div>
+    <div class="wf-hero-visual">[ Hero image / illustration ]</div>
+  </section>
+
+  <div class="wf-section-label">Features</div>
+  <div class="wf-features">
+    <div class="wf-feature-card fb-zone" data-section="feature-1" data-label="Feature Card 1">
+      <div class="fb-hint">+ Feedback</div>
+      <div class="wf-feature-icon">⚡</div>
+      <h3>Feature one</h3>
+      <p>Short description of what this feature does and why it matters to the user.</p>
+    </div>
+    <div class="wf-feature-card fb-zone" data-section="feature-2" data-label="Feature Card 2">
+      <div class="fb-hint">+ Feedback</div>
+      <div class="wf-feature-icon">🔒</div>
+      <h3>Feature two</h3>
+      <p>Short description of what this feature does and why it matters to the user.</p>
+    </div>
+    <div class="wf-feature-card fb-zone" data-section="feature-3" data-label="Feature Card 3">
+      <div class="fb-hint">+ Feedback</div>
+      <div class="wf-feature-icon">📊</div>
+      <h3>Feature three</h3>
+      <p>Short description of what this feature does and why it matters to the user.</p>
+    </div>
+  </div>
+
+  <div class="wf-section-label">Pricing</div>
+  <div class="wf-pricing fb-zone" data-section="pricing" data-label="Pricing Section">
+    <div class="fb-hint">+ Feedback</div>
+    <div class="wf-price-card">
+      <div class="wf-price-label">Starter</div>
+      <div class="wf-price-amount">€0</div>
+      <div class="wf-price-period">per month</div>
+      <ul class="wf-price-features"><li>Feature A</li><li>Feature B</li><li>Feature C</li></ul>
+      <a href="#" class="wf-btn-plan">Get started</a>
+    </div>
+    <div class="wf-price-card featured">
+      <div class="wf-price-label">Pro</div>
+      <div class="wf-price-amount">€29</div>
+      <div class="wf-price-period">per month</div>
+      <ul class="wf-price-features"><li>Everything in Starter</li><li>Feature D</li><li>Feature E</li></ul>
+      <a href="#" class="wf-btn-plan">Get started</a>
+    </div>
+    <div class="wf-price-card">
+      <div class="wf-price-label">Enterprise</div>
+      <div class="wf-price-amount">€99</div>
+      <div class="wf-price-period">per month</div>
+      <ul class="wf-price-features"><li>Everything in Pro</li><li>Feature F</li><li>Custom SLA</li></ul>
+      <a href="#" class="wf-btn-plan">Contact us</a>
+    </div>
+  </div>
+
+  <footer class="wf-footer fb-zone" data-section="footer" data-label="Footer">
+    <div class="fb-hint">+ Feedback</div>
+    <span>© 2025 Brand GmbH</span>
+    <span>Imprint · Privacy · Contact</span>
+  </footer>
+
+</div>
+
+<!-- ══ NEW COMMENT PANEL ══ -->
+<div id="fb-panel">
+  <div class="fb-panel-hd">
+    <div>
+      <div style="font-weight:500">Leave feedback</div>
+      <div id="fb-panel-section">—</div>
+    </div>
+    <button id="fb-close">×</button>
+  </div>
+  <div class="fb-panel-bd">
+    <div id="fb-form">
+      <label>Your name</label>
+      <input id="fb-name-input" class="fb-input" type="text" placeholder="e.g. Maria Muster" />
+      <label>Your feedback</label>
+      <textarea id="fb-text-input" class="fb-input" rows="4" placeholder="What should change here? What's missing? What's unclear?"></textarea>
+      <button class="fb-btn-primary" id="fb-submit">Save feedback</button>
+    </div>
+    <div id="fb-success"><span>✓</span>Feedback saved!</div>
+  </div>
+</div>
+
+<!-- ══ SIDEBAR ══ -->
+<div id="fb-sidebar">
+  <div class="sb-header">
+    <div>
+      <h3>Feedback</h3>
+      <div class="sb-header-meta" id="sb-meta">—</div>
+    </div>
+    <button id="fb-sidebar-close">×</button>
+  </div>
+  <div class="sb-tabs">
+    <button class="sb-tab active" data-filter="all">All</button>
+    <button class="sb-tab" data-filter="open">Open</button>
+    <button class="sb-tab" data-filter="resolved">Resolved</button>
+  </div>
+  <div id="sb-scroll"></div>
+  <div class="sb-footer">
+    <div id="sb-sync-status" style="font-size:10px;text-align:center;padding:4px 0 2px;letter-spacing:0.06em;"></div>
+    <button class="sb-footer-btn dark" id="fb-export-btn">⬇ Export as CSV</button>
+    <button class="sb-footer-btn light" id="fb-copy-html-btn">⟳ Copy HTML + feedback for Claude</button>
+  </div>
+</div>
+
+<!-- ══ TOOLBAR ══ -->
+<div id="fb-toolbar">
+  <button class="tb-btn" id="tb-view-btn">View feedback</button>
+  <button class="tb-btn" id="tb-count"></button>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  SUPABASE CONFIG — fill in your 3 values, then save the file
+// ══════════════════════════════════════════════════════════════
+const SUPABASE_URL  = 'https://ahzqpvhpogizrkxqxpgb.supabase.co';   // https://xxxxxxxxxx.supabase.co
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFoenFwdmhwb2dpenJreHF4cGdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2OTg3NDcsImV4cCI6MjA5NDI3NDc0N30.txFNtp9SwN8UZIcFf0x7M6M8PjH6hj4CkQadc73Vwpk';      // eyJh... (long string)
+const PROJECT_NAME  = 'wireframe-prototype';  // e.g. 'HGV — BI Tool v1'
+// ══════════════════════════════════════════════════════════════
+
+const SB_READY = SUPABASE_URL !== 'YOUR_PROJECT_URL_HERE' && SUPABASE_KEY !== 'YOUR_ANON_KEY_HERE';
+
+// ── Supabase REST helpers ───────────────────────────────────
+const SB_HDR = () => ({
+  'Content-Type':  'application/json',
+  'apikey':        SUPABASE_KEY,
+  'Authorization': `Bearer ${SUPABASE_KEY}`
+});
+
+async function sbInsertFeedback(row) {
+  if (!SB_READY) return null;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/feedback`, {
+      method: 'POST',
+      headers: { ...SB_HDR(), 'Prefer': 'return=representation' },
+      body: JSON.stringify({
+        section_id:     row.section,
+        section_label:  row.label,
+        reviewer_name:  row.name,
+        feedback_text:  row.text,
+        resolved:       false,
+        page_url:       location.href,
+        project_name:   PROJECT_NAME
+      })
+    });
+    const data = await res.json();
+    return Array.isArray(data) ? data[0] : data;
+  } catch(e) { console.warn('[SB] insert feedback failed', e); return null; }
+}
+
+async function sbUpdateFeedback(sbId, fields) {
+  if (!SB_READY || !sbId) return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/feedback?id=eq.${sbId}`, {
+      method: 'PATCH', headers: SB_HDR(), body: JSON.stringify(fields)
+    });
+  } catch(e) { console.warn('[SB] update feedback failed', e); }
+}
+
+async function sbDeleteFeedback(sbId) {
+  if (!SB_READY || !sbId) return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/feedback?id=eq.${sbId}`, {
+      method: 'DELETE', headers: SB_HDR()
+    });
+  } catch(e) { console.warn('[SB] delete feedback failed', e); }
+}
+
+async function sbInsertReply(feedbackSbId, row) {
+  if (!SB_READY || !feedbackSbId) return null;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/replies`, {
+      method: 'POST',
+      headers: { ...SB_HDR(), 'Prefer': 'return=representation' },
+      body: JSON.stringify({
+        feedback_id:  feedbackSbId,
+        author_name:  row.name,
+        reply_text:   row.text
+      })
+    });
+    const data = await res.json();
+    return Array.isArray(data) ? data[0] : data;
+  } catch(e) { console.warn('[SB] insert reply failed', e); return null; }
+}
+
+async function sbDeleteReply(sbId) {
+  if (!SB_READY || !sbId) return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/replies?id=eq.${sbId}`, {
+      method: 'DELETE', headers: SB_HDR()
+    });
+  } catch(e) { console.warn('[SB] delete reply failed', e); }
+}
+
+async function sbFetchAll() {
+  if (!SB_READY) return null;
+  setSyncStatus('syncing');
+  try {
+    const fbRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/feedback?project_name=eq.${encodeURIComponent(PROJECT_NAME)}&order=created_at.asc`,
+      { headers: SB_HDR() }
+    );
+    const fbRows = await fbRes.json();
+    if (!Array.isArray(fbRows)) { setSyncStatus('error'); return null; }
+    if (!fbRows.length) { setSyncStatus('idle'); return []; }
+
+    const ids = fbRows.map(r => r.id).join(',');
+    const repRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/replies?feedback_id=in.(${ids})&order=created_at.asc`,
+      { headers: SB_HDR() }
+    );
+    const repRows = await repRes.json();
+
+    const merged = fbRows.map(row => ({
+      id:       row.id,
+      sbId:     row.id,
+      section:  row.section_id,
+      label:    row.section_label,
+      name:     row.reviewer_name,
+      text:     row.feedback_text,
+      resolved: row.resolved || false,
+      ts:       row.created_at,
+      replies:  (Array.isArray(repRows) ? repRows : [])
+                  .filter(r => r.feedback_id === row.id)
+                  .map(r => ({ id: r.id, sbId: r.id, name: r.author_name, text: r.reply_text, ts: r.created_at }))
+    }));
+    setSyncStatus('idle');
+    return merged;
+  } catch(e) { console.warn('[SB] fetch failed', e); setSyncStatus('error'); return null; }
+}
+
+// ── Sync status indicator ───────────────────────────────────
+function setSyncStatus(state) {
+  const el = document.getElementById('sb-sync-status');
+  if (!el) return;
+  if (!SB_READY) {
+    el.textContent = '⚠ local only — add Supabase config to enable cloud sync';
+    el.style.color = 'var(--accent)';
+    return;
+  }
+  if (state === 'syncing') { el.textContent = '↻ syncing…';     el.style.color = 'var(--muted)'; }
+  if (state === 'idle')    { el.textContent = '☁ synced';       el.style.color = 'var(--green)'; }
+  if (state === 'error')   { el.textContent = '✕ sync failed — check console'; el.style.color = 'var(--accent)'; }
+}
+
+// ══════════════════════════════════════════════════════════════
+// DATA MODEL
+// Comment: { id, sbId?, section, label, name, text, ts, resolved, replies[] }
+// Reply:   { id, sbId?, name, text, ts }
+// ══════════════════════════════════════════════════════════════
+const DB_KEY = 'wf_fb_v2';
+let activeSection = null;
+let currentFilter = 'all';
+
+const load = () => { try { return JSON.parse(localStorage.getItem(DB_KEY)) || []; } catch { return []; } };
+const save = d  => localStorage.setItem(DB_KEY, JSON.stringify(d));
+const esc  = s  => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const fmt  = iso => new Date(iso).toLocaleDateString('de-DE', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+
+// ── Zones ──
+document.querySelectorAll('.fb-zone').forEach(z => {
+  z.addEventListener('click', e => { e.stopPropagation(); openPanel(z.dataset.section, z.dataset.label); });
+});
+
+// ── New comment panel ──
+const panel    = document.getElementById('fb-panel');
+const panelSec = document.getElementById('fb-panel-section');
+const fbForm   = document.getElementById('fb-form');
+const fbOk     = document.getElementById('fb-success');
+const nameIn   = document.getElementById('fb-name-input');
+const textIn   = document.getElementById('fb-text-input');
+
+function openPanel(sid, label) {
+  activeSection = { id: sid, label };
+  panelSec.textContent = label;
+  fbForm.style.display = 'block'; fbOk.style.display = 'none';
+  textIn.value = '';
+  panel.classList.add('open');
+  setTimeout(() => textIn.focus(), 120);
+}
+function closePanel() { panel.classList.remove('open'); activeSection = null; }
+
+document.getElementById('fb-close').addEventListener('click', closePanel);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closePanel(); closeSidebar(); } });
+
+document.getElementById('fb-submit').addEventListener('click', async () => {
+  const text = textIn.value.trim();
+  if (!text) { textIn.style.borderColor = 'var(--accent)'; return; }
+  textIn.style.borderColor = '';
+
+  const newComment = {
+    id:       Date.now(),
+    section:  activeSection.id,
+    label:    activeSection.label,
+    name:     nameIn.value.trim() || 'Anonymous',
+    text,
+    resolved: false,
+    ts:       new Date().toISOString(),
+    replies:  []
+  };
+
+  // Save locally first (instant)
+  const all = load();
+  all.push(newComment);
+  save(all); refreshAll();
+  fbForm.style.display = 'none'; fbOk.style.display = 'block';
+  setTimeout(closePanel, 1600);
+
+  // Then sync to Supabase in background
+  setSyncStatus('syncing');
+  const sbRow = await sbInsertFeedback(newComment);
+  if (sbRow) {
+    // Store the Supabase ID so future edits/deletes can reference it
+    const updated = load();
+    const c = updated.find(x => x.id === newComment.id);
+    if (c) { c.sbId = sbRow.id; save(updated); }
+    setSyncStatus('idle');
+  }
+});
+
+// ── Sidebar ──
+const sidebar  = document.getElementById('fb-sidebar');
+const sbScroll = document.getElementById('sb-scroll');
+const sbMeta   = document.getElementById('sb-meta');
+
+function openSidebar()  { sidebar.classList.add('open'); renderSidebar(); }
+function closeSidebar() { sidebar.classList.remove('open'); }
+
+document.getElementById('tb-view-btn').addEventListener('click', openSidebar);
+document.getElementById('fb-sidebar-close').addEventListener('click', closeSidebar);
+document.getElementById('tb-count').addEventListener('click', openSidebar);
+
+document.querySelectorAll('.sb-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.sb-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentFilter = tab.dataset.filter;
+    renderSidebar();
+  });
+});
+
+function renderSidebar() {
+  const all = load();
+  const openN = all.filter(c => !c.resolved).length;
+  sbMeta.textContent = `${all.length} comment${all.length !== 1 ? 's' : ''} · ${openN} open`;
+
+  let list = all;
+  if (currentFilter === 'open')     list = all.filter(c => !c.resolved);
+  if (currentFilter === 'resolved') list = all.filter(c =>  c.resolved);
+
+  if (!list.length) {
+    const msgs = { all: 'No feedback yet.<br/>Hover a section and click to add.', open: 'No open feedback.', resolved: 'No resolved feedback yet.' };
+    sbScroll.innerHTML = `<div class="sb-empty">${msgs[currentFilter]}</div>`;
+    return;
+  }
+
+  const groups = {};
+  list.forEach(c => {
+    if (!groups[c.section]) groups[c.section] = { label: c.label, items: [] };
+    groups[c.section].items.push(c);
+  });
+
+  sbScroll.innerHTML = Object.entries(groups).map(([sid, g]) => `
+    <div class="sb-group" id="grp-${sid}">
+      <div class="sb-group-header" onclick="toggleGroup('${sid}')">
+        <span class="sb-group-title">${esc(g.label)}</span>
+        <span class="sb-group-right">
+          <span class="sb-group-badge">${g.items.length}</span>
+          <span class="sb-chevron">▾</span>
+        </span>
+      </div>
+      <div class="sb-group-body">
+        ${g.items.map(renderCard).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderCard(c) {
+  const repliesHtml = (c.replies || []).length
+    ? `<div class="sb-replies">${(c.replies || []).map(r => `
+        <div class="sb-reply">
+          <div class="sb-reply-text">${esc(r.text)}</div>
+          <div class="sb-reply-meta">
+            <span>${esc(r.name)} · ${fmt(r.ts)}</span>
+            <button class="sb-reply-del" onclick="deleteReply(${c.id},${r.id})">✕ Remove</button>
+          </div>
+        </div>`).join('')}
+      </div>` : '';
+
+  return `
+    <div class="sb-card${c.resolved ? ' resolved' : ''}" id="card-${c.id}">
+      <div class="sb-card-main">
+        <div class="sb-card-text">${esc(c.text)}</div>
+        <div class="sb-card-meta">
+          <span class="sb-card-author">${esc(c.name)}</span>
+          <span>${fmt(c.ts)}${c.resolved ? ' &nbsp;<span class="sb-resolved-badge">✓ resolved</span>' : ''}</span>
+        </div>
+      </div>
+      <div class="sb-card-actions">
+        <button class="sb-action" onclick="startEdit(${c.id})">✎ Edit</button>
+        <button class="sb-action" onclick="toggleReply(${c.id})">↩ Reply</button>
+        <button class="sb-action" onclick="toggleResolve(${c.id})">${c.resolved ? '↺ Reopen' : '✓ Resolve'}</button>
+        <button class="sb-action danger" onclick="deleteComment(${c.id})">✕ Delete</button>
+      </div>
+      <div class="sb-edit-area" id="edit-${c.id}">
+        <textarea rows="3" id="edit-ta-${c.id}">${esc(c.text)}</textarea>
+        <div class="sb-edit-actions">
+          <button class="sb-btn-save" onclick="saveEdit(${c.id})">Save</button>
+          <button class="sb-btn-cancel" onclick="cancelEdit(${c.id})">Cancel</button>
+        </div>
+      </div>
+      ${repliesHtml}
+      <div class="sb-reply-form" id="rf-${c.id}">
+        <textarea rows="2" id="rta-${c.id}" placeholder="Write a reply…"></textarea>
+        <input id="rname-${c.id}" placeholder="Your name (optional)" />
+        <button class="sb-reply-submit" onclick="submitReply(${c.id})">Send reply</button>
+      </div>
+    </div>`;
+}
+
+// ── Comment actions ─────────────────────────────────────────
+function toggleGroup(sid) {
+  document.getElementById(`grp-${sid}`)?.classList.toggle('collapsed');
+}
+
+function startEdit(id) {
+  document.getElementById(`edit-${id}`).classList.add('open');
+  document.getElementById(`card-${id}`).classList.add('editing');
+  const ta = document.getElementById(`edit-ta-${id}`);
+  ta.focus(); ta.select();
+}
+function cancelEdit(id) {
+  document.getElementById(`edit-${id}`).classList.remove('open');
+  document.getElementById(`card-${id}`).classList.remove('editing');
+}
+async function saveEdit(id) {
+  const text = document.getElementById(`edit-ta-${id}`).value.trim();
+  if (!text) return;
+  const all = load();
+  const c = all.find(x => x.id === id);
+  if (c) {
+    c.text = text;
+    save(all); refreshAll(); renderSidebar();
+    await sbUpdateFeedback(c.sbId, { feedback_text: text });
+  }
+}
+async function deleteComment(id) {
+  if (!confirm('Delete this comment?')) return;
+  const all = load();
+  const c = all.find(x => x.id === id);
+  save(all.filter(x => x.id !== id));
+  refreshAll(); renderSidebar();
+  if (c) await sbDeleteFeedback(c.sbId);
+}
+async function toggleResolve(id) {
+  const all = load();
+  const c = all.find(x => x.id === id);
+  if (c) {
+    c.resolved = !c.resolved;
+    save(all); refreshAll(); renderSidebar();
+    await sbUpdateFeedback(c.sbId, { resolved: c.resolved });
+  }
+}
+function toggleReply(id) {
+  const f = document.getElementById(`rf-${id}`);
+  if (f.classList.toggle('open')) setTimeout(() => document.getElementById(`rta-${id}`).focus(), 80);
+}
+async function submitReply(id) {
+  const text = document.getElementById(`rta-${id}`).value.trim();
+  if (!text) return;
+  const name = document.getElementById(`rname-${id}`).value.trim() || 'studio hug';
+  const newReply = { id: Date.now(), name, text, ts: new Date().toISOString() };
+
+  const all = load();
+  const c = all.find(x => x.id === id);
+  if (c) {
+    (c.replies = c.replies || []).push(newReply);
+    save(all); renderSidebar();
+    // Sync reply to Supabase
+    const sbRow = await sbInsertReply(c.sbId, newReply);
+    if (sbRow) {
+      const updated = load();
+      const uc = updated.find(x => x.id === id);
+      const ur = uc?.replies?.find(r => r.id === newReply.id);
+      if (ur) { ur.sbId = sbRow.id; save(updated); }
+    }
+  }
+}
+async function deleteReply(cid, rid) {
+  const all = load();
+  const c = all.find(x => x.id === cid);
+  if (c) {
+    const r = (c.replies || []).find(x => x.id === rid);
+    c.replies = (c.replies || []).filter(x => x.id !== rid);
+    save(all); renderSidebar();
+    if (r) await sbDeleteReply(r.sbId);
+  }
+}
+
+// ── Count badge + zone markers ──────────────────────────────
+const countBtn = document.getElementById('tb-count');
+function refreshAll() {
+  const all = load();
+  const openN = all.filter(c => !c.resolved).length;
+  countBtn.style.display = all.length ? 'inline-block' : 'none';
+  countBtn.textContent = `${openN} open · ${all.length} total`;
+  document.querySelectorAll('.fb-zone').forEach(z => {
+    const n = all.filter(c => c.section === z.dataset.section).length;
+    z.classList.toggle('fb-has-comment', n > 0);
+    if (n > 0) z.dataset.count = n; else delete z.dataset.count;
+  });
+}
+
+// ── Export CSV ──────────────────────────────────────────────
+document.getElementById('fb-export-btn').addEventListener('click', () => {
+  const all = load();
+  if (!all.length) { alert('No feedback yet.'); return; }
+  const rows = [['Section ID','Section Label','Name','Feedback','Status','Timestamp','Replies']];
+  all.forEach(c => {
+    const r = (c.replies||[]).map(r => `${r.name}: ${r.text}`).join(' | ');
+    rows.push([c.section, c.label, c.name, c.text, c.resolved ? 'resolved' : 'open', c.ts, r]);
+  });
+  const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+  a.download = 'wireframe-feedback.csv'; a.click();
+});
+
+// ── Copy HTML + feedback for Claude ────────────────────────
+document.getElementById('fb-copy-html-btn').addEventListener('click', () => {
+  const all = load();
+  if (!all.length) { alert('No feedback yet.'); return; }
+  const bySection = {};
+  all.forEach(c => { (bySection[c.section] = bySection[c.section] || []).push(c); });
+  let html = document.documentElement.outerHTML;
+  Object.entries(bySection).forEach(([sid, comments]) => {
+    const block = comments.map(c => {
+      const status = c.resolved ? 'RESOLVED' : 'OPEN';
+      const replies = (c.replies||[]).map(r => `\n     REPLY by ${r.name}: ${r.text}`).join('');
+      return `<!-- FEEDBACK [${status}] [${c.label}] by ${c.name}: ${c.text}${replies} -->`;
+    }).join('\n      ');
+    html = html.replace(new RegExp(`(data-section="${sid}"[^>]*>)`, 'g'), `$1\n      ${block}`);
+  });
+  const header = `<!--\nCLAUDE INSTRUCTIONS — Process only OPEN feedback comments below.\nFor each: update that section, add a brief <!-- UPDATED: ... --> note, remove the FEEDBACK comment.\nLeave RESOLVED comments untouched. Return the full updated HTML.\n-->`;
+  navigator.clipboard.writeText(header + '\n' + html).then(() => {
+    const btn = document.getElementById('fb-copy-html-btn');
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = '⟳ Copy HTML + feedback for Claude', 2200);
+  });
+});
+
+// ── Init: load from Supabase, fall back to localStorage ────
+async function init() {
+  setSyncStatus('idle'); // sets warning if not configured
+  if (SB_READY) {
+    const sbData = await sbFetchAll();
+    if (sbData !== null) {
+      save(sbData); // replace local cache with cloud data
+    }
+  }
+  refreshAll();
+}
+
+init();
+</script>
+</body>
+</html>
