@@ -1,0 +1,1276 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Karriere Südtirol – Talentpool 2.0 · Klickbarer Prototyp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FAFAF6;
+  --ink:#141412;
+  --ink-soft:#5c5c55;
+  --line:#e6e6de;
+  --accent:#FFD400;
+  --accent-ink:#1a1a00;
+  --gold:#C9A227;
+  --white:#ffffff;
+  --radius:20px;
+  --radius-sm:12px;
+  --green:#1c7d4d;
+  --green-bg:#e6f4ec;
+  --red:#b3261e;
+  --red-bg:#fbeceb;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:#EFEFE8;
+  color:var(--ink);
+  font-family:"Inter",system-ui,sans-serif;
+  font-size:16px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,.display{font-family:"Bricolage Grotesque",sans-serif;letter-spacing:-.02em}
+a{color:inherit}
+button{font-family:inherit}
+img,svg{display:block}
+
+/* ---------- top bar ---------- */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--ink);color:#fff;padding:14px 24px;
+}
+.wordmark{font-weight:800;font-size:16px;letter-spacing:.02em;display:flex;align-items:center;gap:8px}
+.wordmark .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);display:inline-block}
+.wordmark .hl{color:var(--accent)}
+.topbar .sub{font-size:11px;color:#b9b9ae;letter-spacing:.08em;text-transform:uppercase;margin-left:10px}
+#btn-home{
+  font:inherit;font-weight:600;font-size:13.5px;color:#fff;background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.25);border-radius:99px;padding:8px 16px;cursor:pointer;
+}
+#btn-home:hover{background:rgba(255,255,255,.18)}
+.hidden{display:none !important}
+
+/* ---------- views ---------- */
+.view{display:none;padding:36px 20px 80px}
+.view.active{display:block}
+
+/* ---------- HOME ---------- */
+#view-home .hero{max-width:720px;margin:0 auto 40px;text-align:center}
+.eyebrow{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent-ink);background:var(--accent);padding:6px 14px;border-radius:99px;margin-bottom:20px}
+#view-home h1{font-size:clamp(30px,5vw,44px);font-weight:800;margin-bottom:14px}
+#view-home h1 em{font-style:normal;background:linear-gradient(transparent 62%, var(--accent) 62%)}
+#view-home .lede{color:var(--ink-soft);font-size:18px;max-width:52ch;margin:0 auto}
+
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;max-width:1080px;margin:0 auto}
+.tile{
+  text-align:left;background:var(--white);border:1.5px solid var(--line);border-radius:24px;
+  padding:28px 24px;cursor:pointer;font:inherit;transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease;
+  display:flex;flex-direction:column;gap:12px;min-height:250px;
+}
+.tile:hover{transform:translateY(-4px);border-color:var(--ink);box-shadow:0 14px 30px rgba(20,20,18,.08)}
+.tile-icon{
+  width:52px;height:52px;border-radius:14px;background:var(--accent);
+  display:flex;align-items:center;justify-content:center;font-size:26px;
+}
+.tile h2{font-size:20px;font-weight:800;line-height:1.2}
+.tile p{color:var(--ink-soft);font-size:14.5px;flex:1}
+.tile-cta{font-size:13.5px;font-weight:700;color:var(--ink)}
+
+/* ---------- shells ---------- */
+.shell{margin:0 auto}
+.shell.narrow{max-width:560px}
+.shell.wide{max-width:1120px}
+
+/* ---------- tabbar ---------- */
+.tabbar{display:flex;gap:6px;flex-wrap:wrap;background:var(--white);border:1.5px solid var(--line);
+  border-radius:99px;padding:6px;margin-bottom:24px}
+.tab{
+  font:inherit;font-weight:600;font-size:13.5px;color:var(--ink-soft);background:transparent;border:none;
+  border-radius:99px;padding:9px 16px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .12s ease;
+}
+.tab:hover{color:var(--ink)}
+.tab.active{background:var(--ink);color:#fff}
+.tab .badge{background:var(--accent);color:var(--accent-ink);font-size:11px;font-weight:800;
+  border-radius:99px;padding:1px 7px}
+.tab.active .badge{background:var(--accent);color:var(--accent-ink)}
+
+.panel{display:none;animation:rise .35s ease both}
+.panel.active{display:block}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ---------- generic bits ---------- */
+.pagehead{margin-bottom:22px}
+.pagehead h2{font-size:26px;font-weight:800;margin-bottom:6px}
+.pagehead p{color:var(--ink-soft);font-size:14.5px;max-width:60ch}
+
+.card{background:var(--white);border:1.5px solid var(--line);border-radius:var(--radius);padding:22px}
+.card + .card{margin-top:16px}
+.grid{display:grid;gap:16px}
+.grid.cols-2{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.grid.cols-4{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.grid.cols-3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+
+.kpi{background:var(--white);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:16px}
+.kpi .label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px}
+.kpi .value{font-size:28px;font-weight:800}
+.kpi .trend{font-size:12px;color:var(--green);font-weight:700;margin-left:6px}
+.kpi .sub{font-size:12px;color:var(--ink-soft);margin-top:4px}
+
+.btn{font:inherit;font-weight:700;border:none;cursor:pointer;border-radius:99px;padding:12px 20px;
+  font-size:14.5px;transition:transform .12s ease;display:inline-flex;align-items:center;gap:8px}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:var(--ink);color:#fff}
+.btn-accent{background:var(--accent);color:var(--accent-ink)}
+.btn-ghost{background:transparent;color:var(--ink-soft);border:1.5px solid var(--line)}
+.btn-ghost:hover{color:var(--ink);border-color:var(--ink)}
+.btn-sm{padding:8px 14px;font-size:13px}
+.btn[disabled]{opacity:.4;cursor:default;transform:none}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+
+.badgechip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;
+  border-radius:99px;padding:4px 10px}
+.badge-tb{background:#FFF4C2;color:#6b5600}
+.badge-direct{background:#eee;color:var(--ink-soft)}
+.badge-status{background:var(--green-bg);color:var(--green)}
+.badge-neu{background:#E9F0FF;color:#2451A6}
+.badge-off{background:var(--red-bg);color:var(--red)}
+
+.tag{display:inline-block;font-size:12.5px;font-weight:500;background:var(--paper);border:1px solid var(--line);
+  border-radius:99px;padding:5px 12px;color:var(--ink)}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;background:#fff;border:1.5px solid var(--line);
+  border-radius:99px;padding:9px 15px;color:var(--ink);transition:all .12s ease}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+
+.profile-card{background:var(--white);border:1.5px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  display:flex;flex-direction:column;gap:10px}
+.profile-card .row-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.profile-card .idpill{font-size:11.5px;font-weight:700;color:var(--ink-soft);background:var(--paper);
+  border:1px solid var(--line);border-radius:99px;padding:3px 10px;display:inline-block;margin-bottom:6px}
+.profile-card h3{font-size:16.5px;font-weight:800}
+.profile-card .meta{font-size:13px;color:var(--ink-soft)}
+.profile-card .match{text-align:right;flex-shrink:0}
+.profile-card .match .pct{font-size:20px;font-weight:800}
+.profile-card .match .lbl{font-size:11px;color:var(--ink-soft)}
+.bar{height:5px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:4px;width:90px;margin-left:auto}
+.bar i{display:block;height:100%;background:var(--accent)}
+.profile-card .taglist{display:flex;flex-wrap:wrap;gap:6px}
+.profile-card .foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);
+  padding-top:12px;margin-top:4px;font-size:12.5px;color:var(--ink-soft)}
+
+table{width:100%;border-collapse:collapse;font-size:14px}
+table th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);
+  padding:10px 8px;border-bottom:1.5px solid var(--line)}
+table td{padding:12px 8px;border-bottom:1px solid var(--line)}
+table tr:last-child td{border-bottom:none}
+
+.notice{font-size:13px;color:var(--ink-soft);background:var(--white);border:1px dashed var(--line);
+  border-radius:14px;padding:12px 16px}
+.notice b{color:var(--ink)}
+
+.callout{background:linear-gradient(135deg,#FFF8D6,#FFEFA8);border:1.5px solid #F3DE7A;border-radius:var(--radius);
+  padding:20px}
+.callout h4{font-size:15.5px;font-weight:800;margin-bottom:6px}
+.callout p{font-size:13.5px;color:#6b5600}
+.callout ul{list-style:none;margin:12px 0;font-size:13px;color:#6b5600}
+.callout li{padding:3px 0;display:flex;gap:8px}
+.callout li::before{content:"✓";font-weight:800}
+
+/* ---------- onboarding stepper ---------- */
+#view-onboarding .shell{padding-top:6px}
+.progress{height:4px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:26px}
+.progress i{display:block;height:100%;background:var(--accent);width:6%;transition:width .4s ease}
+.screen{display:none;animation:rise .4s ease both}
+.screen.active{display:block}
+.q-label{font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);
+  margin-bottom:10px}
+.q-text{font-size:clamp(21px,4.6vw,27px);font-weight:800;line-height:1.2;margin-bottom:20px}
+.q-sub{color:var(--ink-soft);font-size:13.5px;margin:-12px 0 20px}
+.field{margin-bottom:20px}
+.field>label{display:block;font-size:13px;font-weight:700;margin-bottom:8px}
+.field .fhint{font-weight:400;color:var(--ink-soft)}
+select,input[type=text],input[type=email],input[type=password],textarea{
+  width:100%;font:inherit;font-size:15px;background:#fff;border:1.5px solid var(--line);
+  border-radius:14px;padding:12px 14px;color:var(--ink)
+}
+textarea{min-height:90px;resize:vertical}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--ink)}
+
+.choice{display:grid;gap:14px;margin-bottom:16px}
+.choice-card{text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:22px;padding:22px;
+  cursor:pointer;font:inherit;transition:border-color .15s ease,transform .12s ease}
+.choice-card:hover{transform:translateY(-2px);border-color:var(--ink)}
+.choice-card .cc-badge{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.08em;
+  text-transform:uppercase;border-radius:99px;padding:3px 10px;margin-bottom:12px}
+.choice-card.tb .cc-badge{background:var(--accent);color:var(--accent-ink)}
+.choice-card.pool .cc-badge{background:var(--paper);border:1px solid var(--line);color:var(--ink-soft)}
+.choice-card h3{font-size:19px;font-weight:800;margin-bottom:6px}
+.choice-card p{font-size:13.5px;color:var(--ink-soft)}
+.choice-card ul{list-style:none;margin-top:12px;font-size:13px}
+.choice-card li{padding:3px 0;display:flex;gap:8px;color:var(--ink-soft)}
+.choice-card li::before{content:"→"}
+
+.avatar-box{width:96px;height:96px;border-radius:50%;background:var(--accent);display:flex;align-items:center;
+  justify-content:center;font-size:40px;margin:0 auto 14px}
+.center{text-align:center}
+
+.stepdots{display:flex;gap:6px;justify-content:center;margin:18px 0}
+.stepdots span{width:6px;height:6px;border-radius:50%;background:var(--line)}
+.stepdots span.on{background:var(--ink)}
+
+/* ---------- modal / toast ---------- */
+.overlay{position:fixed;inset:0;background:rgba(20,20,18,.45);display:none;align-items:center;justify-content:center;
+  z-index:100;padding:20px}
+.overlay.active{display:flex}
+.modal{background:#fff;border-radius:24px;max-width:480px;width:100%;padding:28px;max-height:90vh;overflow:auto}
+.modal h3{font-size:19px;font-weight:800;margin-bottom:6px}
+.modal p.hint{font-size:13px;color:var(--ink-soft);margin-bottom:16px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;
+  padding:14px 22px;border-radius:99px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:10px;
+  z-index:200;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease;transform:translate(-50%,10px)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+.divider{border:none;border-top:1px solid var(--line);margin:20px 0}
+
+@media(max-width:640px){
+  .view{padding:24px 14px 70px}
+  table{font-size:12.5px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wordmark"><span class="dot"></span>KARRIERE <span class="hl">SÜDTIROL</span><span class="sub">Talentpool 2.0 · Prototyp</span></div>
+  <button id="btn-home" class="hidden">← Übersicht</button>
+</div>
+
+<main id="app">
+
+  <!-- ======================= HOME / ÜBERSICHT ======================= -->
+  <section id="view-home" class="view active">
+    <div class="hero fb-zone" data-section="home__hero" data-label="Home &ndash; Hero/Intro"><div class="fb-hint">+ Feedback</div>
+      <span class="eyebrow">Klickbarer Prototyp · Entwurf</span>
+      <h1>Drei Szenarien, <em>ein Talentpool</em>.</h1>
+      <p class="lede">Wähle eines der drei Szenarien, um den zugehörigen Ablauf im Detail durchzuklicken. Jedes Szenario ist eigenständig begehbar.</p>
+    </div>
+    <div class="tiles fb-zone" data-section="home__tiles" data-label="Home &ndash; Szenario-Kacheln"><div class="fb-hint">+ Feedback</div>
+      <button class="tile" data-target="onboarding">
+        <div class="tile-icon">🚀</div>
+        <h2>Kandidat:in — Onboarding &amp; Registrierung</h2>
+        <p>Vom ersten Klick zum aktiven, anonymen Profil im Pool – inklusive Grundsatzentscheidung „Mit Talentberatung" vs. „Self-Service" und dem 6-Schritte-Profilaufbau.</p>
+        <span class="tile-cta">Szenario starten →</span>
+      </button>
+      <button class="tile" data-target="kandidat">
+        <div class="tile-icon">👤</div>
+        <h2>Kandidat:in — Profil &amp; Funktionen</h2>
+        <p>Dashboard mit Vollständigkeits-Score, Profil bearbeiten, eingehende Anfragen entscheiden, passende Stellen anonym winken.</p>
+        <span class="tile-cta">Szenario starten →</span>
+      </button>
+      <button class="tile" data-target="arbeitgeber">
+        <div class="tile-icon">🏢</div>
+        <h2>Arbeitgeber — Profil &amp; Funktionen</h2>
+        <p>Talentpool durchsuchen, tägliche Kandidatenvorschläge nutzen, Anfragen stellen und den Vermittlungs-Trichter verfolgen.</p>
+        <span class="tile-cta">Szenario starten →</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ======================= SZENARIO 1 · ONBOARDING ======================= -->
+  <section id="view-onboarding" class="view scenario">
+    <div class="shell narrow">
+      <div class="progress"><i id="ob-progress"></i></div>
+
+      <!-- 0: Landing -->
+      <div class="screen active fb-zone" data-screen="ob-landing" data-section="onboarding__ob-landing" data-label="Onboarding &ndash; Landing"><div class="fb-hint">+ Feedback</div>
+        <span class="eyebrow">Anonymer Talent-Pool</span>
+        <h2 style="font-size:30px;font-weight:800;margin-bottom:14px;line-height:1.15">Sichtbar für Jobs.<br>Unsichtbar als Person.</h2>
+        <p style="color:var(--ink-soft);margin-bottom:22px">Ein strukturiertes Profil in ~5 Minuten – ohne Lebenslauf-Pflicht. Arbeitgeber melden sich bei dir, nicht umgekehrt. Deinen Namen erfährt niemand ohne dein Ja.</p>
+        <div class="grid cols-3" style="margin-bottom:22px">
+          <div class="card" style="text-align:center;padding:18px 14px">
+            <div style="font-size:22px;margin-bottom:8px">🔒</div>
+            <b style="font-size:13.5px">100 % anonym</b><br><span style="color:var(--ink-soft);font-size:12.5px">Dein Name bleibt bei dir, bis du eine Anfrage annimmst.</span>
+          </div>
+          <div class="card" style="text-align:center;padding:18px 14px">
+            <div style="font-size:22px;margin-bottom:8px">☑️</div>
+            <b style="font-size:13.5px">Strukturiert statt Prosa</b><br><span style="color:var(--ink-soft);font-size:12.5px">Antippen statt tippen – fast alles geht per Auswahl.</span>
+          </div>
+          <div class="card" style="text-align:center;padding:18px 14px">
+            <div style="font-size:22px;margin-bottom:8px">🎛️</div>
+            <b style="font-size:13.5px">Du entscheidest</b><br><span style="color:var(--ink-soft);font-size:12.5px">Sichtbar ist nur, was du am Ende freigibst.</span>
+          </div>
+        </div>
+        <div class="btn-row"><button class="btn btn-accent" onclick="obGoto('ob-choice')">Los geht's</button></div>
+      </div>
+
+      <!-- 1: Grundsatzfrage -->
+      <div class="screen fb-zone" data-screen="ob-choice" data-section="onboarding__ob-choice" data-label="Onboarding &ndash; Grundsatzfrage"><div class="fb-hint">+ Feedback</div>
+        <p class="q-label">Zuerst die Grundsatzfrage</p>
+        <p class="q-text">Wie willst du gefunden werden?</p>
+        <div class="choice">
+          <button class="choice-card tb" onclick="obChoose('tb')">
+            <span class="cc-badge">Persönlich · kostenlos</span>
+            <h3>Mit Talentberatung</h3>
+            <p>Ein:e Talentberater:in lernt dich im Gespräch kennen, prüft dein Profil und begleitet dich durch den Prozess.</p>
+            <ul><li>Geprüftes Profil mit persönlicher Einschätzung</li><li>Gezielte Vorschläge &amp; Vorbereitung auf Gespräche</li></ul>
+          </button>
+          <button class="choice-card pool" onclick="obChoose('pool')">
+            <span class="cc-badge">Anonym · Self-Service</span>
+            <h3>Talentpool auf eigene Faust</h3>
+            <p>Du erstellst dein anonymes Profil selbst. Arbeitgeber stellen Anfragen – du entscheidest, wer dich kennenlernt.</p>
+            <ul><li>In ~5 Minuten sichtbar, jederzeit pausierbar</li><li>Volle Kontrolle über jede Kontaktfreigabe</li></ul>
+          </button>
+        </div>
+        <div class="notice"><b>Entweder – oder:</b> Beide Profile gleichzeitig gibt es nicht. Du kannst aber jederzeit später aus deinem Dashboard zur Talentberatung wechseln.</div>
+        <div class="btn-row"><button class="btn btn-ghost" onclick="obGoto('ob-landing')">← Zurück</button></div>
+      </div>
+
+      <!-- 2a: Talentberatung Kontakt -->
+      <div class="screen fb-zone" data-screen="ob-tb-contact" data-section="onboarding__ob-tb-contact" data-label="Onboarding &ndash; Talentberatung Kontakt"><div class="fb-hint">+ Feedback</div>
+        <p class="q-label">Kontakt für die Talentberatung</p>
+        <p class="q-text">Wie erreichen wir dich?</p>
+        <p class="q-sub">Diese Angaben gehen ausschließlich an deine Talentberatung. Für Anfragen im Pool bleibst du weiterhin anonym.</p>
+        <div class="field"><label>Vorname</label><input type="text" placeholder="Vorname"></div>
+        <div class="field"><label>Nachname</label><input type="text" placeholder="Nachname"></div>
+        <div class="field"><label>E-Mail-Adresse</label><input type="email" placeholder="name@beispiel.com"></div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="obGoto('ob-choice')">← Zurück</button>
+          <button class="btn btn-accent" onclick="obGoto('ob-tb-done')">Weiter</button>
+        </div>
+      </div>
+
+      <!-- 2b: Talentberatung Confirmation (Ende dieses Pfads) -->
+      <div class="screen center fb-zone" data-screen="ob-tb-done" data-section="onboarding__ob-tb-done" data-label="Onboarding &ndash; Talentberatung Bestaetigung"><div class="fb-hint">+ Feedback</div>
+        <div style="font-size:44px;margin-bottom:10px">👋</div>
+        <h3 style="font-size:22px;font-weight:800;margin-bottom:10px">Schön, dass du dabei bist.</h3>
+        <p style="color:var(--ink-soft);max-width:40ch;margin:0 auto 22px">Deine Talentberatung meldet sich innerhalb von 2 Werktagen für ein kurzes Kennenlern-Gespräch. Danach erstellt sie mit dir dein geprüftes Profil.</p>
+        <div class="btn-row" style="justify-content:center"><button class="btn btn-ghost" onclick="obReset()">← Zurück zur Auswahl</button></div>
+      </div>
+
+      <!-- 3: Self-Service Schritt 1 -->
+      <div class="screen fb-zone" data-screen="ob-s1" data-section="onboarding__ob-s1" data-label="Onboarding &ndash; Schritt 1"><div class="fb-hint">+ Feedback</div>
+        <p class="q-label">Schritt 1 · Ich suche</p>
+        <p class="q-text">Welche Jobs sollen dich finden?</p>
+        <div class="field"><label>Bereich <span class="fhint">(mehrere möglich)</span></label>
+          <div class="chips">
+            <button class="chip" aria-pressed="true">IT &amp; Digital</button>
+            <button class="chip">Verwaltung &amp; Buchhaltung</button>
+            <button class="chip">Marketing &amp; Design</button>
+            <button class="chip">Handwerk &amp; Technik</button>
+            <button class="chip">Verkauf &amp; Beratung</button>
+            <button class="chip">Gastronomie &amp; Tourismus</button>
+            <button class="chip">Gesundheit &amp; Soziales</button>
+          </div>
+        </div>
+        <div class="field"><label>Level</label>
+          <div class="chips"><button class="chip">Junior</button><button class="chip" aria-pressed="true">Expert</button><button class="chip">Senior / Lead</button></div>
+        </div>
+        <div class="field"><label>Wunsch-Titel <span class="fhint">(optional, max. 80 Zeichen)</span></label>
+          <input type="text" placeholder="z.B. Senior Frontend – React &amp; Design Systems"></div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="obGoto('ob-choice')">← Zurück</button>
+          <button class="btn btn-accent" onclick="obGoto('ob-s2')">Weiter</button>
+        </div>
+      </div>
+
+      <!-- 4: Schritt 2 Erfahrung -->
+      <div class="screen fb-zone" data-screen="ob-s2" data-section="onboarding__ob-s2" data-label="Onboarding &ndash; Schritt 2 Erfahrung"><div class="fb-hint">+ Feedback</div>
+        <p class="q-label">Schritt 2 · Erfahrung</p>
+        <p class="q-text">Deine letzten zwei Stationen</p>
+        <p class="q-sub">Keine Firmennamen – nur Rahmen. Das reicht Arbeitgebern für den ersten Eindruck.</p>
+        <div class="card" style="margin-bottom:14px">
+          <b style="font-size:13px">Letzte Station</b>
+          <div class="field" style="margin-bottom:0;margin-top:12px"><label>Branche</label>
+            <div class="chips"><button class="chip" aria-pressed="true">IT / Digital</button><button class="chip">Handel</button><button class="chip">Handwerk</button><button class="chip">Industrie</button><button class="chip">Tourismus</button><button class="chip">Dienstleistung</button><button class="chip">Öffentlich</button></div></div>
+          <div class="field" style="margin-bottom:0;margin-top:14px"><label>Level</label>
+            <div class="chips"><button class="chip">Junior</button><button class="chip" aria-pressed="true">Expert</button><button class="chip">Senior</button></div></div>
+          <div class="field" style="margin-bottom:0;margin-top:14px"><label>Dauer</label>
+            <div class="chips"><button class="chip">&lt; 1 Jahr</button><button class="chip">1–3 Jahre</button><button class="chip" aria-pressed="true">3–5 Jahre</button><button class="chip">5+ Jahre</button></div></div>
+        </div>
+        <div class="card" style="margin-bottom:14px;display:none" id="ob-station-2">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <b style="font-size:13px">Vorherige Station (optional)</b>
+            <button type="button" class="btn btn-ghost btn-sm" style="padding:4px 8px" onclick="obRemoveStation()" aria-label="Station entfernen" title="Station entfernen">🗑</button>
+          </div>
+          <div class="field" style="margin-bottom:0;margin-top:12px"><label>Branche</label>
+            <div class="chips"><button class="chip" aria-pressed="true">IT / Digital</button><button class="chip">Handel</button><button class="chip">Handwerk</button><button class="chip">Industrie</button><button class="chip">Tourismus</button><button class="chip">Dienstleistung</button><button class="chip">Öffentlich</button></div></div>
+          <div class="field" style="margin-bottom:0;margin-top:14px"><label>Level</label>
+            <div class="chips"><button class="chip" aria-pressed="true">Junior</button><button class="chip">Expert</button><button class="chip">Senior</button></div></div>
+          <div class="field" style="margin-bottom:0;margin-top:14px"><label>Dauer</label>
+            <div class="chips"><button class="chip" aria-pressed="true">&lt; 1 Jahr</button><button class="chip">1–3 Jahre</button><button class="chip">3–5 Jahre</button><button class="chip">5+ Jahre</button></div></div>
+        </div>
+        <button class="btn btn-ghost btn-sm" type="button" id="ob-add-station" onclick="obAddStation()">+ Zweite Station hinzufügen</button>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="obGoto('ob-s1')">← Zurück</button>
+          <button class="btn btn-accent" onclick="obGoto('ob-s3')">Weiter</button>
+        </div>
+      </div>
+
+      <!-- 5: Schritt 3 Ausbildung -->
+      <div class="screen fb-zone" data-screen="ob-s3" data-section="onboarding__ob-s3" data-label="Onboarding &ndash; Schritt 3 Ausbildung"><div class="fb-hint">+ Feedback</div>
+        <p class="q-label">Schritt 3 · Ausbildung</p>
+        <p class="q-text">Dein höchster Abschluss</p>
+        <div class="field"><label>Grad</label>
+          <div class="chips"><button class="chip">Lehre</button><button class="chip">Matura</button><button class="chip" aria-pressed="true">Studium</button><button class="chip">Sonstiges</button></div>
+        </div>
+        <div class="field"><label>Bereich <span class="fhint">(optional)</span></label><input type="text" placeholder="z.B. Wirtschaft"></div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="obGoto('ob-s2')">← Zurück</button>
+          <button class="btn btn-accent" onclick="obGoto('ob-s4')">Weiter</button>
+        </div>
+      </div>
+
+      <!-- 6: Schritt 4 Können -->
+      <div class="screen fb-zone" data-screen="ob-s4" data-section="onboarding__ob-s4" data-label="Onboarding &ndash; Schritt 4 Koennen"><div class="fb-hint">+ Feedback</div>
+        <p class="q-label">Schritt 4 · Können</p>
+        <p class="q-text">Was bringst du mit?</p>
+        <div class="field"><label>Skills <span class="fhint">(max. 8)</span></label>
+          <div class="chips">
+            <button class="chip" aria-pressed="true">TypeScript</button><button class="chip" aria-pressed="true">React / Next.js</button>
+            <button class="chip">Excel</button><button class="chip">Projektmanagement</button><button class="chip">Kundenberatung</button>
+            <button class="chip">SAP</button><button class="chip">Verkauf</button><button class="chip">Teamführung</button>
+          </div>
+        </div>
+        <div class="field"><label>Soft Skills <span class="fhint">(max. 4)</span></label>
+          <div class="chips">
+            <button class="chip" aria-pressed="true">Strukturiert</button><button class="chip">Kommunikativ</button>
+            <button class="chip">Selbstständig</button><button class="chip">Teamplayer</button><button class="chip">Lernbereit</button>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="obGoto('ob-s3')">← Zurück</button>
+          <button class="btn btn-accent" onclick="obGoto('ob-s5')">Weiter</button>
+        </div>
+      </div>
+
+      <!-- 7: Schritt 5 Sprachen -->
+      <div class="screen fb-zone" data-screen="ob-s5" data-section="onboarding__ob-s5" data-label="Onboarding &ndash; Schritt 5 Sprachen"><div class="fb-hint">+ Feedback</div>
+        <p class="q-label">Schritt 5 · Sprachen</p>
+        <p class="q-text">Wie sicher bist du unterwegs?</p>
+        <div class="field"><label>Deutsch</label><div class="chips"><button class="chip">Basis</button><button class="chip">Gut</button><button class="chip">Fließend</button><button class="chip" aria-pressed="true">Muttersprache</button></div></div>
+        <div class="field"><label>Italienisch</label><div class="chips"><button class="chip">Basis</button><button class="chip">Gut</button><button class="chip" aria-pressed="true">Fließend</button><button class="chip">Muttersprache</button></div></div>
+        <div class="field"><label>Englisch</label><div class="chips"><button class="chip">Basis</button><button class="chip">Gut</button><button class="chip" aria-pressed="true">Fließend</button><button class="chip">Muttersprache</button></div></div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="obGoto('ob-s4')">← Zurück</button>
+          <button class="btn btn-accent" onclick="obGoto('ob-s6')">Weiter</button>
+        </div>
+      </div>
+
+      <!-- 8: Schritt 6 Rahmen -->
+      <div class="screen fb-zone" data-screen="ob-s6" data-section="onboarding__ob-s6" data-label="Onboarding &ndash; Schritt 6 Rahmen"><div class="fb-hint">+ Feedback</div>
+        <p class="q-label">Schritt 6 · Rahmen</p>
+        <p class="q-text">Damit Anfragen wirklich passen</p>
+        <div class="field"><label>Gehaltsvorstellung <span class="fhint">(brutto/Jahr)</span></label>
+          <div class="chips"><button class="chip">bis 30.000 €</button><button class="chip">30–35.000 €</button><button class="chip" aria-pressed="true">35–40.000 €</button><button class="chip">40–50.000 €</button><button class="chip">50.000 €+</button></div></div>
+        <div class="field"><label>Bezirk <span class="fhint">(mehrere möglich)</span></label>
+          <div class="chips"><button class="chip" aria-pressed="true">Bozen &amp; Umgebung</button><button class="chip">Meran</button><button class="chip">Brixen / Eisacktal</button><button class="chip">Pustertal</button><button class="chip">Vinschgau</button><button class="chip">Remote</button></div></div>
+        <div class="field"><label>Arbeitszeit</label><div class="chips"><button class="chip" aria-pressed="true">Vollzeit</button><button class="chip">Teilzeit</button></div></div>
+        <div class="field"><label>Verfügbarkeit</label><div class="chips"><button class="chip">Ab sofort</button><button class="chip" aria-pressed="true">1–3 Monate</button><button class="chip">3+ Monate</button></div></div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="obGoto('ob-s5')">← Zurück</button>
+          <button class="btn btn-accent" onclick="obGoto('ob-about')">Weiter</button>
+        </div>
+      </div>
+
+      <!-- 9a: Über dich (KI) · Frage 1 -->
+      <div class="screen fb-zone" data-screen="ob-about" data-section="onboarding__ob-about" data-label="Onboarding &ndash; Ueber dich (KI)"><div class="fb-hint">+ Feedback</div>
+        <p class="q-label">Über dich · optional, KI-gestützt · Frage 1/3</p>
+        <p class="q-text">Was ist das Letzte, das dich wirklich begeistert hat – egal wie groß oder klein?</p>
+        <p class="q-sub">Deine Antworten werden zu einem kurzen Profiltext verdichtet – du redigierst danach, was nicht passt.</p>
+        <textarea placeholder="Erzähl kurz davon…"></textarea>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="obGoto('ob-s6')">← Zurück</button>
+          <button class="btn btn-ghost" onclick="obGoto('ob-preview')">Überspringen</button>
+          <button class="btn btn-accent" onclick="obGoto('ob-about-2')">Weiter</button>
+        </div>
+      </div>
+
+      <!-- 9b: Über dich (KI) · Frage 2 -->
+      <div class="screen fb-zone" data-screen="ob-about-2" data-section="onboarding__ob-about-2" data-label="Onboarding &ndash; Ueber dich (KI) Frage 2"><div class="fb-hint">+ Feedback</div>
+        <p class="q-label">Über dich · optional, KI-gestützt · Frage 2/3</p>
+        <p class="q-text">Ein komplett freies Wochenende: Wie sieht dein Samstag aus?</p>
+        <p class="q-sub">Deine Antworten werden zu einem kurzen Profiltext verdichtet – du redigierst danach, was nicht passt.</p>
+        <textarea placeholder="Erzähl kurz davon…"></textarea>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="obGoto('ob-about')">← Zurück</button>
+          <button class="btn btn-ghost" onclick="obGoto('ob-preview')">Überspringen</button>
+          <button class="btn btn-accent" onclick="obGoto('ob-about-3')">Weiter</button>
+        </div>
+      </div>
+
+      <!-- 9c: Über dich (KI) · Frage 3 -->
+      <div class="screen fb-zone" data-screen="ob-about-3" data-section="onboarding__ob-about-3" data-label="Onboarding &ndash; Ueber dich (KI) Frage 3"><div class="fb-hint">+ Feedback</div>
+        <p class="q-label">Über dich · optional, KI-gestützt · Frage 3/3</p>
+        <p class="q-text">Nenn uns drei Dinge, die nichts mit Arbeit zu tun haben – aber viel darüber sagen, wer du bist.</p>
+        <p class="q-sub">Deine Antworten werden zu einem kurzen Profiltext verdichtet – du redigierst danach, was nicht passt.</p>
+        <textarea placeholder="Erzähl kurz davon…"></textarea>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="obGoto('ob-about-2')">← Zurück</button>
+          <button class="btn btn-ghost" onclick="obGoto('ob-preview')">Überspringen</button>
+          <button class="btn btn-accent" onclick="obGoto('ob-preview')">Weiter</button>
+        </div>
+      </div>
+
+      <!-- 10: Avatar + Vorschau -->
+      <div class="screen center fb-zone" data-screen="ob-preview" data-section="onboarding__ob-preview" data-label="Onboarding &ndash; Avatar + Vorschau"><div class="fb-hint">+ Feedback</div>
+        <div class="avatar-box" id="ob-avatar">🙂</div>
+        <p style="font-size:12.5px;color:var(--ink-soft);margin:10px 0 2px">Dein Avatar – nicht du, aber deiner. Würfle, bis er passt.</p>
+        <button class="btn btn-ghost btn-sm" onclick="obRoll()" style="margin-bottom:18px">↻ Würfeln</button>
+        <div class="card" style="text-align:left">
+          <span class="idpill" style="display:inline-block;margin-bottom:8px">Anonymes Profil · #4218</span>
+          <h3 style="font-size:17px;font-weight:800;margin-bottom:6px">Senior Frontend – React &amp; Design Systems</h3>
+          <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:10px">IT &amp; Digital · Expert · Vollzeit · Bozen &amp; Umgebung</p>
+          <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:10px">„Ich behalte auch bei vielen offenen Punkten den Überblick und arbeite gerne strukturiert."</p>
+          <div class="chips" style="margin-bottom:14px"><span class="tag">TypeScript</span><span class="tag">React / Next.js</span><span class="tag">DE Muttersprache</span></div>
+          <div style="border-top:1px solid var(--line);padding-top:12px">
+            <span style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)">KI-Interpretation deiner Antworten</span>
+            <p style="font-size:13px;margin-top:8px"><b>Arbeitsstil:</b> <span style="color:var(--ink-soft)">Strukturiert und ruhig, auch wenn viel gleichzeitig läuft.</span></p>
+            <p style="font-size:13px;margin-top:6px"><b>Team-Energie:</b> <span style="color:var(--ink-soft)">Zieht sich gerne mit anderen gemeinsam Aufgaben zurecht, statt im Alleingang.</span></p>
+            <p style="font-size:13px;margin-top:6px"><b>Neugier-Profil:</b> <span style="color:var(--ink-soft)">Probiert Neues gerne dort aus, wo es sofort sichtbar wird.</span></p>
+          </div>
+          <div class="btn-row" style="margin-top:14px">
+            <button class="btn btn-ghost btn-sm" type="button">✎ Bearbeiten</button>
+            <button class="btn btn-ghost btn-sm" type="button" onclick="obReset()">Neu</button>
+          </div>
+        </div>
+        <div class="notice" style="margin-top:16px;text-align:left">
+          <b>So geht's weiter</b>
+          <div style="margin-top:8px">Du wirst einem Talentberater zugewiesen.</div>
+          <div style="margin-top:8px">Sobald ein Unternehmen für dein Profil Interesse ausdrückt, meldet sich der Talentberater bei dir, um einen Match-Check zu machen. Bis hierhin bleibt dein Profil immer anonym.</div>
+          <div style="margin-top:8px">In deinem Profil siehst du auch Job-Vorschläge, die zu dir passen könnten und kannst Interesse bekunden.</div>
+          <div style="margin-top:8px">Hast auch du Lust auf den Job, startet die Kommunikation zwischen dir und dem Unternehmen.</div>
+        </div>
+        <div class="notice" style="margin-top:12px;text-align:left">Solltest du trotzdem lieber den persönlichen Weg einschlagen wollen, und mit einem Talentberater:in von Karriere Südtirol zusammenarbeiten wollen, um einen passenden Job zu finden, kannst du dies immer in deinem Profil machen.</div>
+        <div class="btn-row" style="justify-content:center">
+          <button class="btn btn-ghost" onclick="obGoto('ob-about-3')">← Zurück</button>
+          <button class="btn btn-accent" onclick="obGoto('ob-account')">Freigeben</button>
+        </div>
+      </div>
+
+      <!-- 11: Konto anlegen -->
+      <div class="screen fb-zone" data-screen="ob-account" data-section="onboarding__ob-account" data-label="Onboarding &ndash; Konto anlegen"><div class="fb-hint">+ Feedback</div>
+        <p class="q-label">Fast geschafft</p>
+        <p class="q-text">Konto anlegen oder anmelden</p>
+        <div class="tabbar" style="margin-bottom:16px">
+          <button class="tab active" id="ob-tab-register" onclick="obAccountTab('register')">Registrieren</button>
+          <button class="tab" id="ob-tab-login" onclick="obAccountTab('login')">Anmelden</button>
+        </div>
+        <p class="q-sub">Damit du dein Profil und Anfragen jederzeit wiederfindest.</p>
+        <div class="field"><label>E-Mail-Adresse</label><input type="email" placeholder="name@beispiel.com"></div>
+        <div class="field"><label>Passwort</label><input type="password" placeholder="••••••••"></div>
+        <div class="btn-row">
+          <button class="btn btn-accent" id="ob-account-submit" onclick="obGoto('ob-done')">Konto anlegen &amp; fortfahren</button>
+        </div>
+      </div>
+
+      <!-- 12: Bestätigung -->
+      <div class="screen center fb-zone" data-screen="ob-done" data-section="onboarding__ob-done" data-label="Onboarding &ndash; Bestaetigung"><div class="fb-hint">+ Feedback</div>
+        <div style="font-size:44px;margin-bottom:10px">✓</div>
+        <h3 style="font-size:22px;font-weight:800;margin-bottom:10px">Du bist im Pool.</h3>
+        <p style="color:var(--ink-soft);max-width:42ch;margin:0 auto 20px">Sobald ein Arbeitgeber eine Anfrage mit konkretem Job stellt, entscheidest du: Ja oder Nein. Erst bei Ja erfährt er, wer du bist.</p>
+        <div class="card" style="max-width:320px;margin:0 auto;text-align:left">
+          <b style="font-size:13px">Dein aktueller Profil-Status</b>
+          <p style="font-weight:700;margin-top:4px">Offen für Neues</p>
+          <p style="font-size:12.5px;color:var(--ink-soft);margin-top:8px">Pausiert = sofort unsichtbar, nichts geht verloren. Reagierst du länger nicht auf Anfragen, wird dein Profil automatisch pausiert. Diesen Status kannst du jederzeit im Profil ändern.</p>
+        </div>
+        <div class="btn-row" style="justify-content:center">
+          <button class="btn btn-accent" onclick="showView('kandidat')">Weiter zum Kandidaten-Dashboard →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= SZENARIO 2 · KANDIDAT ======================= -->
+  <section id="view-kandidat" class="view scenario">
+    <div class="shell narrow">
+      <div class="tabbar">
+        <button class="tab active" data-scope="k" data-panel="k-overview" onclick="showPanel(this)">Übersicht</button>
+        <button class="tab" data-scope="k" data-panel="k-profile" onclick="showPanel(this)">Mein Profil</button>
+        <button class="tab" data-scope="k" data-panel="k-requests" onclick="showPanel(this)">Anfragen <span class="badge">1</span></button>
+        <button class="tab" data-scope="k" data-panel="k-jobs" onclick="showPanel(this)">Passende Stellen</button>
+      </div>
+
+      <!-- Übersicht -->
+      <div id="k-overview" class="panel active fb-zone" data-section="kandidat__overview" data-label="Kandidat &ndash; Uebersicht"><div class="fb-hint">+ Feedback</div>
+        <div class="pagehead">
+          <h2>Willkommen zurück.</h2>
+          <p>Dein Profil ist sichtbar – anonym. Unternehmen fragen dich an, du entscheidest.</p>
+        </div>
+
+        <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px;background:var(--green-bg);border-color:#bfe3cf">
+          <div><b style="color:var(--green)">✓ Aktivität bestätigt vor 2 Tagen</b><br>
+          <span style="font-size:13px;color:var(--ink-soft)">Nächste Bestätigung in 28 Tagen – wir schicken dir dazu einen 1-Klick-Link per Mail. So bleibt dein Profil oben in den Ergebnissen.</span></div>
+          <button class="btn btn-ghost btn-sm">Jetzt bestätigen</button>
+        </div>
+
+        <div class="grid cols-4" style="margin-bottom:18px">
+          <div class="kpi"><div class="label">Profil-Aufrufe (30T)</div><div class="value">47 <span class="trend">↑18%</span></div></div>
+          <div class="kpi"><div class="label">Offene Anfragen</div><div class="value">1</div><div class="sub">von 4 gesamt</div></div>
+          <div class="kpi"><div class="label">Laufende Matches</div><div class="value">1</div><div class="sub">Intro läuft</div></div>
+          <div class="kpi"><div class="label">Job-Signale gesendet</div><div class="value">1</div><div class="sub">offene Winks</div></div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <b>Neue Anfragen</b><span class="tag">2 aktiv</span>
+          </div>
+          <p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px">Unternehmen möchten dich kennenlernen. Du entscheidest, ob wir Kontakt herstellen.</p>
+          <div class="profile-card" style="margin-bottom:10px">
+            <div class="row-top">
+              <div><h3 style="font-size:15px">Senior Frontend Entwickler:in</h3><div class="meta">Alpin Systems GmbH · Bozen · Hybrid</div></div>
+            </div>
+            <div class="taglist"><span class="tag">60–72 T€ brutto</span><span class="tag">Vollzeit</span><span class="badgechip badge-tb">Von Experten begleitet</span></div>
+            <div class="foot"><span>schließt in 10 Tagen</span>
+              <span><button class="btn btn-ghost btn-sm">Kein Interesse</button> <button class="btn btn-accent btn-sm">Ansehen</button></span></div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="showPanel(document.querySelector('[data-panel=k-requests]'))">Alle Anfragen →</button>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><b>Passende Stellen</b></div>
+          <p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px">Winke einer Firma, dass eine Anfrage willkommen wäre. Du bewirbst dich nicht – die Firma bleibt am Zug.</p>
+          <div class="profile-card">
+            <div class="row-top">
+              <div><h3 style="font-size:15px">Senior Frontend Engineer</h3><div class="meta">Brennercom AG · Bozen · 58–70 T€</div></div>
+              <div class="match"><span class="pct">92%</span><div class="lbl">Match</div></div>
+            </div>
+            <div class="foot"><span>Firma sieht nur dein anonymes Profil</span><button class="btn btn-accent btn-sm" onclick="winken(this)">Winken</button></div>
+          </div>
+        </div>
+
+        <div class="grid cols-2">
+          <div class="card">
+            <b style="font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft)">Profil-Vollständigkeit</b>
+            <p style="font-size:13px;color:var(--ink-soft);margin:8px 0">Profile mit Werdegang und Skills erhalten 3× mehr Anfragen.</p>
+            <div style="font-size:30px;font-weight:800">88%</div>
+            <div class="bar" style="width:100%;margin:8px 0 12px"><i style="width:88%"></i></div>
+            <button class="btn btn-ghost btn-sm" onclick="showPanel(document.querySelector('[data-panel=k-profile]'))">Profil vervollständigen</button>
+          </div>
+          <div class="callout">
+            <h4>🤝 Persönliche Beratung freischalten</h4>
+            <p>Unsere Talentberater:innen suchen aktiv für dich – kostenlos.</p>
+            <ul><li>Kurzes Kennenlern-Gespräch (20 Min)</li><li>Berater-Badge auf deinem Profil</li><li>Persönliche Vorschläge statt nur Anfragen</li></ul>
+            <button class="btn btn-primary btn-sm">Beratung anfragen</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+          <b>🎁 500 € Startprämie</b>
+          <p style="font-size:13px;color:var(--ink-soft);margin-top:6px">Wenn du über Karriere Südtirol eingestellt wirst und die Probezeit bestehst, bekommst du 500 € Startprämie – als kleines „Willkommen im neuen Job".</p>
+        </div>
+
+        <div class="notice" style="margin-top:16px">⚠ Dein Profil ist <b>anonym</b>. Weder dein Name noch dein aktueller Arbeitgeber sind sichtbar. Kontaktaufnahme läuft immer über uns – erst nach deinem „Ja".</div>
+      </div>
+
+      <!-- Mein Profil -->
+      <div id="k-profile" class="panel fb-zone" data-section="kandidat__profile" data-label="Kandidat &ndash; Mein Profil"><div class="fb-hint">+ Feedback</div>
+        <div class="pagehead"><h2>Mein anonymes Profil</h2><p>So sehen Unternehmen dich. Weder dein Name noch dein aktueller Arbeitgeber sind sichtbar.</p></div>
+        <div class="card" style="margin-bottom:16px">
+          <b>Dein Profil ist zu 88% ausgefüllt</b>
+          <div class="bar" style="width:100%;margin:10px 0 4px"><i style="width:88%"></i></div>
+          <p style="font-size:12.5px;color:var(--ink-soft)">Profile mit Werdegang, Skills und Selbstbeschreibung erhalten 3× mehr Anfragen.</p>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <b style="font-size:14px">Pflichtfelder fürs Matching</b>
+          <div class="grid cols-2" style="margin-top:14px">
+            <div class="field" style="margin-bottom:0"><label>Profilüberschrift</label><input type="text" value="Senior Frontend – React &amp; Design Systems"></div>
+            <div class="field" style="margin-bottom:0"><label>Berufsfeld</label><select><option>IT &amp; Software</option></select></div>
+            <div class="field" style="margin-bottom:0"><label>Erfahrungslevel</label><select><option>Senior (5–10 J.)</option></select></div>
+            <div class="field" style="margin-bottom:0"><label>Arbeitszeit</label><select><option>Vollzeit</option></select></div>
+            <div class="field" style="margin-bottom:0"><label>Bezirk / Region</label><select><option>Raum Bozen</option></select></div>
+            <div class="field" style="margin-bottom:0"><label>Arbeitsweg-Radius</label><select><option>bis 30 km</option></select></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <b style="font-size:14px">Sprachen</b>
+          <div class="chips" style="margin-top:12px"><span class="tag">DE Muttersprache</span><span class="tag">IT · C1</span><span class="tag">EN · C1</span><button class="chip">+ Sprache hinzufügen</button></div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <b style="font-size:14px">Skills</b>
+          <p style="font-size:12.5px;color:var(--ink-soft);margin:6px 0 12px">Firmen suchen gezielt nach Skills und Level.</p>
+          <div class="grid cols-2">
+            <div class="tag" style="display:flex;justify-content:space-between">TypeScript <b>Experte</b></div>
+            <div class="tag" style="display:flex;justify-content:space-between">React / Next.js <b>Experte</b></div>
+            <div class="tag" style="display:flex;justify-content:space-between">Design Systems <b>Experte</b></div>
+            <div class="tag" style="display:flex;justify-content:space-between">Accessibility <b>Erfahren</b></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <b style="font-size:14px">Werdegang (anonym)</b>
+          <p style="font-size:12.5px;color:var(--ink-soft);margin:6px 0 12px">Nur Rolle, Branche und Unternehmensgröße – keine Firmennamen.</p>
+          <div class="tag" style="display:block;margin-bottom:8px"><b>Lead Frontend Engineer</b><br><span style="color:var(--ink-soft);font-size:12.5px">SaaS / Fintech · 50–200 Mitarbeitende · 2022–heute</span></div>
+          <div class="tag" style="display:block"><b>Senior Frontend Engineer</b><br><span style="color:var(--ink-soft);font-size:12.5px">E-Commerce · 200–500 Mitarbeitende · 2019–2022</span></div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <b style="font-size:14px">Kurze Selbstbeschreibung</b>
+          <p style="font-size:12.5px;color:var(--ink-soft);margin:6px 0 10px">2–3 Sätze. Kein Firmenname, kein Klarname.</p>
+          <textarea>Erfahrener Frontend-Entwickler mit Fokus auf Design Systems. Suche eine Rolle mit Team-Verantwortung, aber nah am Code.</textarea>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <b style="font-size:14px">Lebenslauf (optional)</b>
+          <p style="font-size:12.5px;color:var(--ink-soft);margin:6px 0 10px">Nur für dich sichtbar. Talentberater:innen sehen den CV nur, wenn du Beratung anfragst.</p>
+          <button class="btn btn-ghost btn-sm">Datei auswählen (PDF, max. 5MB)</button>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <b style="font-size:14px">Ausschlussliste</b>
+          <p style="font-size:12.5px;color:var(--ink-soft);margin:6px 0 10px">Arbeitgeber, die dein Profil nicht sehen dürfen (z.B. aktueller Arbeitgeber).</p>
+          <button class="btn btn-ghost btn-sm">+ Arbeitgeber ausschließen</button>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-ghost">Vorschau</button>
+          <button class="btn btn-accent">Speichern</button>
+          <button class="btn btn-ghost" style="margin-left:auto">Pausieren</button>
+        </div>
+      </div>
+
+      <!-- Anfragen -->
+      <div id="k-requests" class="panel fb-zone" data-section="kandidat__requests" data-label="Kandidat &ndash; Anfragen"><div class="fb-hint">+ Feedback</div>
+        <div class="pagehead"><h2>Anfragen von Unternehmen</h2>
+          <p>Firmen können dich nur anfragen – nicht kontaktieren. Du entscheidest, ob wir Kontakt herstellen. Anfragen laufen nach 10 Tagen automatisch ab, wenn du nicht reagierst.</p></div>
+        <div class="chips" style="margin-bottom:18px">
+          <button class="chip" aria-pressed="true">Alle</button><button class="chip">Neu</button><button class="chip">Interesse gezeigt</button><button class="chip">Match</button><button class="chip">Abgelehnt</button>
+        </div>
+
+        <div class="profile-card" style="margin-bottom:12px">
+          <div class="row-top"><div><h3 style="font-size:16px">Senior Frontend Entwickler:in</h3><div class="meta">Alpin Systems GmbH · Bozen · vor 3 Stunden</div></div><span class="badgechip badge-neu">Neu</span></div>
+          <div class="taglist"><span class="tag">60–72 T€ brutto</span><span class="tag">Vollzeit</span><span class="tag">Hybrid · 2 Tage remote</span><span class="badgechip badge-tb">Von Experten begleitet</span></div>
+          <div class="notice">Kurzmitteilung: „Wir bauen unser Web-Team neu auf und suchen jemanden, der unser Design System vorantreibt. Dein Profil passt sehr gut zu unserer Roadmap."</div>
+          <div class="foot"><span>Dein Kontakt bleibt anonym, bis du zustimmst.</span>
+            <span><button class="btn btn-ghost btn-sm" onclick="reqStatus(this,'Abgelehnt','badge-off')">Kein Interesse</button> <button class="btn btn-accent btn-sm" onclick="reqStatus(this,'Interesse gezeigt','badge-neu')">Interesse zeigen</button></span></div>
+        </div>
+
+        <div class="profile-card" style="margin-bottom:12px">
+          <div class="row-top"><div><h3 style="font-size:16px">Frontend Lead</h3><div class="meta">Loacker Digital Studio · Auer · vor 1 Tag</div></div><span class="badgechip" style="background:#FFF4C2;color:#6b5600">Interesse gezeigt</span></div>
+          <div class="taglist"><span class="tag">65–75 T€ brutto</span><span class="tag">Vollzeit</span><span class="tag">Hybrid</span><span class="badgechip badge-direct">Direktkontakt</span></div>
+          <div class="foot"><span>Dein Kontakt bleibt anonym, bis du zustimmst.</span></div>
+        </div>
+
+        <div class="profile-card">
+          <div class="row-top"><div><h3 style="font-size:16px">Senior Web Engineer – Online Banking</h3><div class="meta">Südtirol Bank AG · Bozen · vor 4 Tagen</div></div><span class="badgechip badge-status">Match · Intro läuft</span></div>
+          <div class="taglist"><span class="tag">62–70 T€ brutto</span><span class="tag">Vollzeit</span><span class="tag">Vor Ort</span><span class="badgechip badge-tb">Von Experten begleitet</span></div>
+          <div class="foot"><span>Intro-Call vereinbart</span><span><button class="btn btn-ghost btn-sm">Termin verschieben</button> <button class="btn btn-accent btn-sm">Zum Intro-Call</button></span></div>
+        </div>
+      </div>
+
+      <!-- Passende Stellen -->
+      <div id="k-jobs" class="panel fb-zone" data-section="kandidat__jobs" data-label="Kandidat &ndash; Passende Stellen"><div class="fb-hint">+ Feedback</div>
+        <div class="pagehead"><h2>Stellen in Südtirol</h2><p>Wir schlagen dir passende Stellen auf Basis deines Profils vor.</p></div>
+        <div class="notice" style="margin-bottom:18px">Du bewirbst dich nicht – du winkst der Firma zu, dass eine Anfrage willkommen wäre. Die Firma bleibt am Zug und sieht nur dein anonymes Profil.</div>
+        <div class="chips" style="margin-bottom:16px"><button class="chip" aria-pressed="true">Für dich passend</button><button class="chip">Alle Stellen</button></div>
+        <div class="chips" style="margin-bottom:18px"><span class="tag">IT &amp; Software ✕</span><span class="tag">Match ≥ 70% ✕</span></div>
+
+        <div class="grid cols-2">
+          <div class="profile-card">
+            <div class="row-top"><div><h3 style="font-size:15px">Senior Frontend Engineer</h3><div class="meta">Brennercom AG · Bozen</div></div><div class="match"><span class="pct">92%</span></div></div>
+            <div class="taglist"><span class="tag">IT &amp; Software</span><span class="tag">Hybrid</span><span class="tag">58–70 T€</span></div>
+            <div class="foot"><span>Firma sieht nur dein anonymes Profil</span><span><button class="btn btn-ghost btn-sm">Details</button> <button class="btn btn-accent btn-sm" onclick="winken(this)">Winken</button></span></div>
+          </div>
+          <div class="profile-card">
+            <div class="row-top"><div><h3 style="font-size:15px">Design System Engineer</h3><div class="meta">MiCROTEC · Brixen</div></div><div class="match"><span class="pct">85%</span></div></div>
+            <div class="taglist"><span class="tag">IT &amp; Software</span><span class="tag">Hybrid</span><span class="tag">55–68 T€</span></div>
+            <div class="foot"><span>Firma sieht nur dein anonymes Profil</span><span><button class="btn btn-ghost btn-sm">Details</button> <button class="btn btn-accent btn-sm" onclick="winken(this)">Winken</button></span></div>
+          </div>
+          <div class="profile-card">
+            <div class="row-top"><div><h3 style="font-size:15px">Fullstack Developer (React/Node)</h3><div class="meta">Salewa · Bozen</div></div><div class="match"><span class="pct">78%</span></div></div>
+            <div class="taglist"><span class="tag">IT &amp; Software</span><span class="tag">Vor Ort</span><span class="tag">52–62 T€</span></div>
+            <div class="foot"><span>Wink gesendet – Firma sieht dein Interesse</span><span><button class="btn btn-ghost btn-sm">Details</button> <button class="btn btn-ghost btn-sm" disabled>Gewinkt</button></span></div>
+          </div>
+          <div class="profile-card">
+            <div class="row-top"><div><h3 style="font-size:15px">Mobile Developer (iOS/Android)</h3><div class="meta">Würth Phoenix · Bozen</div></div><div class="match"><span class="pct">72%</span></div></div>
+            <div class="taglist"><span class="tag">IT &amp; Software</span><span class="tag">Hybrid</span><span class="tag">50–60 T€</span></div>
+            <div class="foot"><span>Firma sieht nur dein anonymes Profil</span><span><button class="btn btn-ghost btn-sm">Details</button> <button class="btn btn-accent btn-sm" onclick="winken(this)">Winken</button></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= SZENARIO 3 · ARBEITGEBER ======================= -->
+  <section id="view-arbeitgeber" class="view scenario">
+    <div class="shell wide">
+      <div class="tabbar">
+        <button class="tab active" data-scope="a" data-panel="a-overview" onclick="showPanel(this)">Übersicht</button>
+        <button class="tab" data-scope="a" data-panel="a-pool" onclick="showPanel(this)">Talentpool <span class="badge">1.284</span></button>
+        <button class="tab" data-scope="a" data-panel="a-suggestions" onclick="showPanel(this)">Vorschläge <span class="badge">12</span></button>
+        <button class="tab" data-scope="a" data-panel="a-requests" onclick="showPanel(this)">Anfragen</button>
+        <button class="tab" data-scope="a" data-panel="a-jobs" onclick="showPanel(this)">Offene Stellen</button>
+      </div>
+
+      <!-- Übersicht -->
+      <div id="a-overview" class="panel active fb-zone" data-section="arbeitgeber__overview" data-label="Arbeitgeber &ndash; Uebersicht"><div class="fb-hint">+ Feedback</div>
+        <div class="card" style="background:linear-gradient(135deg,#fff,#FFFBEA);margin-bottom:18px">
+          <span class="tag">Talent Service · Alpin Systems GmbH</span>
+          <h2 style="font-size:26px;font-weight:800;margin:10px 0 6px">Guten Morgen, Anna.</h2>
+          <p style="color:var(--ink-soft);margin-bottom:16px">12 neue Profile aus Südtirol passen zu deinen offenen Stellen – und 3 Kandidat:innen haben deine Stellen diese Woche gewinkt.</p>
+          <div class="btn-row" style="margin-top:0">
+            <button class="btn btn-accent" onclick="showPanel(document.querySelector('[data-panel=a-suggestions]'))">Vorschläge ansehen</button>
+            <button class="btn btn-ghost" onclick="showPanel(document.querySelector('[data-panel=a-pool]'))">Talentpool durchsuchen</button>
+          </div>
+        </div>
+
+        <div class="grid cols-4" style="margin-bottom:18px">
+          <div class="kpi"><div class="label">Profile im Pool</div><div class="value">1.284</div><div class="sub">+47 diese Woche</div></div>
+          <div class="kpi"><div class="label">Passende Vorschläge</div><div class="value">12</div><div class="sub">aktualisiert heute</div></div>
+          <div class="kpi"><div class="label">Offene Anfragen</div><div class="value">8</div><div class="sub">⌀ 1,4 Tage Antwortzeit</div></div>
+          <div class="kpi"><div class="label">Matches</div><div class="value">5</div><div class="sub">+2 ggü. Vormonat</div></div>
+        </div>
+
+        <div class="grid" style="grid-template-columns:2fr 1fr;align-items:start">
+          <div>
+            <div class="card" style="margin-bottom:16px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b>Passende Profile aus dem Talentpool</b><span class="tag">Alle 12 ansehen</span></div>
+              <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:14px">Automatisch abgeglichen mit deinen offenen Stellen. Profile sind anonymisiert – erst beim Match wird die Identität geteilt.</p>
+
+              <div class="profile-card" style="margin-bottom:10px">
+                <div class="row-top">
+                  <div><span class="idpill">ANONYM K-2847</span><h3>Senior Frontend – React &amp; Design Systems</h3><div class="meta">IT &amp; Software · Senior · Vollzeit · Raum Bozen · Hybrid</div></div>
+                  <div class="match"><div class="pct">94%</div><div class="lbl">Match Score</div><div class="bar"><i style="width:94%"></i></div></div>
+                </div>
+                <div class="taglist"><span class="badgechip badge-tb">Von Experten geprüft</span><span class="tag">TypeScript</span><span class="tag">React/Next.js</span><span class="tag">Design Systems</span></div>
+                <div class="foot"><span>Gehaltswunsch 58–68 T€ · Verfügbar ab 01.09.2026</span>
+                  <span><button class="btn btn-ghost btn-sm">👁</button> <button class="btn btn-accent btn-sm" onclick="openRequest('K-2847','Senior Frontend – React &amp; Design Systems','Vermittlung · 16% Jahresbrutto')">Anfragen</button></span></div>
+              </div>
+
+              <div class="profile-card">
+                <div class="row-top">
+                  <div><span class="idpill">ANONYM K-3120</span><h3>Full-Stack Engineer – Node.js &amp; Vue</h3><div class="meta">IT &amp; Software · Mid · Vollzeit · Überetsch-Unterland</div></div>
+                  <div class="match"><div class="pct">88%</div><div class="lbl">Match Score</div><div class="bar"><i style="width:88%"></i></div></div>
+                </div>
+                <div class="taglist"><span class="badgechip badge-direct">Direktprofil</span><span class="tag">Node.js</span><span class="tag">Vue 3</span><span class="tag">AWS</span></div>
+                <div class="foot"><span>Gehaltswunsch 45–55 T€ · Verfügbar sofort</span>
+                  <span><button class="btn btn-ghost btn-sm">👁</button> <button class="btn btn-accent btn-sm" onclick="openRequest('K-3120','Full-Stack Engineer – Node.js &amp; Vue','Direktkontakt · 3.500 € fix')">Anfragen</button></span></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <b>Aktive Anfragen</b>
+              <table style="margin-top:12px">
+                <tr><th>Kandidat</th><th>Stelle</th><th>Status</th><th>Gesendet</th><th></th></tr>
+                <tr><td>K-2611</td><td>Marketing Lead DACH</td><td><span class="badgechip badge-status">Match!</span></td><td>vor 2 Std.</td><td><a href="#">Öffnen</a></td></tr>
+                <tr><td>K-3120</td><td>Full-Stack Engineer</td><td><span class="badgechip badge-neu">Gesehen</span></td><td>vor 1 Tag</td><td><a href="#">Öffnen</a></td></tr>
+                <tr><td>K-3402</td><td>CNC-Werkstattleitung</td><td><span class="badgechip badge-status">Kontaktiert</span></td><td>vor 3 Tagen</td><td><a href="#">Öffnen</a></td></tr>
+                <tr><td>K-3155</td><td>F&amp;B Manager</td><td><span class="badgechip badge-off">Abgelehnt</span></td><td>vor 4 Tagen</td><td><a href="#">Öffnen</a></td></tr>
+              </table>
+            </div>
+          </div>
+
+          <div>
+            <div class="card" style="margin-bottom:16px">
+              <b style="font-size:13px;text-transform:uppercase;color:var(--ink-soft)">Letzte 30 Tage</b>
+              <p style="font-weight:800;font-size:16px;margin:6px 0 12px">Dein Vermittlungs-Trichter</p>
+              <div style="font-size:13px;margin-bottom:8px">Anfragen gesendet — <b>23</b></div><div class="bar" style="width:100%"><i style="width:100%"></i></div>
+              <div style="font-size:13px;margin:10px 0 8px">Von Kandidat gesehen — <b>19</b></div><div class="bar" style="width:100%"><i style="width:82%"></i></div>
+              <div style="font-size:13px;margin:10px 0 8px">Beidseitiges Match — <b>5</b></div><div class="bar" style="width:100%"><i style="width:22%"></i></div>
+              <div style="font-size:13px;margin:10px 0 8px">Einstellungen — <b>1</b></div><div class="bar" style="width:100%"><i style="width:5%"></i></div>
+              <p style="font-size:11.5px;color:var(--ink-soft);margin-top:12px">Rund 1 von 5 Anfragen führt zu einem Match – in 80% der Fälle entsteht für dich kein Aufwand.</p>
+            </div>
+
+            <div class="card" style="margin-bottom:16px">
+              <b style="font-size:13px;text-transform:uppercase;color:var(--ink-soft)">Deine offenen Stellen</b>
+              <div style="margin-top:10px;font-size:13.5px"><b>Senior Frontend Entwickler:in</b><br><span style="color:var(--ink-soft)">8 Vorschläge · 3 Anfragen offen</span></div>
+              <hr class="divider" style="margin:10px 0">
+              <div style="font-size:13.5px"><b>CNC-Werkstattleitung</b><br><span style="color:var(--ink-soft)">4 Vorschläge · 2 Anfragen offen</span></div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:14px">+ Neue Stelle anlegen</button>
+            </div>
+
+            <div class="card">
+              <b style="font-size:13px;text-transform:uppercase;color:var(--ink-soft)">Dein Talentberater</b>
+              <p style="font-weight:800;margin:8px 0 2px">Marco Sattler</p>
+              <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:10px">Karriere Südtirol · Bozen</p>
+              <p style="font-size:13px;color:var(--ink-soft);margin-bottom:12px">„Beim Match übernehme ich den Kontakt-Check und stelle die Verbindung her. Ruf mich jederzeit an – auch auf Italienisch."</p>
+              <div class="btn-row" style="margin-top:0"><button class="btn btn-accent btn-sm">Nachricht</button><button class="btn btn-ghost btn-sm">Termin</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Talentpool -->
+      <div id="a-pool" class="panel fb-zone" data-section="arbeitgeber__pool" data-label="Arbeitgeber &ndash; Talentpool"><div class="fb-hint">+ Feedback</div>
+        <div class="pagehead"><h2>1.284 anonyme Profile aus Südtirol</h2><p>Alle Profile sind bis zum Match anonym. Beim beidseitigen „Ja" stellt der Talentberater den Kontakt her – rein erfolgsbasiert.</p></div>
+        <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+          <input type="text" placeholder="Rolle, Skill oder Sprache suchen…" style="flex:2;min-width:220px">
+          <input type="text" placeholder="Bezirk" style="flex:1;min-width:140px">
+          <button class="btn btn-accent">Profile finden</button>
+        </div>
+        <div class="chips" style="margin-bottom:10px">
+          <button class="chip" aria-pressed="true">IT &amp; Software</button><button class="chip">Handwerk &amp; Produktion</button>
+          <button class="chip">Hotellerie &amp; Gastro</button><button class="chip">Marketing &amp; Sales</button><button class="chip">Handel</button><button class="chip">Health &amp; Care</button>
+        </div>
+        <div class="chips" style="margin-bottom:20px">
+          <button class="chip" aria-pressed="true">Bozen</button><button class="chip">Überetsch-Unterland</button><button class="chip">Burggrafenamt</button><button class="chip">Pustertal</button><button class="chip">Eisacktal</button>
+        </div>
+        <p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px">6 von 1.284 Ergebnisse · sortiert nach Match-Score</p>
+
+        <div class="grid cols-3">
+          <div class="profile-card">
+            <div class="row-top"><div><span class="idpill">K-2847</span><h3 style="font-size:15px">Senior Frontend – React</h3></div><div class="match"><span class="pct">94%</span></div></div>
+            <div class="taglist"><span class="badgechip badge-tb">Von Experten geprüft</span></div>
+            <div class="meta">IT &amp; Software · Senior · Raum Bozen</div>
+            <div class="foot"><span>Aktiv vor 2 Tagen</span><span><button class="btn btn-ghost btn-sm">👁</button><button class="btn btn-accent btn-sm" onclick="openRequest('K-2847','Senior Frontend – React','Vermittlung · 16% Jahresbrutto')">Anfragen</button></span></div>
+          </div>
+          <div class="profile-card">
+            <div class="row-top"><div><span class="idpill">K-3402</span><h3 style="font-size:15px">CNC-Techniker</h3></div><div class="match"><span class="pct">91%</span></div></div>
+            <div class="taglist"><span class="badgechip badge-tb">Von Experten geprüft</span></div>
+            <div class="meta">Handwerk &amp; Produktion · Senior · Pustertal</div>
+            <div class="foot"><span>Aktiv vor 1 Tag</span><span><button class="btn btn-ghost btn-sm">👁</button><button class="btn btn-accent btn-sm" onclick="openRequest('K-3402','CNC-Techniker','Vermittlung · 16% Jahresbrutto')">Anfragen</button></span></div>
+          </div>
+          <div class="profile-card">
+            <div class="row-top"><div><span class="idpill">K-3120</span><h3 style="font-size:15px">Full-Stack Engineer</h3></div><div class="match"><span class="pct">88%</span></div></div>
+            <div class="taglist"><span class="badgechip badge-direct">Direktprofil</span></div>
+            <div class="meta">IT &amp; Software · Mid · Überetsch-Unterland</div>
+            <div class="foot"><span>Aktiv heute</span><span><button class="btn btn-ghost btn-sm">👁</button><button class="btn btn-accent btn-sm" onclick="openRequest('K-3120','Full-Stack Engineer','Direktkontakt · 3.500 € fix')">Anfragen</button></span></div>
+          </div>
+          <div class="profile-card">
+            <div class="row-top"><div><span class="idpill">K-2611</span><h3 style="font-size:15px">Marketing Lead B2B</h3></div><div class="match"><span class="pct">82%</span></div></div>
+            <div class="taglist"><span class="badgechip badge-tb">Von Experten geprüft</span></div>
+            <div class="meta">Marketing &amp; Sales · Lead · Raum Meran</div>
+            <div class="foot"><span>Aktiv vor 5 Tagen</span><span><button class="btn btn-ghost btn-sm">👁</button><button class="btn btn-accent btn-sm" onclick="openRequest('K-2611','Marketing Lead B2B','Vermittlung · 16% Jahresbrutto')">Anfragen</button></span></div>
+          </div>
+          <div class="profile-card">
+            <div class="row-top"><div><span class="idpill">K-2988</span><h3 style="font-size:15px">Data Scientist</h3></div><div class="match"><span class="pct">79%</span></div></div>
+            <div class="taglist"><span class="badgechip badge-direct">Direktprofil</span></div>
+            <div class="meta">IT &amp; Software · Mid · Raum Brixen</div>
+            <div class="foot"><span>Aktiv vor 3 Tagen</span><span><button class="btn btn-ghost btn-sm">👁</button><button class="btn btn-accent btn-sm" onclick="openRequest('K-2988','Data Scientist','Direktkontakt · 3.500 € fix')">Anfragen</button></span></div>
+          </div>
+          <div class="profile-card">
+            <div class="row-top"><div><span class="idpill">K-3155</span><h3 style="font-size:15px">Hotelmanager 4* Superior</h3></div><div class="match"><span class="pct">86%</span></div></div>
+            <div class="taglist"><span class="badgechip badge-tb">Von Experten geprüft</span></div>
+            <div class="meta">Hotellerie &amp; Gastro · Senior · Gadertal</div>
+            <div class="foot"><span>Aktiv vor 4 Tagen</span><span><button class="btn btn-ghost btn-sm">👁</button><button class="btn btn-accent btn-sm" onclick="openRequest('K-3155','Hotelmanager 4* Superior','Vermittlung · 16% Jahresbrutto')">Anfragen</button></span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vorschläge -->
+      <div id="a-suggestions" class="panel fb-zone" data-section="arbeitgeber__suggestions" data-label="Arbeitgeber &ndash; Vorschlaege"><div class="fb-hint">+ Feedback</div>
+        <div class="pagehead" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+          <div><h2>12 neue Vorschläge</h2><p>Jeden Morgen frisch berechnet: Kandidat:innen aus Südtirol, die zu deinen aktiven Stellen passen.</p></div>
+          <div class="btn-row" style="margin-top:0"><button class="btn btn-ghost btn-sm">Alle ablehnen</button><button class="btn btn-accent btn-sm">Alle anfragen</button></div>
+        </div>
+
+        <p style="font-size:12px;text-transform:uppercase;color:var(--ink-soft);letter-spacing:.05em;margin-bottom:4px">Bozen · Hybrid</p>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <h3 style="font-size:19px;font-weight:800">Senior Frontend Entwickler:in</h3><span class="tag">Stelle aktiv · 2 neue Vorschläge</span>
+        </div>
+        <div class="grid cols-2" style="margin-bottom:26px">
+          <div class="profile-card">
+            <div class="row-top"><div><span class="idpill">K-2847</span><h3 style="font-size:15px">Senior Frontend – React</h3></div><div class="match"><span class="pct">94%</span></div></div>
+            <div class="taglist"><span class="badgechip badge-tb">Von Experten geprüft</span><span class="tag">TypeScript</span><span class="tag">React</span></div>
+            <div class="foot"><span>58–68 T€ · ab 01.09.2026</span><button class="btn btn-accent btn-sm" onclick="openRequest('K-2847','Senior Frontend Entwickler:in','Vermittlung · 16% Jahresbrutto')">Anfragen</button></div>
+          </div>
+          <div class="profile-card">
+            <div class="row-top"><div><span class="idpill">K-3120</span><h3 style="font-size:15px">Full-Stack Engineer</h3></div><div class="match"><span class="pct">88%</span></div></div>
+            <div class="taglist"><span class="badgechip badge-direct">Direktprofil</span><span class="tag">Node.js</span><span class="tag">Vue 3</span></div>
+            <div class="foot"><span>45–55 T€ · sofort</span><button class="btn btn-accent btn-sm" onclick="openRequest('K-3120','Full-Stack Engineer','Direktkontakt · 3.500 € fix')">Anfragen</button></div>
+          </div>
+        </div>
+
+        <p style="font-size:12px;text-transform:uppercase;color:var(--ink-soft);letter-spacing:.05em;margin-bottom:4px">Bruneck · Vor Ort</p>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <h3 style="font-size:19px;font-weight:800">CNC-Werkstattleitung</h3><span class="tag">Stelle aktiv · 1 neuer Vorschlag</span>
+        </div>
+        <div class="grid cols-2">
+          <div class="profile-card">
+            <div class="row-top"><div><span class="idpill">K-3402</span><h3 style="font-size:15px">CNC-Techniker mit Werkstattverantwortung</h3></div><div class="match"><span class="pct">91%</span></div></div>
+            <div class="taglist"><span class="badgechip badge-tb">Von Experten geprüft</span><span class="tag">Heidenhain</span><span class="tag">CAM (hyperMILL)</span></div>
+            <div class="foot"><span>42–52 T€ · ab 01.10.2026</span><button class="btn btn-accent btn-sm" onclick="openRequest('K-3402','CNC-Werkstattleitung','Vermittlung · 16% Jahresbrutto')">Anfragen</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Anfragen -->
+      <div id="a-requests" class="panel fb-zone" data-section="arbeitgeber__requests" data-label="Arbeitgeber &ndash; Anfragen"><div class="fb-hint">+ Feedback</div>
+        <div class="pagehead"><h2>Deine Kandidaten-Anfragen</h2><p>Der Talentberater wird erst beim Match aktiv. ⌀ Antwortzeit der Kandidat:innen: 1,4 Tage.</p></div>
+        <div class="chips" style="margin-bottom:18px">
+          <button class="chip" aria-pressed="true">Alle · 6</button><button class="chip">Offen · 3</button><button class="chip">Matches · 1</button><button class="chip">Kontaktiert · 1</button><button class="chip">Abgelehnt · 1</button>
+        </div>
+        <table style="margin-bottom:24px">
+          <tr><th>Kandidat</th><th>Stelle</th><th>Kondition</th><th>Gesendet</th><th>Status</th><th></th></tr>
+          <tr><td>K-2611 ✓</td><td>Marketing Lead DACH</td><td>Vermittlung · 16%</td><td>vor 2 Std.</td><td><span class="badgechip badge-status">Match!</span></td><td><a href="#">Öffnen</a></td></tr>
+          <tr><td>K-3120</td><td>Full-Stack Engineer</td><td>Direktkontakt · 3.500€</td><td>vor 1 Tag</td><td><span class="badgechip badge-neu">Gesehen</span></td><td><a href="#">Öffnen</a></td></tr>
+          <tr><td>K-2988</td><td>Data Scientist</td><td>Direktkontakt · 3.500€</td><td>vor 2 Tagen</td><td><span class="badgechip badge-neu">Gesendet</span></td><td><a href="#">Öffnen</a></td></tr>
+          <tr><td>K-3402 ✓</td><td>CNC-Werkstattleitung</td><td>Vermittlung · 16%</td><td>vor 3 Tagen</td><td><span class="badgechip badge-status">Kontaktiert</span></td><td><a href="#">Öffnen</a></td></tr>
+          <tr><td>K-3155 ✓</td><td>F&amp;B Manager</td><td>Vermittlung · 16%</td><td>vor 4 Tagen</td><td><span class="badgechip badge-off">Abgelehnt</span></td><td><a href="#">Öffnen</a></td></tr>
+        </table>
+        <div class="card">
+          <b>Merke: So läuft eine Anfrage ab</b>
+          <div class="grid cols-4" style="margin-top:14px">
+            <div><b style="font-size:13px">1 · Anfragen</b><p style="font-size:12.5px;color:var(--ink-soft);margin-top:4px">Du wählst eine Stelle und einen kurzen Text. Konditionen sind sichtbar.</p></div>
+            <div><b style="font-size:13px">2 · Kandidat reagiert</b><p style="font-size:12.5px;color:var(--ink-soft);margin-top:4px">Ja oder Nein per Klick – Follow-ups laufen automatisch.</p></div>
+            <div><b style="font-size:13px">3 · Match</b><p style="font-size:12.5px;color:var(--ink-soft);margin-top:4px">Erst jetzt wird der Talentberater aktiv und macht den Match-Check.</p></div>
+            <div><b style="font-size:13px">4 · Kontakt</b><p style="font-size:12.5px;color:var(--ink-soft);margin-top:4px">Marco stellt den Kontakt zwischen Firma und Kandidat:in her.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Offene Stellen -->
+      <div id="a-jobs" class="panel fb-zone" data-section="arbeitgeber__jobs" data-label="Arbeitgeber &ndash; Offene Stellen"><div class="fb-hint">+ Feedback</div>
+        <div class="pagehead" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+          <div><h2>4 aktive Stellen</h2><p>Neue Stellen erscheinen sofort im Talentpool und werden automatisch mit passenden Profilen abgeglichen.</p></div>
+          <button class="btn btn-accent">+ Neue Stelle anlegen</button>
+        </div>
+        <div class="grid cols-2">
+          <div class="card">
+            <span class="badgechip badge-status">Aktiv</span>
+            <h3 style="font-size:17px;font-weight:800;margin:10px 0 4px">Senior Frontend Entwickler:in</h3>
+            <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:14px">Bozen · Hybrid · Vollzeit</p>
+            <div class="grid cols-2"><div class="kpi"><div class="label">Vorschläge</div><div class="value" style="font-size:20px">8</div></div><div class="kpi"><div class="label">Anfragen offen</div><div class="value" style="font-size:20px">3</div></div></div>
+            <div class="btn-row"><button class="btn btn-ghost btn-sm">Bearbeiten</button><button class="btn btn-accent btn-sm">Vorschläge ansehen</button></div>
+          </div>
+          <div class="card">
+            <span class="badgechip badge-status">Aktiv</span>
+            <h3 style="font-size:17px;font-weight:800;margin:10px 0 4px">Full-Stack Engineer</h3>
+            <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:14px">Bozen · Vor Ort · Vollzeit</p>
+            <div class="grid cols-2"><div class="kpi"><div class="label">Vorschläge</div><div class="value" style="font-size:20px">12</div></div><div class="kpi"><div class="label">Anfragen offen</div><div class="value" style="font-size:20px">4</div></div></div>
+            <div class="btn-row"><button class="btn btn-ghost btn-sm">Bearbeiten</button><button class="btn btn-accent btn-sm">Vorschläge ansehen</button></div>
+          </div>
+          <div class="card">
+            <span class="badgechip badge-status">Aktiv</span>
+            <h3 style="font-size:17px;font-weight:800;margin:10px 0 4px">CNC-Werkstattleitung</h3>
+            <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:14px">Bruneck · Vor Ort · Vollzeit</p>
+            <div class="grid cols-2"><div class="kpi"><div class="label">Vorschläge</div><div class="value" style="font-size:20px">4</div></div><div class="kpi"><div class="label">Anfragen offen</div><div class="value" style="font-size:20px">2</div></div></div>
+            <div class="btn-row"><button class="btn btn-ghost btn-sm">Bearbeiten</button><button class="btn btn-accent btn-sm">Vorschläge ansehen</button></div>
+          </div>
+          <div class="card">
+            <span class="badgechip" style="background:#eee;color:var(--ink-soft)">Pausiert</span>
+            <h3 style="font-size:17px;font-weight:800;margin:10px 0 4px">IT-Support (Level 2)</h3>
+            <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:14px">Meran · Vor Ort · Vollzeit</p>
+            <div class="grid cols-2"><div class="kpi"><div class="label">Vorschläge</div><div class="value" style="font-size:20px">3</div></div><div class="kpi"><div class="label">Anfragen offen</div><div class="value" style="font-size:20px">0</div></div></div>
+            <div class="btn-row"><button class="btn btn-ghost btn-sm">Bearbeiten</button><button class="btn btn-accent btn-sm">Vorschläge ansehen</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Modal: Anfrage senden (Arbeitgeber) -->
+<div class="overlay" id="request-overlay">
+  <div class="modal">
+    <h3>Anfrage senden</h3>
+    <p class="hint">an Profil <b id="req-id"></b> · <span id="req-title"></span></p>
+    <div class="notice" style="margin-bottom:16px">Kondition: <b id="req-kondition"></b></div>
+    <div class="field"><label>Stelle</label><select><option id="req-job"></option><option>Initiativanfrage</option></select></div>
+    <div class="field"><label>Gehaltsangabe <span class="fhint">(optional)</span></label><input type="text" placeholder="z.B. 58.000–68.000 €"></div>
+    <div class="field"><label>Kurznachricht</label><textarea placeholder="Kurze, persönliche Nachricht an das Profil…"></textarea></div>
+    <div class="notice" style="margin-bottom:16px">🔒 Double Opt-in: Das Profil sieht deine Anfrage samt Stelle und wählt Ja oder Nein. Ohne Zustimmung bleibst du für das Profil unsichtbar.</div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="closeModal()">Abbrechen</button>
+      <button class="btn btn-accent" onclick="sendRequest()">Anfrage senden</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">✓ <span id="toast-text">Aktion ausgeführt</span></div>
+
+<script>
+/* ---------- view switching ---------- */
+function showView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.getElementById('btn-home').classList.toggle('hidden', name==='home');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('.tile').forEach(t=>{
+  t.addEventListener('click',()=>showView(t.dataset.target));
+});
+document.getElementById('btn-home').addEventListener('click',()=>showView('home'));
+
+/* ---------- tab / panel switching (kandidat & arbeitgeber) ---------- */
+function showPanel(btn){
+  var scope = btn.dataset.scope;
+  document.querySelectorAll('.tab[data-scope="'+scope+'"]').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  var scopeRoot = btn.closest('.shell');
+  scopeRoot.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(btn.dataset.panel).classList.add('active');
+  scopeRoot.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ---------- generic chip toggles ---------- */
+document.querySelectorAll('.chip').forEach(c=>{
+  if(!c.hasAttribute('aria-pressed')) c.setAttribute('aria-pressed','false');
+  c.addEventListener('click',()=>{
+    var pressed = c.getAttribute('aria-pressed')==='true';
+    c.setAttribute('aria-pressed', pressed? 'false':'true');
+  });
+});
+
+/* ---------- onboarding stepper ---------- */
+var obOrder = ['ob-landing','ob-choice','ob-s1','ob-s2','ob-s3','ob-s4','ob-s5','ob-s6','ob-about','ob-about-2','ob-about-3','ob-preview','ob-account','ob-done'];
+function obGoto(id){
+  document.querySelectorAll('#view-onboarding .screen').forEach(s=>s.classList.remove('active'));
+  document.querySelector('#view-onboarding [data-screen="'+id+'"]').classList.add('active');
+  var idx = obOrder.indexOf(id);
+  var pct = idx<0 ? 8 : Math.max(6, Math.round(((idx+1)/obOrder.length)*100));
+  document.getElementById('ob-progress').style.width = pct+'%';
+  document.getElementById('view-onboarding').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function obChoose(kind){
+  obGoto(kind==='tb' ? 'ob-tb-contact' : 'ob-s1');
+}
+function obReset(){ obGoto('ob-landing'); }
+function obAddStation(){
+  document.getElementById('ob-station-2').style.display = 'block';
+  document.getElementById('ob-add-station').style.display = 'none';
+}
+function obRemoveStation(){
+  document.getElementById('ob-station-2').style.display = 'none';
+  document.getElementById('ob-add-station').style.display = 'inline-flex';
+}
+function obAccountTab(mode){
+  document.getElementById('ob-tab-register').classList.toggle('active', mode==='register');
+  document.getElementById('ob-tab-login').classList.toggle('active', mode==='login');
+  document.getElementById('ob-account-submit').textContent = mode==='login' ? 'Anmelden & fortfahren' : 'Konto anlegen & fortfahren';
+}
+var obAvatars = ['🙂','😎','🤓','🧑‍💻','🙃','😊','🧑‍🎨','🤠'];
+function obRoll(){
+  document.getElementById('ob-avatar').textContent = obAvatars[Math.floor(Math.random()*obAvatars.length)];
+}
+
+/* ---------- toast ---------- */
+function toast(msg){
+  var t = document.getElementById('toast');
+  document.getElementById('toast-text').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+/* ---------- kandidat interactions ---------- */
+function winken(btn){
+  btn.textContent = 'Gewinkt';
+  btn.disabled = true;
+  var foot = btn.closest('.foot');
+  if(foot) foot.querySelector('span').textContent = 'Wink gesendet – Firma sieht dein Interesse';
+  toast('Wink gesendet – die Firma sieht dein Interesse.');
+}
+function reqStatus(btn, label, cls){
+  var card = btn.closest('.profile-card');
+  var badge = card.querySelector('.row-top .badgechip, .row-top span.badgechip');
+  var actions = btn.parentElement;
+  actions.innerHTML = '<span style="font-size:12.5px;color:var(--ink-soft)">'+label+'</span>';
+  toast(label==='Abgelehnt' ? 'Anfrage abgelehnt – archiviert.' : 'Interesse übermittelt. Talentberater:in wird informiert, sobald die Firma ebenfalls zustimmt.');
+}
+
+/* ---------- arbeitgeber: request modal ---------- */
+function openRequest(id, title, kondition){
+  document.getElementById('req-id').textContent = id;
+  document.getElementById('req-title').textContent = title;
+  document.getElementById('req-kondition').textContent = kondition;
+  document.getElementById('req-job').textContent = title;
+  document.getElementById('request-overlay').classList.add('active');
+}
+function closeModal(){ document.getElementById('request-overlay').classList.remove('active'); }
+function sendRequest(){
+  closeModal();
+  toast('Anfrage gesendet – das Profil wurde benachrichtigt.');
+}
+document.getElementById('request-overlay').addEventListener('click', function(e){
+  if(e.target === this) closeModal();
+});
+</script>
+<!-- ══════════════════════════════ FEEDBACK SYSTEM v4 — DO NOT EDIT BELOW THIS LINE ══════════════════════════════ -->
+<style>
+:root{--fb-ink:#1a1714;--fb-paper:#f5f1eb;--fb-cream:#ede8df;--fb-acc:#d94f2b;--fb-acc-s:rgba(217,79,43,.10);--fb-acc-b:rgba(217,79,43,.50);--fb-green:#2e7d5e;--fb-muted:#8c8580;--fb-muted2:#b5b0ab;--fb-r:4px;--fb-sw:360px}
+.fb-zone{position:relative;cursor:crosshair;transition:outline .12s,background .12s;outline:2px dashed transparent}.fb-zone:hover{outline:2px dashed var(--fb-acc-b);background:var(--fb-acc-s)}.fb-zone:hover .fb-hint{opacity:1}.fb-hint{position:absolute;top:6px;right:8px;font-size:10px;font-family:monospace;color:var(--fb-acc);background:#fff;border:1px solid var(--fb-acc-b);padding:2px 8px;border-radius:20px;pointer-events:none;opacity:0;transition:opacity .12s;white-space:nowrap;z-index:10}.fb-has-comment::after{content:attr(data-count);position:absolute;top:6px;left:8px;background:var(--fb-acc);color:#fff;font-size:9px;font-family:monospace;padding:1px 7px;border-radius:20px;z-index:10}
+#fb-panel{display:none;position:fixed;bottom:24px;right:24px;width:320px;background:#fff;border:1.5px solid var(--fb-ink);border-radius:8px;box-shadow:4px 4px 0 var(--fb-ink);z-index:1100;font-family:monospace;overflow:hidden}#fb-panel.open{display:block;animation:fbUp .18s ease}@keyframes fbUp{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}.fb-panel-hd{background:var(--fb-ink);color:var(--fb-paper);padding:10px 14px;display:flex;justify-content:space-between;align-items:flex-start;font-size:11px;letter-spacing:.08em;text-transform:uppercase}#fb-panel-section{color:var(--fb-acc);font-size:10px;margin-top:2px}.fb-panel-hd button{background:none;border:none;color:var(--fb-paper);cursor:pointer;font-size:18px;line-height:1}.fb-panel-bd{padding:14px}.fb-panel-bd label{display:block;font-size:10px;color:var(--fb-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}.fb-inp{width:100%;font-family:monospace;font-size:13px;border:1.5px solid var(--fb-cream);border-radius:var(--fb-r);padding:8px 10px;background:var(--fb-paper);color:var(--fb-ink);margin-bottom:10px;resize:none;transition:border-color .12s}.fb-inp:focus{outline:none;border-color:var(--fb-ink)}.fb-btn-p{width:100%;background:var(--fb-acc);color:#fff;border:none;border-radius:var(--fb-r);padding:9px;font-family:monospace;font-size:12px;font-weight:500;letter-spacing:.06em;cursor:pointer;text-transform:uppercase}.fb-btn-p:hover{opacity:.85}#fb-ok{display:none;text-align:center;padding:20px 14px;font-size:12px;color:var(--fb-muted)}#fb-ok span{display:block;font-size:24px;margin-bottom:6px}
+#fb-sb{position:fixed;top:0;right:0;width:var(--fb-sw);height:100vh;background:#fff;border-left:1.5px solid var(--fb-ink);z-index:999;font-family:monospace;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s cubic-bezier(.4,0,.2,1);box-shadow:-4px 0 24px rgba(0,0,0,.08)}#fb-sb.open{transform:translateX(0)}.sb-hd{background:var(--fb-ink);color:var(--fb-paper);padding:14px 16px;display:flex;justify-content:space-between;align-items:flex-start;flex-shrink:0}.sb-hd h3{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:500}.sb-hd-meta{font-size:10px;color:var(--fb-muted2);margin-top:3px}.sb-hd button{background:none;border:none;color:var(--fb-paper);cursor:pointer;font-size:18px}.sb-tabs{display:flex;border-bottom:1.5px solid var(--fb-cream);flex-shrink:0;background:var(--fb-paper)}.sb-tab{flex:1;padding:8px 6px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;text-align:center;cursor:pointer;border:none;background:none;color:var(--fb-muted);border-bottom:2px solid transparent;transition:color .12s,border-color .12s;font-family:monospace}.sb-tab.active{color:var(--fb-ink);border-bottom-color:var(--fb-acc)}#sb-scroll{flex:1;overflow-y:auto;padding:12px}
+.sb-grp{margin-bottom:8px}.sb-grp-hd{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--fb-cream);border-radius:var(--fb-r);cursor:pointer;border:1.5px solid transparent;transition:border-color .12s;user-select:none}.sb-grp-hd:hover{border-color:var(--fb-ink)}.sb-grp-title{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--fb-ink);font-weight:500}.sb-grp-right{display:flex;align-items:center;gap:8px}.sb-grp-badge{background:var(--fb-acc);color:#fff;font-size:9px;padding:1px 7px;border-radius:20px}.sb-chev{font-size:10px;color:var(--fb-muted);transition:transform .18s;display:inline-block}.sb-grp.collapsed .sb-chev{transform:rotate(-90deg)}.sb-grp-body{padding-top:6px}.sb-grp.collapsed .sb-grp-body{display:none}
+.sb-card{background:var(--fb-paper);border:1.5px solid var(--fb-cream);border-radius:var(--fb-r);margin-bottom:6px;overflow:hidden;transition:border-color .12s}.sb-card:hover{border-color:var(--fb-muted2)}.sb-card.editing{border-color:var(--fb-ink)}.sb-card.resolved{opacity:.6}.sb-cm{padding:10px 12px 8px}.sb-ct{font-size:13px;line-height:1.55;color:var(--fb-ink);margin-bottom:6px;white-space:pre-wrap}.sb-meta{font-size:10px;color:var(--fb-muted);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px}.sb-author{font-weight:500}.sb-res-badge{color:var(--fb-green)}
+.sb-acts{display:flex;border-top:1px solid var(--fb-cream)}.sb-act{flex:1;padding:6px 2px;font-family:monospace;font-size:9px;letter-spacing:.05em;text-transform:uppercase;border:none;background:none;cursor:pointer;color:var(--fb-muted);transition:background .1s,color .1s;border-right:1px solid var(--fb-cream)}.sb-act:last-child{border-right:none}.sb-act:hover{background:var(--fb-cream);color:var(--fb-ink)}.sb-act.del:hover{background:rgba(217,79,43,.08);color:var(--fb-acc)}
+.sb-edit{display:none;padding:10px 12px;border-top:1px solid var(--fb-cream);background:#fff}.sb-edit.open{display:block}.sb-edit textarea{width:100%;font-family:monospace;font-size:13px;border:1.5px solid var(--fb-cream);border-radius:var(--fb-r);padding:7px 9px;resize:none;background:var(--fb-paper);color:var(--fb-ink);margin-bottom:8px}.sb-edit textarea:focus{outline:none;border-color:var(--fb-ink)}.sb-edit-acts{display:flex;gap:6px}.sb-save{flex:1;background:var(--fb-ink);color:var(--fb-paper);border:none;border-radius:var(--fb-r);padding:6px;font-family:monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}.sb-cancel{flex:1;background:none;color:var(--fb-muted);border:1.5px solid var(--fb-cream);border-radius:var(--fb-r);padding:6px;font-family:monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.sb-replies{border-top:1px solid var(--fb-cream)}.sb-reply{padding:8px 12px 8px 20px;border-bottom:1px solid var(--fb-cream);position:relative}.sb-reply:last-child{border-bottom:none}.sb-reply::before{content:'';position:absolute;left:10px;top:0;bottom:0;width:2px;background:var(--fb-cream)}.sb-rtext{font-size:12px;color:var(--fb-ink);line-height:1.5;margin-bottom:4px;white-space:pre-wrap}.sb-rmeta{font-size:10px;color:var(--fb-muted);display:flex;justify-content:space-between}.sb-rdel{background:none;border:none;color:var(--fb-muted2);cursor:pointer;font-size:10px;font-family:monospace}.sb-rdel:hover{color:var(--fb-acc)}
+.sb-rf{display:none;padding:8px 12px;border-top:1px solid var(--fb-cream);background:rgba(46,125,94,.04)}.sb-rf.open{display:block}.sb-rf textarea,.sb-rf input{width:100%;font-family:monospace;border:1.5px solid var(--fb-cream);border-radius:var(--fb-r);padding:6px 8px;background:#fff;color:var(--fb-ink);margin-bottom:6px}.sb-rf textarea{font-size:12px;resize:none}.sb-rf input{font-size:11px}.sb-rf textarea:focus,.sb-rf input:focus{outline:none;border-color:var(--fb-green)}.sb-rsub{width:100%;background:var(--fb-green);color:#fff;border:none;border-radius:var(--fb-r);padding:7px;font-family:monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}.sb-rsub:hover{opacity:.88}
+.sb-empty{text-align:center;color:var(--fb-muted);font-size:12px;padding:48px 20px;line-height:2.2}.sb-ft{flex-shrink:0;padding:12px;border-top:1.5px solid var(--fb-cream);display:flex;flex-direction:column;gap:8px}.sb-ftb{display:block;width:100%;padding:10px;font-family:monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-radius:var(--fb-r);text-align:center}.sb-ftb.dk{background:var(--fb-ink);color:var(--fb-paper);border:none}.sb-ftb.lt{background:#fff;color:var(--fb-ink);border:1.5px solid var(--fb-ink)}.sb-ftb:hover{opacity:.85}
+#fb-tb{position:fixed;bottom:24px;left:24px;display:flex;gap:8px;z-index:1000}.tb-b{font-family:monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:8px 14px;border-radius:20px;border:1.5px solid var(--fb-ink);cursor:pointer;background:#fff;color:var(--fb-ink);box-shadow:2px 2px 0 var(--fb-ink);transition:transform .1s,box-shadow .1s}.tb-b:hover{transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--fb-ink)}.tb-b:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--fb-ink)}#tb-cnt{background:var(--fb-acc);color:#fff;border-color:var(--fb-acc);box-shadow:2px 2px 0 rgba(217,79,43,.35);display:none}
+#pw-gate{position:fixed;inset:0;background:var(--fb-paper);display:flex;align-items:center;justify-content:center;z-index:9999;font-family:monospace}#pw-gate.unlocked{display:none}.pw-box{width:100%;max-width:360px;padding:0 24px;display:flex;flex-direction:column;align-items:center}.pw-logo{font-family:serif;font-size:28px;font-weight:300;color:var(--fb-ink);margin-bottom:8px}.pw-logo em{font-style:italic;color:var(--fb-acc)}.pw-label{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--fb-muted);margin-bottom:24px}.pw-field-wrap{width:100%;position:relative;margin-bottom:10px}#pw-input{width:100%;font-family:monospace;font-size:15px;border:1.5px solid var(--fb-ink);border-radius:var(--fb-r);padding:12px 44px 12px 14px;background:#fff;color:var(--fb-ink);letter-spacing:.06em;transition:border-color .12s,box-shadow .12s}#pw-input:focus{outline:none;border-color:var(--fb-acc);box-shadow:3px 3px 0 var(--fb-acc)}#pw-input.error{border-color:var(--fb-acc);animation:pw-shake .3s ease}@keyframes pw-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}#pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--fb-muted);font-size:16px;padding:0;line-height:1}#pw-toggle:hover{color:var(--fb-ink)}#pw-submit{width:100%;background:var(--fb-ink);color:var(--fb-paper);border:none;border-radius:var(--fb-r);padding:12px;font-family:monospace;font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:3px 3px 0 rgba(0,0,0,.15);transition:transform .1s,box-shadow .1s;margin-bottom:10px}#pw-submit:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 rgba(0,0,0,.15)}#pw-submit:active{transform:translate(1px,1px);box-shadow:1px 1px 0 rgba(0,0,0,.15)}#pw-error{font-size:11px;color:var(--fb-acc);letter-spacing:.06em;min-height:16px;opacity:0;transition:opacity .15s}#pw-error.visible{opacity:1}
+</style>
+
+<div id="pw-gate"><div class="pw-box"><div class="pw-logo">studio <em>hug</em></div><div class="pw-label">Enter password to view wireframe</div><div class="pw-field-wrap"><input id="pw-input" type="password" placeholder="Password" autocomplete="off"/><button id="pw-toggle" type="button">&#128065;</button></div><button id="pw-submit">Enter</button><div id="pw-error">Incorrect password &mdash; try again</div></div></div>
+<div id="fb-panel"><div class="fb-panel-hd"><div><div style="font-weight:500">Leave feedback</div><div id="fb-panel-section"></div></div><button id="fb-close">×</button></div><div class="fb-panel-bd"><div id="fb-form"><label>Your name</label><input id="fb-ni" class="fb-inp" type="text" placeholder="e.g. Maria Muster"/><label>Your feedback</label><textarea id="fb-ti" class="fb-inp" rows="4" placeholder="What should change here?"></textarea><button class="fb-btn-p" id="fb-submit">Save feedback</button></div><div id="fb-ok"><span>✓</span>Feedback saved!</div></div></div>
+<div id="fb-sb"><div class="sb-hd"><div><h3>Feedback</h3><div class="sb-hd-meta" id="sb-meta">—</div></div><button id="fb-sb-close">×</button></div><div class="sb-tabs"><button class="sb-tab active" data-filter="all">All</button><button class="sb-tab" data-filter="open">Open</button><button class="sb-tab" data-filter="resolved">Resolved</button></div><div id="sb-scroll"></div><div class="sb-ft"><div id="sb-sync-status" style="font-size:10px;text-align:center;padding:4px 0 2px;letter-spacing:0.06em;"></div><button class="sb-ftb dk" id="fb-exp">⬇ Export as CSV</button><button class="sb-ftb lt" id="fb-cp">⟳ Copy HTML + feedback for Claude</button></div></div>
+<div id="fb-tb"><button class="tb-b" id="tb-view">View feedback</button><button class="tb-b" id="tb-cnt"></button></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  SUPABASE CONFIG — fill in your 3 values, then save the file
+// ══════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://ahzqpvhpogizrkxqxpgb.supabase.co';   // https://xxxxxxxxxx.supabase.co
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFoenFwdmhwb2dpenJreHF4cGdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2OTg3NDcsImV4cCI6MjA5NDI3NDc0N30.txFNtp9SwN8UZIcFf0x7M6M8PjH6hj4CkQadc73Vwpk';      // eyJh... (long string)
+const PROJECT_NAME = 'ks-tp-v2';  // e.g. 'HGV — BI Tool v1'
+const PASSWORD     = 'talentpool2026';      // e.g. 'hgv2025' — share this with your client
+// ══════════════════════════════════════════════════════════════
+// Lines below are automatic — do NOT edit them
+const SB_READY = SUPABASE_URL !== 'YOUR_PROJECT_URL_HERE' && SUPABASE_KEY !== 'YOUR_ANON_KEY_HERE';
+
+const SB_HDR=()=>({'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`});
+async function sbIF(row){if(!SB_READY)return null;try{const r=await fetch(`${SUPABASE_URL}/rest/v1/feedback`,{method:'POST',headers:{...SB_HDR(),'Prefer':'return=representation'},body:JSON.stringify({section_id:row.section,section_label:row.label,reviewer_name:row.name,feedback_text:row.text,resolved:false,page_url:location.href,project_name:PROJECT_NAME})});const d=await r.json();return Array.isArray(d)?d[0]:d;}catch(e){console.warn('[SB] insert feedback',e);return null;}}
+async function sbUF(sbId,fields){if(!SB_READY||!sbId)return;try{await fetch(`${SUPABASE_URL}/rest/v1/feedback?id=eq.${sbId}`,{method:'PATCH',headers:SB_HDR(),body:JSON.stringify(fields)});}catch(e){console.warn('[SB] update feedback',e);}}
+async function sbDF(sbId){if(!SB_READY||!sbId)return;try{await fetch(`${SUPABASE_URL}/rest/v1/feedback?id=eq.${sbId}`,{method:'DELETE',headers:SB_HDR()});}catch(e){console.warn('[SB] delete feedback',e);}}
+async function sbIR(fsbId,row){if(!SB_READY||!fsbId)return null;try{const r=await fetch(`${SUPABASE_URL}/rest/v1/replies`,{method:'POST',headers:{...SB_HDR(),'Prefer':'return=representation'},body:JSON.stringify({feedback_id:fsbId,author_name:row.name,reply_text:row.text})});const d=await r.json();return Array.isArray(d)?d[0]:d;}catch(e){console.warn('[SB] insert reply',e);return null;}}
+async function sbDR(sbId){if(!SB_READY||!sbId)return;try{await fetch(`${SUPABASE_URL}/rest/v1/replies?id=eq.${sbId}`,{method:'DELETE',headers:SB_HDR()});}catch(e){console.warn('[SB] delete reply',e);}}
+async function sbFetch(){if(!SB_READY)return null;_sss('syncing');try{const fr=await fetch(`${SUPABASE_URL}/rest/v1/feedback?project_name=eq.${encodeURIComponent(PROJECT_NAME)}&order=created_at.asc`,{headers:SB_HDR()});const fb=await fr.json();if(!Array.isArray(fb)){_sss('error');return null;}if(!fb.length){_sss('idle');return[];}const ids=fb.map(r=>r.id).join(',');const rr=await fetch(`${SUPABASE_URL}/rest/v1/replies?feedback_id=in.(${ids})&order=created_at.asc`,{headers:SB_HDR()});const rep=await rr.json();_sss('idle');return fb.map(row=>({id:row.id,sbId:row.id,section:row.section_id,label:row.section_label,name:row.reviewer_name,text:row.feedback_text,resolved:row.resolved||false,ts:row.created_at,replies:(Array.isArray(rep)?rep:[]).filter(r=>r.feedback_id===row.id).map(r=>({id:r.id,sbId:r.id,name:r.author_name,text:r.reply_text,ts:r.created_at}))}));}catch(e){console.warn('[SB] fetch',e);_sss('error');return null;}}
+function _sss(s){const el=document.getElementById('sb-sync-status');if(!el)return;if(!SB_READY){el.textContent='⚠ local only — add Supabase config';el.style.color='var(--fb-acc)';return;}if(s==='syncing'){el.textContent='↻ syncing…';el.style.color='var(--fb-muted)';}if(s==='idle'){el.textContent='☁ synced';el.style.color='var(--fb-green)';}if(s==='error'){el.textContent='✕ sync failed — check console';el.style.color='var(--fb-acc)';}}
+
+const _DB='wf_fb_v2';let _as=null,_cf='all';
+const _ld=()=>{try{return JSON.parse(localStorage.getItem(_DB))||[];}catch{return[];}};
+const _sv=d=>localStorage.setItem(_DB,JSON.stringify(d));
+const _e=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const _f=iso=>new Date(iso).toLocaleDateString('de-DE',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+const FB_INTERACTIVE_TAGS=["BUTTON","A","INPUT","TEXTAREA","SELECT","DIALOG"];
+function fbIsInteractive(node){if(!node||!node.tagName)return false;if(FB_INTERACTIVE_TAGS.indexOf(node.tagName)!==-1)return true;if(node.getAttribute&&node.getAttribute("role")==="button")return true;if(node.classList&&(node.classList.contains("chip")||node.classList.contains("tab")||node.classList.contains("tile")))return true;return false;}
+document.querySelectorAll('.fb-zone').forEach(z=>{z.addEventListener('click',e=>{let node=e.target,interactive=false;while(node&&node!==z){if(fbIsInteractive(node)){interactive=true;break;}node=node.parentElement;}if(interactive)return;e.stopPropagation();_op(z.dataset.section,z.dataset.label);});});
+const _pan=document.getElementById('fb-panel'),_ps=document.getElementById('fb-panel-section'),_ff=document.getElementById('fb-form'),_fok=document.getElementById('fb-ok'),_ni=document.getElementById('fb-ni'),_ti=document.getElementById('fb-ti');
+function _op(sid,label){_as={id:sid,label};_ps.textContent=label;_ff.style.display='block';_fok.style.display='none';_ti.value='';_pan.classList.add('open');setTimeout(()=>_ti.focus(),120);}
+function _cp(){_pan.classList.remove('open');_as=null;}
+document.getElementById('fb-close').addEventListener('click',_cp);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){_cp();_csb();}});
+document.getElementById('fb-submit').addEventListener('click',async()=>{const t=_ti.value.trim();if(!t){_ti.style.borderColor='var(--fb-acc)';return;}_ti.style.borderColor='';const nc={id:Date.now(),section:_as.id,label:_as.label,name:_ni.value.trim()||'Anonymous',text:t,resolved:false,ts:new Date().toISOString(),replies:[]};const a=_ld();a.push(nc);_sv(a);_ra();_ff.style.display='none';_fok.style.display='block';setTimeout(_cp,1600);_sss('syncing');const sb=await sbIF(nc);if(sb){const u=_ld();const c=u.find(x=>x.id===nc.id);if(c){c.sbId=sb.id;_sv(u);}_sss('idle');}});
+const _sb=document.getElementById('fb-sb'),_sc=document.getElementById('sb-scroll'),_sm=document.getElementById('sb-meta');
+function _osb(){_sb.classList.add('open');_rs();}
+function _csb(){_sb.classList.remove('open');}
+document.getElementById('tb-view').addEventListener('click',_osb);
+document.getElementById('fb-sb-close').addEventListener('click',_csb);
+document.getElementById('tb-cnt').addEventListener('click',_osb);
+document.querySelectorAll('.sb-tab').forEach(t=>{t.addEventListener('click',()=>{document.querySelectorAll('.sb-tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');_cf=t.dataset.filter;_rs();});});
+function _rs(){const all=_ld();const on=all.filter(c=>!c.resolved).length;_sm.textContent=`${all.length} comment${all.length!==1?'s':''} · ${on} open`;let list=all;if(_cf==='open')list=all.filter(c=>!c.resolved);if(_cf==='resolved')list=all.filter(c=>c.resolved);if(!list.length){const m={all:'No feedback yet.<br/>Hover a section and click to add.',open:'No open feedback.',resolved:'No resolved feedback yet.'};_sc.innerHTML=`<div class="sb-empty">${m[_cf]}</div>`;return;}const g={};list.forEach(c=>{if(!g[c.section])g[c.section]={label:c.label,items:[]};g[c.section].items.push(c);});_sc.innerHTML=Object.entries(g).map(([sid,gd])=>`<div class="sb-grp" id="grp-${sid}"><div class="sb-grp-hd" onclick="fbTG('${sid}')"><span class="sb-grp-title">${_e(gd.label)}</span><span class="sb-grp-right"><span class="sb-grp-badge">${gd.items.length}</span><span class="sb-chev">▾</span></span></div><div class="sb-grp-body">${gd.items.map(_rc).join('')}</div></div>`).join('');}
+function _rc(c){const rh=(c.replies||[]).length?`<div class="sb-replies">${(c.replies||[]).map(r=>`<div class="sb-reply"><div class="sb-rtext">${_e(r.text)}</div><div class="sb-rmeta"><span>${_e(r.name)} · ${_f(r.ts)}</span><button class="sb-rdel" onclick="fbDR(${c.id},${r.id})">✕ Remove</button></div></div>`).join('')}</div>`:'';return `<div class="sb-card${c.resolved?' resolved':''}" id="card-${c.id}"><div class="sb-cm"><div class="sb-ct">${_e(c.text)}</div><div class="sb-meta"><span class="sb-author">${_e(c.name)}</span><span>${_f(c.ts)}${c.resolved?' &nbsp;<span class="sb-res-badge">✓ resolved</span>':''}</span></div></div><div class="sb-acts"><button class="sb-act" onclick="fbE(${c.id})">✎ Edit</button><button class="sb-act" onclick="fbTR(${c.id})">↩ Reply</button><button class="sb-act" onclick="fbRV(${c.id})">${c.resolved?'↺ Reopen':'✓ Resolve'}</button><button class="sb-act del" onclick="fbD(${c.id})">✕ Delete</button></div><div class="sb-edit" id="ed-${c.id}"><textarea rows="3" id="eta-${c.id}">${_e(c.text)}</textarea><div class="sb-edit-acts"><button class="sb-save" onclick="fbSE(${c.id})">Save</button><button class="sb-cancel" onclick="fbCE(${c.id})">Cancel</button></div></div>${rh}<div class="sb-rf" id="rf-${c.id}"><textarea rows="2" id="rta-${c.id}" placeholder="Write a reply…"></textarea><input id="rn-${c.id}" placeholder="Your name (optional)"/><button class="sb-rsub" onclick="fbSR(${c.id})">Send reply</button></div></div>`;}
+function fbTG(sid){document.getElementById(`grp-${sid}`)?.classList.toggle('collapsed');}
+function fbE(id){document.getElementById(`ed-${id}`).classList.add('open');document.getElementById(`card-${id}`).classList.add('editing');const t=document.getElementById(`eta-${id}`);t.focus();t.select();}
+function fbCE(id){document.getElementById(`ed-${id}`).classList.remove('open');document.getElementById(`card-${id}`).classList.remove('editing');}
+async function fbSE(id){const t=document.getElementById(`eta-${id}`).value.trim();if(!t)return;const a=_ld();const c=a.find(x=>x.id===id);if(c){c.text=t;_sv(a);_ra();_rs();await sbUF(c.sbId,{feedback_text:t});}}
+async function fbD(id){if(!confirm('Delete this comment?'))return;const a=_ld();const c=a.find(x=>x.id===id);_sv(a.filter(x=>x.id!==id));_ra();_rs();if(c)await sbDF(c.sbId);}
+async function fbRV(id){const a=_ld();const c=a.find(x=>x.id===id);if(c){c.resolved=!c.resolved;_sv(a);_ra();_rs();await sbUF(c.sbId,{resolved:c.resolved});}}
+function fbTR(id){const f=document.getElementById(`rf-${id}`);if(f.classList.toggle('open'))setTimeout(()=>document.getElementById(`rta-${id}`).focus(),80);}
+async function fbSR(id){const t=document.getElementById(`rta-${id}`).value.trim();if(!t)return;const n=document.getElementById(`rn-${id}`).value.trim()||'studio hug';const nr={id:Date.now(),name:n,text:t,ts:new Date().toISOString()};const a=_ld();const c=a.find(x=>x.id===id);if(c){(c.replies=c.replies||[]).push(nr);_sv(a);_rs();const sb=await sbIR(c.sbId,nr);if(sb){const u=_ld();const uc=u.find(x=>x.id===id);const ur=uc?.replies?.find(r=>r.id===nr.id);if(ur){ur.sbId=sb.id;_sv(u);}}}}
+async function fbDR(cid,rid){const a=_ld();const c=a.find(x=>x.id===cid);if(c){const r=(c.replies||[]).find(x=>x.id===rid);c.replies=(c.replies||[]).filter(x=>x.id!==rid);_sv(a);_rs();if(r)await sbDR(r.sbId);}}
+const _cb=document.getElementById('tb-cnt');
+function _ra(){const a=_ld();const on=a.filter(c=>!c.resolved).length;_cb.style.display=a.length?'inline-block':'none';_cb.textContent=`${on} open · ${a.length} total`;document.querySelectorAll('.fb-zone').forEach(z=>{const n=a.filter(c=>c.section===z.dataset.section).length;z.classList.toggle('fb-has-comment',n>0);if(n>0)z.dataset.count=n;else delete z.dataset.count;});}
+document.getElementById('fb-exp').addEventListener('click',()=>{const a=_ld();if(!a.length){alert('No feedback yet.');return;}const rows=[['Section ID','Section Label','Name','Feedback','Status','Timestamp','Replies']];a.forEach(c=>{const r=(c.replies||[]).map(r=>`${r.name}: ${r.text}`).join(' | ');rows.push([c.section,c.label,c.name,c.text,c.resolved?'resolved':'open',c.ts,r]);});const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');const el=document.createElement('a');el.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));el.download='wireframe-feedback.csv';el.click();});
+document.getElementById('fb-cp').addEventListener('click',()=>{const a=_ld();if(!a.length){alert('No feedback yet.');return;}const bs={};a.forEach(c=>{(bs[c.section]=bs[c.section]||[]).push(c);});let html=document.documentElement.outerHTML;Object.entries(bs).forEach(([sid,cs])=>{const bl=cs.map(c=>{const st=c.resolved?'RESOLVED':'OPEN';const rs=(c.replies||[]).map(r=>`\n     REPLY by ${r.name}: ${r.text}`).join('');return `<!-- FEEDBACK [${st}] [${c.label}] by ${c.name}: ${c.text}${rs} -->`;}).join('\n      ');html=html.replace(new RegExp(`(data-section="${sid}"[^>]*>)`),`$1\n      ${bl}`);});const hdr=`<!--\nCLAUDE INSTRUCTIONS — Process only OPEN feedback.\nFor each: update that section, add <!-- UPDATED: ... --> note, remove the FEEDBACK comment.\nLeave RESOLVED untouched. Return full updated HTML.\n-->`;navigator.clipboard.writeText(hdr+'\n'+html).then(()=>{const b=document.getElementById('fb-cp');b.textContent='✓ Copied!';setTimeout(()=>b.textContent='⟳ Copy HTML + feedback for Claude',2200);});});
+async function init(){_sss('idle');if(SB_READY){const d=await sbFetch();if(d!==null)_sv(d);}_ra();}
+init();
+// Password Gate
+(function(){var SK='wf_pw_'+location.pathname;var gate=document.getElementById('pw-gate');var inp=document.getElementById('pw-input');var btn=document.getElementById('pw-submit');var err=document.getElementById('pw-error');var tog=document.getElementById('pw-toggle');if(sessionStorage.getItem(SK)==='1'){gate.classList.add('unlocked');return;}setTimeout(function(){inp.focus();},80);function attempt(){if(inp.value===PASSWORD){sessionStorage.setItem(SK,'1');gate.style.transition='opacity 0.3s';gate.style.opacity='0';setTimeout(function(){gate.classList.add('unlocked');},300);}else{inp.classList.add('error');err.classList.add('visible');inp.value='';setTimeout(function(){inp.classList.remove('error');},400);setTimeout(function(){inp.focus();},100);}}btn.addEventListener('click',attempt);inp.addEventListener('keydown',function(e){if(e.key==='Enter')attempt();});tog.addEventListener('click',function(){inp.type=inp.type==='password'?'text':'password';tog.innerHTML=inp.type==='password'?'&#128065;':'&#128584;';inp.focus();});inp.addEventListener('input',function(){err.classList.remove('visible');});})();
+</script>
+<!-- ══════════════════════════════ END FEEDBACK SYSTEM v4 ══════════════════════════════ -->
+
+</body>
+</html>
