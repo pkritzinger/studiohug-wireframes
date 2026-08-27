@@ -1,0 +1,2485 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GaudiCard – Klickbarer Prototyp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --rot:#18181B;
+    --rot-dunkel:#09090B;
+    --schwarz:#18181B;
+    --grau:#71717A;
+    --grau-hell:#A1A1AA;
+    --linie:#E4E4E7;
+    --flaeche:#FAFAFA;
+    --flaeche2:#F4F4F5;
+    --weiss:#FFFFFF;
+    --gruen:#18181B;
+    --gelb:#52525B;
+    --radius:12px;
+    --font-sans:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--font-sans);
+    color:var(--schwarz);background:var(--weiss);
+    -webkit-font-smoothing:antialiased;line-height:1.5;
+  }
+  img{display:block;max-width:100%}
+  button{font:inherit;cursor:pointer;border:none;background:none}
+  input,select,textarea{font:inherit;color:inherit}
+  a{color:inherit}
+  ::selection{background:var(--rot);color:#fff}
+  .material-symbols-outlined{
+    font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;
+    font-size:1.2em;line-height:1;letter-spacing:normal;text-transform:none;
+    display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;
+    -webkit-font-smoothing:antialiased;vertical-align:-.22em;
+    font-variation-settings:'FILL' 0,'wght' 450,'GRAD' 0,'opsz' 24;
+  }
+  .btn:focus-visible,.chip:focus-visible,.kat-kachel:focus-visible,
+  input:focus-visible,select:focus-visible,textarea:focus-visible{
+    outline:none;box-shadow:0 0 0 3px rgba(24,24,27,.14);
+  }
+
+  /* ---------- Proto-Leiste (Meta, nicht Teil der Website) ---------- */
+  .proto-bar{position:fixed;bottom:0;left:0;right:0;z-index:200;background:var(--schwarz);color:#fff;
+    display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:12.5px;overflow-x:auto;white-space:nowrap}
+  .proto-bar b{color:var(--rot);font-weight:800;margin-right:6px;flex-shrink:0}
+  .proto-bar button{color:#A1A1AA;padding:6px 12px;border-radius:8px;flex-shrink:0;transition:.15s}
+  .proto-bar button:hover{color:#fff;background:#27272A}
+  .proto-bar button.aktiv{color:#fff;background:var(--rot)}
+  body{padding-bottom:40px}
+
+  /* ---------- Header: Dynamic Island ---------- */
+  header{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:80;width:100%;display:flex;justify-content:center;padding:0 16px}
+  .island{
+    display:flex;align-items:center;
+    background:rgba(9,9,11,.92);backdrop-filter:blur(18px) saturate(1.4);
+    border-radius:100px;padding:7px 7px 7px 22px;color:#fff;max-width:100%;
+    box-shadow:0 14px 44px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,255,255,.07);
+    transition:padding .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s;
+  }
+  .island:hover{box-shadow:0 20px 60px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.1)}
+  header.gescrollt .island{padding:5px 5px 5px 18px}
+  .logo{font-weight:800;font-size:18px;letter-spacing:-.02em;text-decoration:none;color:#fff;flex-shrink:0;white-space:nowrap}
+  .logo span{color:var(--rot)}
+  .island-nav{display:grid;grid-template-columns:0fr;transition:grid-template-columns .45s cubic-bezier(.2,.8,.2,1)}
+  .island:hover .island-nav,.island:focus-within .island-nav{grid-template-columns:1fr}
+  nav.primary-nav{display:flex;gap:22px;font-size:14px;color:rgba(255,255,255,.65);
+    overflow:hidden;white-space:nowrap;min-width:0;padding:0 6px 0 26px;opacity:0;transition:opacity .25s}
+  .island:hover nav.primary-nav,.island:focus-within nav.primary-nav{opacity:1;transition-delay:.12s}
+  nav.primary-nav a{text-decoration:none;color:inherit;padding:6px 0;cursor:pointer}
+  nav.primary-nav a:hover,nav.primary-nav a.aktuell{color:#fff}
+  .header-tools{display:flex;align-items:center;gap:4px;margin-left:12px;flex-shrink:0}
+  .lang-toggle{display:flex;background:rgba(255,255,255,.08);border-radius:100px;padding:3px}
+  .lang-toggle button{color:rgba(255,255,255,.55);font-size:12px;font-weight:700;padding:5px 9px;border-radius:100px}
+  .lang-toggle button.aktiv{background:#fff;color:var(--schwarz)}
+  .lang-toggle-footer{background:var(--flaeche)}
+  .lang-toggle-footer button{color:var(--grau)}
+  .lang-toggle-footer button.aktiv{background:var(--schwarz);color:#fff}
+  .header-cta{margin-left:10px;flex-shrink:0}
+  .header-cta .btn{padding:10px 20px;font-size:14px;border-radius:100px}
+  @media(prefers-reduced-motion:reduce){.island,.island-nav,nav.primary-nav{transition:none}}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:8px;
+    font-weight:600;font-size:15px;padding:12px 24px;transition:.15s;text-decoration:none;white-space:nowrap}
+  .btn-rot{background:var(--rot);color:#fff}
+  .btn-rot:hover{background:var(--rot-dunkel)}
+  .btn-schwarz{background:var(--schwarz);color:#fff}
+  .btn-schwarz:hover{background:#000}
+  .btn-ghost{border:1.5px solid var(--schwarz);color:var(--schwarz);background:#fff}
+  .btn-ghost:hover{background:var(--schwarz);color:#fff}
+  .btn-ghost-weiss{border:1.5px solid rgba(255,255,255,.5);color:#fff}
+  .btn-ghost-weiss:hover{background:#fff;color:var(--schwarz)}
+  .btn-weiss{background:#fff;color:var(--schwarz)}
+  .btn-weiss:hover{background:var(--flaeche)}
+  .btn-gross{padding:16px 32px;font-size:17px}
+  .btn-block{width:100%}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+
+  /* ---------- Layout Grundraster ---------- */
+  .page{display:none}
+  .page.aktiv{display:block;animation:einblenden .25s ease}
+  @keyframes einblenden{from{opacity:0}to{opacity:1}}
+  .wrap{max-width:1280px;margin:0 auto;padding:0 32px}
+  .wrap-breit{max-width:1440px;margin:0 auto;padding:0 32px}
+  section.modul{padding:88px 0}
+  section.modul.eng{padding:56px 0}
+  section.modul.grau{background:var(--flaeche)}
+  section.modul.dunkel{background:var(--schwarz);color:#fff}
+  .modul-kopf{max-width:640px;margin-bottom:44px}
+  .modul-kopf.mitte{margin-inline:auto;text-align:center}
+  .modul-kopf.breit{max-width:820px}
+  .eyebrow{font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--rot);margin-bottom:16px}
+  .eyebrow.hell{color:#A1A1AA}
+  h1{font-size:clamp(38px,5vw,64px);font-weight:800;letter-spacing:-.03em;line-height:1.04;text-wrap:balance}
+  h2{font-size:clamp(28px,3.2vw,42px);font-weight:800;letter-spacing:-.025em;text-wrap:balance}
+  h3{font-size:20px;font-weight:800;letter-spacing:-.01em}
+  .modul-kopf p,.sub{font-size:17px;color:var(--grau);margin-top:14px}
+  .dunkel .sub{color:#A1A1AA}
+  .modul-kopf-zeile{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:36px}
+  .modul-kopf-zeile .modul-kopf{margin-bottom:0}
+
+  /* Placeholder-Flächen (Bild-Mocks) */
+  .ph{background:linear-gradient(140deg,#E4E4E7,#A1A1AA);border-radius:var(--radius);position:relative;overflow:hidden}
+  .ph.b{background:linear-gradient(135deg,#E4E4E7,#A1A1AA 55%,#71717A)}
+  .ph.gruen{background:linear-gradient(135deg,#E4E4E7,#A1A1AA)}
+  .ph.blau{background:linear-gradient(135deg,#E4E4E7,#A1A1AA)}
+  .ph.rot{background:linear-gradient(135deg,#E4E4E7,#A1A1AA)}
+  .ph-tag{position:absolute;inset:auto 12px 12px 12px;font-size:11px;color:#fff;opacity:.8}
+
+  /* ---------- Chips / Filter ---------- */
+  .chip{border:1.5px solid var(--linie);border-radius:8px;padding:9px 18px;font-size:14px;font-weight:600;
+    color:var(--schwarz);background:#fff;transition:.15s;flex-shrink:0}
+  .chip:hover{border-color:var(--schwarz)}
+  .chip.aktiv{background:var(--schwarz);color:#fff;border-color:var(--schwarz)}
+  .filter-trenner{width:1px;height:24px;background:var(--linie);margin:0 6px;flex-shrink:0}
+  select.chip{appearance:none;padding-right:34px;
+    background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M1 1l4 4 4-4" stroke="%23141414" stroke-width="1.5" fill="none"/></svg>') no-repeat right 14px center #fff}
+
+  /* ---------- Kategorie-Kacheln ---------- */
+  .kat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+  .kat-kachel{display:flex;flex-direction:column;align-items:center;gap:10px;padding:22px 10px;
+    border:1px solid var(--linie);border-radius:var(--radius);background:#fff;text-align:center;transition:.15s}
+  .kat-kachel:hover{border-color:var(--schwarz);transform:translateY(-2px)}
+  .kat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px}
+  .kat-kachel span{font-size:13.5px;font-weight:700}
+
+  /* ---------- Karten-Reihen (horizontal scroll) ---------- */
+  .reihe-scroll{display:flex;gap:18px;overflow-x:auto;padding:4px 4px 16px;scroll-snap-type:x proximity;-ms-overflow-style:none;scrollbar-width:none}
+  .reihe-scroll::-webkit-scrollbar{display:none}
+  .slider-wrap{position:relative}
+  .slider-pfeil{position:absolute;top:calc(50% - 8px);transform:translateY(-50%);width:42px;height:42px;border-radius:50%;
+    background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;
+    font-size:17px;z-index:2;transition:.15s;color:var(--schwarz)}
+  .slider-pfeil:hover{background:var(--schwarz);color:#fff}
+  .slider-pfeil.prev{left:-8px}
+  .slider-pfeil.next{right:-8px}
+  @media(max-width:900px){.slider-pfeil{display:none}}
+  .teaser-karte{flex:0 0 260px;scroll-snap-align:start;cursor:pointer}
+  .teaser-bild{aspect-ratio:4/3;border-radius:var(--radius);position:relative;margin-bottom:12px}
+  .badge{position:absolute;top:10px;left:10px;background:#fff;border-radius:8px;padding:5px 12px;font-size:11.5px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+  .badge.dunkel{background:var(--schwarz);color:#fff}
+  .badge.neu{background:var(--rot);color:#fff}
+  .teaser-kat{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--grau)}
+  .teaser-titel{font-weight:700;font-size:15.5px;letter-spacing:-.01em;margin:3px 0}
+  .teaser-ort{font-size:13.5px;color:var(--grau)}
+  .teaser-preis{margin-top:8px;font-size:14.5px}
+  .teaser-preis del{color:var(--grau-hell);margin-right:6px}
+  .teaser-preis b{color:var(--rot);font-size:16px}
+  .alle-karte .teaser-bild{display:flex;align-items:center;justify-content:center}
+  .alle-karte .teaser-bild span{color:#fff;font-weight:800;font-size:15px;text-align:center;padding:0 22px;line-height:1.35}
+
+  /* ---------- Hero 2.0 (Screenshot-Feedback) ---------- */
+  .hero2{position:relative;padding:150px 0 0;overflow:hidden;text-align:center;
+    background:radial-gradient(ellipse 55% 38% at 12% 10%, rgba(0,0,0,.05), transparent 62%),
+               radial-gradient(ellipse 65% 46% at 88% 26%, rgba(0,0,0,.035), transparent 60%),
+               var(--weiss)}
+  .hero2-trust{display:flex;gap:26px;justify-content:center;font-size:13px;color:var(--grau);margin-bottom:26px;flex-wrap:wrap;position:relative;z-index:2}
+  .hero2-trust b{color:var(--schwarz)}
+  .hero2-trust small{color:var(--grau-hell);font-weight:400;margin-left:4px}
+  .hero2-inner{text-align:center;position:relative;z-index:2}
+  .hero2-headline{font-size:clamp(38px,6.2vw,84px);color:var(--rot);font-weight:800;letter-spacing:-.03em;line-height:1.03;text-wrap:balance}
+  .hero2-card{display:inline-flex;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:10px 20px 10px 10px;
+    box-shadow:0 16px 44px rgba(9,9,11,.08);margin:28px 0;text-align:left}
+  .hero2-card-info{display:flex;flex-direction:column;gap:2px;font-size:12.5px;color:var(--grau)}
+  .hero2-card-info b{font-size:14px;color:var(--schwarz)}
+  .hero2-sub{color:var(--grau);font-size:16.5px;max-width:54ch;margin:0 auto 30px;line-height:1.6}
+  .hero2-cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:56px;position:relative;z-index:2}
+  .hero2-phones{position:relative;display:flex;justify-content:center;align-items:flex-end;padding-bottom:0;min-height:300px}
+  .phone-mini{width:216px;aspect-ratio:9/18.5;border-radius:32px;background:var(--schwarz);padding:9px;flex-shrink:0;box-shadow:0 26px 54px rgba(0,0,0,.18)}
+  .phone-mini.side{margin:0 -44px;transform:translateY(30px) scale(.9);opacity:.92;z-index:1}
+  .phone-mini.center{z-index:2}
+  .phone-mini .ms{width:100%;height:100%;border-radius:24px;background:#fff;overflow:hidden;position:relative}
+  .hero2-qr{position:absolute;right:4%;bottom:10%;background:#fff;border-radius:14px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.12);
+    text-align:center;font-size:10.5px;font-weight:700;color:var(--grau);z-index:3}
+  @media(max-width:900px){.hero2-phones{display:none}.hero2-qr{display:none}.hero2{padding-top:120px}}
+
+  /* ---------- Prinzip 2.0 (kompakt) ---------- */
+  .prinzip2-grid{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:14px;align-items:center}
+  .prinzip2-karte{border:1.5px solid var(--linie);border-radius:16px;padding:30px 18px;text-align:center;background:#fff}
+  .prinzip2-karte.hi{border-color:var(--schwarz);border-width:2px}
+  .prinzip2-icon{width:50px;height:50px;border-radius:13px;background:var(--flaeche);display:flex;align-items:center;justify-content:center;font-size:21px;margin:0 auto 14px}
+  .prinzip2-karte b{display:block;font-size:15px;font-weight:800;margin-bottom:4px;letter-spacing:-.01em}
+  .prinzip2-karte span{font-size:12.5px;color:var(--grau)}
+  .prinzip2-op{font-size:19px;font-weight:800;color:var(--grau-hell)}
+  @media(max-width:760px){.prinzip2-grid{grid-template-columns:1fr}.prinzip2-op{display:none}}
+
+  /* ---------- Wochenende: Uhr-Steuerung ---------- */
+  .story2{display:grid;grid-template-columns:.85fr 1.15fr;gap:48px;align-items:center}
+  .story2-karte{border:1px solid var(--linie);border-radius:20px;background:#fff;padding:28px;min-height:132px;display:flex;flex-direction:column;justify-content:center;gap:14px}
+  @media(max-width:860px){.story2{grid-template-columns:1fr}}
+  .wochenende-slider-wrap{position:relative;margin:26px 0 18px}
+  .wochenende-slider{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 8px;
+    -ms-overflow-style:none;scrollbar-width:none}
+  .wochenende-slider::-webkit-scrollbar{display:none}
+  .wochenende-slide{flex:0 0 172px;scroll-snap-align:start;cursor:pointer;text-align:center}
+  .wochenende-slide-bild{width:172px;height:172px;border-radius:20px;opacity:.5;transition:.2s;border:3px solid transparent}
+  .wochenende-slide.aktiv .wochenende-slide-bild{opacity:1;box-shadow:0 12px 30px rgba(0,0,0,.18);border-color:var(--schwarz)}
+  .wochenende-slide-zeit{margin-top:10px;font-size:13px;font-weight:700;color:var(--grau)}
+  .wochenende-slide.aktiv .wochenende-slide-zeit{color:var(--schwarz)}
+  .wochenende-stapel{position:relative;width:172px;height:172px;margin:0 auto;opacity:.5;transition:.2s;border-radius:20px}
+  .wochenende-slide.aktiv .wochenende-stapel{opacity:1;outline:3px solid var(--schwarz);outline-offset:6px}
+  .wochenende-stapel .ph{position:absolute;inset:0;border-radius:20px;box-shadow:0 10px 24px rgba(0,0,0,.16)}
+  .wochenende-stapel .ph:nth-child(1){transform:rotate(-9deg) translate(-10px,5px);z-index:1}
+  .wochenende-stapel .ph:nth-child(2){transform:rotate(5deg) translate(7px,-3px);z-index:2}
+  .wochenende-stapel .ph:nth-child(3){transform:rotate(-2deg);z-index:3}
+
+  /* ---------- Trust-Bar / Kennzahlen ---------- */
+  .stat-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:28px;text-align:center}
+  .stat-zahl{font-size:clamp(28px,3.4vw,40px);font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .stat-label{font-size:14px;color:var(--grau);margin-top:4px}
+  .dunkel .stat-label{color:#A1A1AA}
+
+  /* ---------- 1+1 Prinzip ---------- */
+  .prinzip{display:grid;grid-template-columns:1fr auto 1fr;gap:28px;align-items:center;max-width:920px;margin:0 auto}
+  .prinzip-karte{border:1.5px solid var(--linie);border-radius:20px;padding:28px;text-align:center}
+  .prinzip-preis{font-size:34px;font-weight:800;margin-top:8px}
+  .prinzip-preis del{color:var(--grau-hell);font-size:20px;margin-right:8px}
+  .prinzip-plus{width:48px;height:48px;border-radius:50%;background:var(--rot);color:#fff;font-size:22px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;margin:0 auto}
+  @media(max-width:640px){.prinzip{grid-template-columns:1fr}.prinzip-plus{transform:rotate(90deg)}}
+
+  /* ---------- Schritte ---------- */
+  .schritte{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:28px}
+  .schritt{display:flex;flex-direction:column;gap:12px}
+  .schritt-nr{width:34px;height:34px;border-radius:50%;background:var(--schwarz);color:#fff;font-weight:800;font-size:14px;
+    display:flex;align-items:center;justify-content:center}
+  .dunkel .schritt-nr{background:#fff;color:var(--schwarz)}
+  .schritt h3{font-size:16.5px}
+  .schritt p{color:var(--grau);font-size:14.5px}
+  .dunkel .schritt p{color:#A1A1AA}
+  .schritte-vertikal{display:flex;flex-direction:column;gap:0;max-width:480px}
+  .schritt-v{display:grid;grid-template-columns:34px 1fr;gap:16px;padding-bottom:26px;position:relative}
+  .schritt-v:not(:last-child)::before{content:"";position:absolute;left:16px;top:34px;bottom:0;width:1.5px;background:var(--linie)}
+  .schritt-v .schritt-nr{width:32px;height:32px;font-size:13px;background:var(--flaeche);color:var(--schwarz);border:1.5px solid var(--linie);z-index:1}
+  .schritt-v h3{font-size:15.5px;margin-bottom:2px}
+  .schritt-v p{color:var(--grau);font-size:14px}
+
+  /* ---------- USP ---------- */
+  .usp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2px;background:var(--linie);
+    border:1px solid var(--linie);border-radius:var(--radius);overflow:hidden}
+  .usp-item{background:#fff;padding:28px 24px}
+  .usp-item .icon{font-size:22px;margin-bottom:14px}
+
+  /* ---------- Karten / Boxen allgemein ---------- */
+  .card{border:1px solid var(--linie);border-radius:var(--radius);padding:26px;background:#fff}
+  .card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
+
+  /* ---------- Split-View (Erlebnisse) ---------- */
+  .filterbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
+  .split{display:grid;grid-template-columns:minmax(380px,44%) 1fr;gap:0;height:min(78vh,760px);
+    border:1px solid var(--linie);border-radius:20px;overflow:hidden;position:relative}
+  .liste{overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px;background:#fff}
+  .erlebnis{display:grid;grid-template-columns:110px 1fr;gap:16px;padding:12px;border:1px solid var(--linie);
+    border-radius:var(--radius);transition:.15s;cursor:pointer;background:#fff}
+  .erlebnis:hover,.erlebnis.hi{border-color:var(--schwarz);box-shadow:0 6px 24px rgba(0,0,0,.08)}
+  .erlebnis-bild{aspect-ratio:1/0.85;border-radius:10px;background:linear-gradient(140deg,#E4E4E7,#A1A1AA)}
+  .erlebnis-info{display:flex;flex-direction:column;gap:3px;min-width:0}
+  .erlebnis-kat{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--grau)}
+  .erlebnis-titel{font-weight:700;font-size:15px;letter-spacing:-.01em}
+  .erlebnis-ort{font-size:13px;color:var(--grau)}
+  .ersparnis{margin-top:auto;font-weight:800;color:var(--rot);font-size:15px}
+  .ersparnis small{font-weight:500;color:var(--grau);font-size:12.5px}
+  .liste-leer{padding:40px;text-align:center;color:var(--grau)}
+  .map{position:relative;background:#F4F4F5;overflow:hidden}
+  .map svg{position:absolute;inset:0;width:100%;height:100%}
+  .map-hinweis{position:absolute;top:16px;right:16px;background:#fff;border-radius:10px;padding:8px 14px;
+    font-size:12px;color:var(--grau);box-shadow:0 4px 16px rgba(0,0,0,.08)}
+  .region-label{position:absolute;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#A1A1AA}
+  .pin{position:absolute;transform:translate(-50%,-100%);background:#fff;border-radius:8px;padding:7px 13px;
+    font-size:13.5px;font-weight:800;color:var(--schwarz);box-shadow:0 4px 14px rgba(0,0,0,.16);cursor:pointer;
+    transition:.12s;display:flex;align-items:center;gap:7px;white-space:nowrap}
+  .pin::after{content:"";position:absolute;left:50%;bottom:-5px;transform:translateX(-50%);border:5px solid transparent;
+    border-top-color:#fff;border-bottom:none}
+  .pin .dot{width:9px;height:9px;border-radius:50%}
+  .pin:hover,.pin.hi{background:var(--schwarz);color:#fff;z-index:5;transform:translate(-50%,-100%) scale(1.08)}
+  .pin:hover::after,.pin.hi::after{border-top-color:var(--schwarz)}
+  .detail{position:absolute;top:0;bottom:0;left:0;width:min(440px,100%);background:#fff;z-index:10;
+    box-shadow:20px 0 60px rgba(0,0,0,.12);transform:translateX(-105%);
+    transition:transform .3s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;overflow-y:auto}
+  .detail.offen{transform:translateX(0)}
+  .detail-bild{aspect-ratio:16/10;background:linear-gradient(140deg,#E4E4E7,#71717A);position:relative;flex-shrink:0}
+  .detail-schliessen{position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;background:#fff;
+    font-size:18px;line-height:1;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+  .detail-body{padding:26px;display:flex;flex-direction:column;gap:14px;flex:1}
+  .detail-body h3{font-size:23px;font-weight:800;letter-spacing:-.02em}
+  .detail-ersparnis{background:var(--flaeche);border-radius:12px;padding:16px 18px;display:flex;justify-content:space-between;align-items:center}
+  .detail-ersparnis b{color:var(--rot);font-size:22px}
+  .detail-block{border-top:1px solid var(--linie);padding-top:14px}
+  .detail-block h4{font-size:13.5px;font-weight:800;margin-bottom:8px}
+  .detail-schritte{display:flex;flex-direction:column;gap:8px;font-size:13.5px;color:var(--grau)}
+  .detail-schritte li{list-style:none;display:flex;gap:8px}
+  .detail-schritte b{color:var(--schwarz);font-weight:700}
+  .detail-kontakt{font-size:13.5px;color:var(--grau);display:flex;flex-direction:column;gap:6px}
+  .detail-cta{margin-top:auto;padding-top:10px}
+  .ansicht-toggle{display:none;position:absolute;bottom:88px;left:50%;transform:translateX(-50%);z-index:20;
+    background:var(--schwarz);color:#fff;border-radius:8px;padding:13px 26px;font-weight:700;font-size:15px;
+    box-shadow:0 8px 30px rgba(0,0,0,.3);gap:8px;align-items:center}
+
+  /* ---------- Erlebnis-Karte in Liste (Datenstruktur laut Feedback) ---------- */
+  .erlebnis-bild{position:relative}
+  .erlebnis-preis{margin-top:auto;font-size:14.5px}
+  .erlebnis-preis del{color:var(--grau-hell);margin-right:6px}
+  .erlebnis-preis b{color:var(--rot);font-size:16px}
+  .erlebnis-icons{margin-top:auto;display:flex;gap:8px;flex-wrap:wrap}
+  .erlebnis-icon{width:26px;height:26px;border-radius:8px;background:var(--flaeche);color:var(--grau);
+    display:flex;align-items:center;justify-content:center}
+  .erlebnis-icon .material-symbols-outlined{font-size:15px}
+  .pin-kachel .erlebnis-icon{width:22px;height:22px}
+  .pin-kachel .erlebnis-icon .material-symbols-outlined{font-size:13px}
+
+  /* ---------- Filterleiste (kompakt: 3-4 wichtigste + Suche) ---------- */
+  .filterbar-neu{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+  .filterbar-scroll{display:flex;gap:10px;overflow-x:auto;flex:1;min-width:0;-ms-overflow-style:none;scrollbar-width:none;padding-bottom:2px}
+  .filterbar-scroll::-webkit-scrollbar{display:none}
+  .filterbar-rechts{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .chip-mehr{background:var(--flaeche);border-color:var(--flaeche);white-space:nowrap}
+  .chip-mehr::before{content:"tune";font-family:'Material Symbols Outlined';font-size:16px;vertical-align:-3px;margin-right:4px}
+  .chip-schwarz{background:var(--schwarz);color:#fff;border-color:var(--schwarz)}
+  #verfuegbar-chip-inline.aktiv,#verfuegbar-chip-overlay.aktiv{background:var(--gruen);border-color:var(--gruen);color:#fff}
+  .erl-suche-wrap{position:relative}
+  .erl-suche-wrap input{width:240px;max-width:60vw;border:1.5px solid var(--linie);border-radius:8px;
+    padding:10px 18px;font-size:14px}
+  .erl-suche-wrap input:focus{outline:none;border-color:var(--schwarz)}
+
+  /* ---------- Filter-Overlay ---------- */
+  .filter-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(9,9,11,.5)}
+  .filter-overlay.offen{display:flex;align-items:flex-end;justify-content:center}
+  .filter-overlay-panel{background:#fff;width:min(640px,100%);max-height:88vh;border-radius:24px 24px 0 0;
+    display:flex;flex-direction:column;box-shadow:0 -20px 60px rgba(0,0,0,.25)}
+  @media(min-width:760px){
+    .filter-overlay.offen{align-items:center}
+    .filter-overlay-panel{border-radius:20px;max-height:80vh}
+  }
+  .filter-overlay-kopf{display:flex;align-items:center;justify-content:center;position:relative;
+    padding:20px 20px 16px;border-bottom:1px solid var(--linie);flex-shrink:0}
+  .filter-overlay-kopf h3{font-size:17px}
+  .filter-overlay-schliessen{position:absolute;right:16px;top:14px;font-size:22px;line-height:1;width:34px;height:34px}
+  .filter-overlay-body{padding:20px 24px 8px;overflow-y:auto;flex:1}
+  .filter-overlay-body h4{font-size:15px;font-weight:800;margin:22px 0 12px}
+  .filter-overlay-body h4:first-of-type{margin-top:16px}
+  .wrap-chips{flex-wrap:wrap;overflow:visible}
+  .filter-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .filter-grid .chip{justify-content:flex-start;gap:10px;padding:12px 16px}
+  .filter-overlay-footer{display:flex;align-items:center;gap:10px;padding:16px 20px;border-top:1px solid var(--linie);flex-shrink:0}
+  .filter-overlay-footer .btn{flex:1;justify-content:center}
+
+  /* ---------- Karte: Drag / Bereichssuche / Pin-Kachel ---------- */
+  .map{cursor:grab;touch-action:none}
+  .map.ziehen{cursor:grabbing}
+  .map-inner{position:absolute;inset:0;width:100%;height:100%}
+  .karte-bereich-btn{display:none;position:absolute;top:18px;left:50%;transform:translateX(-50%);z-index:15;
+    background:var(--schwarz);color:#fff;border-radius:8px;padding:11px 22px;font-weight:700;font-size:13.5px;
+    box-shadow:0 8px 26px rgba(0,0,0,.28)}
+  .karte-bereich-btn.zeig{display:block;animation:einblenden .2s ease}
+  .pin-kachel{display:none;position:absolute;z-index:16;width:220px;background:#fff;border-radius:14px;
+    box-shadow:0 14px 40px rgba(0,0,0,.22);overflow:hidden;transform:translate(-50%,calc(-100% - 16px));cursor:pointer}
+  .pin-kachel.zeig{display:block}
+  .pin-kachel::after{content:"";position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);
+    border:7px solid transparent;border-top-color:#fff}
+  .pin-kachel .erlebnis-bild{aspect-ratio:16/10;border-radius:0}
+  .pin-kachel .erlebnis-info{padding:10px 12px 12px;gap:2px}
+  .pin-kachel .erlebnis-titel{font-size:13.5px}
+  .pin-kachel .erlebnis-kat{font-size:10.5px}
+  .pin-kachel .erlebnis-ort{font-size:12px}
+  .pin-kachel .erlebnis-preis{font-size:12.5px}
+  .pin-kachel .erlebnis-preis b{font-size:14px}
+  .pin-kachel-schliessen{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;
+    background:rgba(255,255,255,.92);font-size:14px;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,.15);z-index:2}
+
+  /* ---------- Erlebnis-Detailseite (eigene Page) ---------- */
+  .ed-galerie{position:relative;display:grid;grid-template-columns:1.5fr 1fr;gap:8px;border-radius:20px;overflow:hidden;margin:0 auto}
+  .ed-galerie-haupt{aspect-ratio:4/3.1;border-radius:0}
+  .ed-galerie-neben{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .ed-galerie-neben .ph{aspect-ratio:1}
+  .ed-galerie-alle{position:absolute;right:16px;bottom:16px;background:#fff;border-radius:8px;padding:9px 16px;
+    font-size:13px;font-weight:700;box-shadow:0 4px 16px rgba(0,0,0,.18);z-index:2}
+  @media(max-width:760px){.ed-galerie{grid-template-columns:1fr}.ed-galerie-neben{display:none}.ed-galerie-haupt{aspect-ratio:16/11}}
+  .ed-zurueck{position:absolute;top:20px;left:20px;width:40px;height:40px;border-radius:50%;background:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 4px 16px rgba(0,0,0,.18);z-index:2}
+  .ed-galerie #ed-badge{position:absolute;top:20px;left:auto;right:20px;bottom:auto}
+  .ed-kopf{padding:26px 0 18px;text-align:left}
+  .ed-kopf h1{margin:6px 0 4px}
+  .ed-text{color:var(--grau);font-size:14.5px;line-height:1.7}
+  .ed-clamp{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .ed-clamp.offen{-webkit-line-clamp:unset}
+  .ed-mehr-lesen{margin-top:10px;background:var(--flaeche);padding:10px 16px;width:100%;text-align:center;border-radius:10px}
+  .ed-acc-kopf{display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:12px}
+  .ed-acc-chevron{transition:.2s}
+  .ed-schritte{transition:max-height .25s ease;overflow:hidden}
+  .ed-schritte.zu{max-height:0}
+  .ed-acc-kopf.zu .ed-acc-chevron{transform:rotate(180deg)}
+  .ed-schritte{display:flex;flex-direction:column;gap:0;font-size:14.5px;color:var(--grau)}
+  .ed-schritt{display:grid;grid-template-columns:20px 1fr auto;gap:10px;padding-bottom:20px;position:relative}
+  .ed-schritt:not(:last-child)::before{content:"";position:absolute;left:6px;top:22px;bottom:0;width:1.5px;background:var(--linie)}
+  .ed-schritt .punkt{width:12px;height:12px;border-radius:50%;background:var(--schwarz);margin-top:4px}
+  .ed-schritt:last-child .punkt{background:var(--rot);box-shadow:0 0 0 4px rgba(0,0,0,.14)}
+  .ed-schritt b{color:var(--schwarz);display:block;font-weight:700;margin-bottom:2px}
+  .ed-schritt-hinweis{font-size:12.5px;color:var(--grau-hell);margin-top:4px;display:flex;align-items:center;gap:5px}
+  .ed-schritt-btn{align-self:start;background:var(--rot);color:#fff;border-radius:8px;padding:9px 16px;font-weight:700;font-size:13px}
+  .ed-konditionen p{margin-bottom:12px}
+  .ed-map-pin{position:absolute;left:50%;top:50%;transform:translate(-50%,-100%);width:30px;height:30px;
+    border-radius:50% 50% 50% 0;background:var(--rot);rotate:-45deg;box-shadow:0 6px 16px rgba(0,0,0,.25)}
+  .ed-kontakt{display:flex;flex-direction:column;gap:8px}
+  .ed-kontakt-zeile{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--schwarz);
+    background:var(--flaeche);border-radius:10px;padding:12px 14px}
+
+  /* ---------- Rechner ---------- */
+  .rechner-box{background:var(--schwarz);color:#fff;border-radius:24px;padding:56px;
+    display:grid;grid-template-columns:1fr 340px;gap:56px;align-items:start}
+  .rechner-box h2{color:#fff}
+  .rechner-box>div>p{color:#A1A1AA;margin:10px 0 24px;max-width:48ch}
+  .rechner-chips{display:flex;flex-wrap:wrap;gap:10px}
+  .rechner-chips .chip{background:transparent;color:#fff;border-color:#3F3F46}
+  .rechner-chips .chip:hover{border-color:#fff}
+  .rechner-chips .chip.aktiv{background:var(--rot);border-color:var(--rot)}
+  .rechner-summe{background:#fff;color:var(--schwarz);border-radius:16px;padding:28px;position:sticky;top:100px}
+  .rechner-zeile{display:flex;justify-content:space-between;font-size:15px;padding:7px 0;color:var(--grau)}
+  .rechner-zeile.total{border-top:1px solid var(--linie);margin-top:8px;padding-top:14px;font-weight:800;font-size:20px;color:var(--schwarz)}
+  .rechner-zeile.total span:last-child{color:var(--rot)}
+  .rechner-fazit{font-size:13.5px;color:var(--grau);margin-top:10px;min-height:36px}
+  @media(max-width:900px){.rechner-box{grid-template-columns:1fr;padding:36px 28px}}
+
+  /* ---------- Pricing ---------- */
+  .pricing-box{border:2px solid var(--schwarz);border-radius:20px;padding:44px;display:grid;
+    grid-template-columns:1fr auto;gap:40px;align-items:center}
+  .pricing-preis{font-size:46px;font-weight:800;letter-spacing:-.02em}
+  .pricing-preis span{font-size:16px;font-weight:600;color:var(--grau)}
+  .pricing-liste{list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:16px;font-size:14.5px;color:var(--grau)}
+  .pricing-liste li::before{content:"check";font-family:'Material Symbols Outlined';font-variation-settings:'wght' 600;color:var(--schwarz);font-size:16px;vertical-align:-3px;margin-right:6px}
+  @media(max-width:760px){.pricing-box{grid-template-columns:1fr}}
+  .staffel-tabelle{width:100%;border-collapse:collapse}
+  .staffel-tabelle th,.staffel-tabelle td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--linie);font-size:14.5px}
+  .staffel-tabelle th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--grau);font-weight:700}
+  .staffel-tabelle td:last-child,.staffel-tabelle th:last-child{text-align:right;font-variant-numeric:tabular-nums}
+  .tabelle-wrap{overflow-x:auto;border:1px solid var(--linie);border-radius:var(--radius)}
+
+  /* ---------- Accordion ---------- */
+  .faq-gruppe{margin-bottom:32px}
+  .faq-gruppe:last-child{margin-bottom:0}
+  .faq-gruppe-titel{font-size:15px;font-weight:800;letter-spacing:-.01em;margin-bottom:6px}
+  .accordion{border-top:1px solid var(--linie)}
+  .acc-item{border-bottom:1px solid var(--linie)}
+  .acc-frage{width:100%;display:flex;justify-content:space-between;align-items:center;gap:16px;
+    padding:20px 4px;text-align:left;font-weight:700;font-size:15.5px}
+  .acc-frage .plus{flex-shrink:0;width:22px;height:22px;position:relative}
+  .acc-frage .plus::before,.acc-frage .plus::after{content:"";position:absolute;background:var(--schwarz);
+    top:50%;left:50%;transform:translate(-50%,-50%)}
+  .acc-frage .plus::before{width:14px;height:1.5px}
+  .acc-frage .plus::after{width:1.5px;height:14px;transition:transform .2s}
+  .acc-item.offen .acc-frage .plus::after{transform:translate(-50%,-50%) rotate(90deg) scaleX(0)}
+  .acc-antwort{max-height:0;overflow:hidden;transition:max-height .25s ease}
+  .acc-antwort p{padding:0 4px 20px;color:var(--grau);font-size:14.5px;max-width:64ch}
+  .acc-item.offen .acc-antwort{max-height:260px}
+  .top-frage{background:var(--flaeche);border-radius:var(--radius);padding:18px 20px;margin-bottom:10px;
+    display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:14.5px;cursor:pointer}
+
+  /* ---------- Formulare ---------- */
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .form-grid .voll{grid-column:1/-1}
+  .feld{display:flex;flex-direction:column;gap:6px}
+  .feld label{font-size:13px;font-weight:700}
+  .feld input,.feld select,.feld textarea{border:1.5px solid var(--linie);border-radius:10px;padding:12px 14px;
+    font-size:14.5px;background:#fff}
+  .feld input:focus,.feld select:focus,.feld textarea:focus{outline:none;border-color:var(--schwarz)}
+  .feld textarea{resize:vertical;min-height:90px}
+  @media(max-width:640px){.form-grid{grid-template-columns:1fr}}
+  .form-erfolg{display:none;background:var(--flaeche);border-radius:var(--radius);padding:28px;text-align:center}
+  .form-erfolg.zeig{display:block}
+  .form-erfolg .haken{width:44px;height:44px;border-radius:50%;background:var(--gruen);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 12px}
+
+  /* ---------- App Preview (Home) ---------- */
+  .app-preview{display:grid;grid-template-columns:.85fr 1.15fr;gap:56px;align-items:center}
+  .app-tabs{display:flex;gap:8px;margin-bottom:20px}
+  .app-tabs button{padding:9px 16px;border-radius:8px;font-size:13.5px;font-weight:700;border:1.5px solid var(--linie)}
+  .app-tabs button.aktiv{background:var(--schwarz);color:#fff;border-color:var(--schwarz)}
+  .phone{width:280px;aspect-ratio:9/18.5;border-radius:38px;background:var(--schwarz);padding:12px;margin:0 auto;
+    box-shadow:0 30px 70px rgba(0,0,0,.25)}
+  .phone-screen{width:100%;height:100%;border-radius:28px;background:#fff;overflow:hidden;position:relative;display:flex;flex-direction:column}
+  .phone-bar{height:22px;background:#fff;display:flex;align-items:center;justify-content:center}
+  .phone-bar::before{content:"";width:70px;height:6px;border-radius:4px;background:#E4E4E7}
+  .phone-content{flex:1;overflow:hidden;position:relative}
+  .phone-view{position:absolute;inset:0;padding:14px;display:none;flex-direction:column;gap:10px;overflow-y:auto}
+  .phone-view.aktiv{display:flex}
+  .phone-suche{background:var(--flaeche);border-radius:8px;padding:10px 14px;font-size:11.5px;color:var(--grau)}
+  .phone-card{display:grid;grid-template-columns:52px 1fr;gap:8px;padding:8px;border:1px solid var(--linie);border-radius:10px}
+  .phone-card .ph{aspect-ratio:1;border-radius:6px}
+  .phone-card-info{font-size:9.5px;color:var(--grau);display:flex;flex-direction:column;gap:2px}
+  .phone-card-info b{font-size:11px;color:var(--schwarz)}
+  .phone-map{flex:1;background:#F4F4F5;border-radius:12px;position:relative;overflow:hidden}
+  .phone-pin{position:absolute;width:16px;height:16px;border-radius:50%;background:var(--rot);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+  .phone-qr{width:120px;height:120px;margin:20px auto;border-radius:14px;
+    background:repeating-linear-gradient(45deg,#18181B,#18181B 4px,#fff 4px,#fff 8px),
+    repeating-linear-gradient(-45deg,#18181B,#18181B 4px,transparent 4px,transparent 8px);
+    background-blend-mode:multiply;border:6px solid #fff;box-shadow:0 4px 20px rgba(0,0,0,.15)}
+  .phone-timer{text-align:center;font-size:26px;font-weight:800;color:var(--rot)}
+  .phone-view h4{font-size:13px;font-weight:800;text-align:center;margin-top:6px}
+  .phone-view p{font-size:11px;color:var(--grau);text-align:center}
+
+  /* ---------- Logowall ---------- */
+  .logowall{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:16px}
+  .logo-item{border:1px solid var(--linie);border-radius:10px;padding:20px 10px;text-align:center;font-weight:700;
+    font-size:13px;color:var(--grau-hell);background:var(--flaeche)}
+
+  /* ---------- Testimonials ---------- */
+  .testi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+  .testi{border:1px solid var(--linie);border-radius:var(--radius);padding:24px}
+  .testi-logo{width:40px;height:40px;border-radius:8px;background:var(--flaeche);border:1px solid var(--linie);
+    display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--grau);margin-bottom:16px}
+  .testi p{font-size:15px;margin-bottom:14px}
+  .testi small{color:var(--grau);font-weight:700}
+  .testi-person{display:flex;align-items:center;gap:12px}
+  .testi-person b{display:block;font-size:14px;color:var(--schwarz)}
+  .testi-person small{color:var(--grau);font-weight:400;font-size:13px}
+
+  /* ---------- Verschenken Varianten ---------- */
+  .varianten{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .variante{border:2px solid var(--linie);border-radius:var(--radius);padding:24px;cursor:pointer;transition:.15s}
+  .variante.aktiv{border-color:var(--schwarz);background:var(--flaeche)}
+  .variante h3{margin-bottom:6px}
+  .variante ul{margin-top:12px;padding-left:18px;font-size:13.5px;color:var(--grau)}
+  .tooltip-wrap{position:relative;display:inline-flex;align-items:center;gap:3px;cursor:help}
+  .tooltip-wrap .tooltip-icon{font-size:15px;color:var(--grau);vertical-align:-3px}
+  .tooltip-wrap .tooltip-box{position:absolute;left:0;bottom:calc(100% + 8px);background:var(--schwarz);color:#fff;
+    font-size:12.5px;line-height:1.45;padding:10px 12px;border-radius:10px;width:230px;opacity:0;visibility:hidden;
+    transition:.15s;pointer-events:none;z-index:20;text-align:left;font-weight:400}
+  .tooltip-wrap .tooltip-box::after{content:"";position:absolute;top:100%;left:14px;border:6px solid transparent;border-top-color:var(--schwarz)}
+  .tooltip-wrap:hover .tooltip-box,.tooltip-wrap:focus-within .tooltip-box{opacity:1;visibility:visible}
+  @media(max-width:640px){.varianten{grid-template-columns:1fr}}
+  .gutschein-mock{aspect-ratio:1.55/1;border-radius:16px;background:linear-gradient(135deg,#18181B,#27272A);
+    color:#fff;padding:28px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+  .gutschein-mock::after{content:"";position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,255,255,.08),transparent 70%)}
+  .gutschein-mock .gs-logo{font-weight:800;font-size:20px}
+  .gutschein-mock .gs-logo span{color:var(--rot)}
+  .gutschein-mock .gs-wert{font-size:30px;font-weight:800}
+  .gutschein-mock .gs-code{font-family:monospace;letter-spacing:.1em;font-size:13px;color:#A1A1AA}
+
+  /* ---------- Anlass Kacheln ---------- */
+  .anlass-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px}
+  .anlass{border:1px solid var(--linie);border-radius:var(--radius);padding:20px;text-align:center;font-weight:700;font-size:14.5px}
+
+  /* ---------- Code-Eingabe (Einlösen) ---------- */
+  .code-box{display:flex;gap:10px;max-width:420px;flex-wrap:wrap}
+  .code-box input{flex:1;min-width:200px;border:1.5px solid var(--linie);border-radius:8px;padding:14px 22px;
+    font-size:16px;letter-spacing:.05em;text-transform:uppercase}
+  .code-box input:focus{outline:none;border-color:var(--schwarz)}
+  .redeem-erfolg{display:none;margin-top:18px;background:var(--flaeche);border-radius:var(--radius);padding:20px 22px;
+    display:none;align-items:center;gap:14px}
+  .redeem-erfolg.zeig{display:flex}
+  .redeem-erfolg .haken{width:38px;height:38px;border-radius:50%;background:var(--gruen);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+
+  /* ---------- Rechner Mini (B2B) ---------- */
+  .mini-rechner{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center}
+  .mini-rechner .card{background:var(--flaeche)}
+  .range-zeile{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .range-zeile b{font-size:22px}
+  input[type="range"]{width:100%;accent-color:var(--rot)}
+  @media(max-width:760px){.mini-rechner{grid-template-columns:1fr}}
+
+  /* ---------- Dashboard-Preview (Partner) ---------- */
+  .dash-mock{border:1px solid var(--linie);border-radius:var(--radius);padding:24px;background:#fff}
+  .dash-kopf{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+  .dash-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+  .dash-stat{background:var(--flaeche);border-radius:10px;padding:14px 16px}
+  .dash-stat .zahl{font-size:22px;font-weight:800}
+  .dash-stat .label{font-size:12px;color:var(--grau)}
+  .dash-chart{display:flex;align-items:flex-end;gap:8px;height:120px}
+  .dash-bar{flex:1;background:linear-gradient(180deg,var(--rot),#A1A1AA);border-radius:4px 4px 0 0}
+
+  /* ---------- Footer ---------- */
+  footer{border-top:1px solid var(--linie);padding:52px 0 40px}
+  .footer-newsletter{background:var(--flaeche);border-radius:20px;padding:36px 40px;margin-bottom:40px;
+    display:flex;justify-content:space-between;align-items:center;gap:32px;flex-wrap:wrap}
+  .footer-newsletter h3{font-size:19px;letter-spacing:-.015em}
+  .footer-newsletter p{font-size:13.5px;color:var(--grau);margin-top:6px;max-width:38ch}
+  .footer-newsletter-form{display:flex;flex-direction:column;gap:10px;flex:0 1 420px;min-width:280px}
+  .footer-newsletter-zeile{display:flex;gap:10px;flex-wrap:wrap}
+  .footer-newsletter-zeile input[type="email"]{flex:1;min-width:200px;border:1.5px solid var(--linie);
+    border-radius:8px;padding:12px 16px;font-size:14.5px;background:#fff}
+  .footer-newsletter-zeile input[type="email"]:focus{outline:none;border-color:var(--schwarz)}
+  .footer-newsletter-datenschutz{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--grau)}
+  .footer-newsletter-datenschutz input{margin-top:3px;flex-shrink:0}
+  .footer-newsletter-datenschutz a{color:var(--schwarz);text-decoration:underline}
+  @media(max-width:760px){.footer-newsletter{padding:28px 24px}}
+  .footer-grid{display:grid;grid-template-columns:1.4fr repeat(4,1fr);gap:32px;margin-bottom:36px}
+  .footer-col h4{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--grau);margin-bottom:14px}
+  .footer-col a{display:block;font-size:14.5px;padding:5px 0;text-decoration:none;color:var(--schwarz)}
+  .footer-col a:hover{color:var(--rot)}
+  .footer-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;
+    padding-top:24px;border-top:1px solid var(--linie);font-size:13px;color:var(--grau)}
+  .store-badges{display:flex;gap:10px}
+  .store-badge{border:1.5px solid var(--linie);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700}
+  @media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr}}
+
+  /* ---------- Responsive ---------- */
+  @media(max-width:1000px){
+    .app-preview{grid-template-columns:1fr}
+    .story2{grid-template-columns:1fr}
+  }
+  @media(max-width:768px){
+    .island-nav{display:none}
+    header{top:12px}
+    section.modul{padding:56px 0}
+    .split{grid-template-columns:1fr;height:74vh}
+    .map{display:none;position:absolute;inset:0}
+    .split.zeige-karte .map{display:block}
+    .split.zeige-karte .liste{visibility:hidden}
+    .ansicht-toggle{display:flex}
+    .detail{top:auto;bottom:0;left:0;right:0;width:100%;max-height:82%;border-radius:20px 20px 0 0;
+      transform:translateY(105%);box-shadow:0 -20px 60px rgba(0,0,0,.2)}
+    .detail.offen{transform:translateY(0)}
+    .footer-grid{grid-template-columns:1fr 1fr}
+    .rechner-box,.pricing-box{padding:28px 22px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ======= PROTO-LEISTE: Meta-Navigation zum Klicktest, kein Website-Element ======= -->
+<div class="proto-bar" id="protobar">
+  <b>Prototyp</b>
+  <button data-goto="home" class="aktiv">Home</button>
+  <button data-goto="erlebnisse">Erlebnisse</button>
+  <button data-goto="verschenken">Verschenken</button>
+  <button data-goto="einloesen">Gutschein einlösen</button>
+  <button data-goto="faq">FAQ</button>
+  <button data-goto="partner">Partner werden</button>
+  <button data-goto="unternehmen">Mitarbeitergeschenk</button>
+</div>
+
+<!-- ======= HEADER: Dynamic Island, reduzierte Nav, erweitert bei Hover ======= -->
+<header id="header">
+  <div class="island">
+    <a class="logo" data-goto="home" href="#">Gaudi<span>Card</span></a>
+    <div class="island-nav">
+      <nav class="primary-nav" id="primary-nav">
+        <a data-goto="erlebnisse">Erlebnisse</a>
+        <a data-goto="verschenken">Verschenken</a>
+        <a data-goto="partner">Partner werden</a>
+        <a data-goto="unternehmen">Mitarbeitergeschenk</a>
+        <a data-goto="faq">FAQ</a>
+      </nav>
+    </div>
+    <div class="header-cta">
+      <a class="btn btn-weiss" data-goto="home" data-scrollto="kaufen" href="#">Karte kaufen · 122&thinsp;€</a>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- =================================================================== -->
+<!-- ======================= 1. HOME / KARTE KAUFEN ==================== -->
+<!-- =================================================================== -->
+<section class="page aktiv fb-zone" data-page="home" data-section="page-home" data-label="1. Home / Karte kaufen">
+
+  <!-- 1.1 Hero -->
+  <section class="hero2" id="kaufen">
+    <div class="hero2-trust">
+      <span> <b>4,8 <span class="material-symbols-outlined" style="font-size:15px;vertical-align:-2px;font-variation-settings:'FILL' 1">star</span></b> im App Store <small>1,3 Mio. Bewertungen</small></span>
+      <span> <b>4,8 <span class="material-symbols-outlined" style="font-size:15px;vertical-align:-2px;font-variation-settings:'FILL' 1">star</span></b> bei Google Play <small>1,3 Mio. Bewertungen</small></span>
+    </div>
+    <div class="wrap hero2-inner">
+      <h1 class="hero2-headline">Weniger zahlen,<br>mehr Gaudi.</h1>
+      <div class="hero2-card">
+        <div class="ph rot" style="width:52px;height:52px;border-radius:10px;flex-shrink:0"></div>
+        <div class="hero2-card-info">
+          <b>Foglium Restaurant</b>
+          <span>Kulinarik · Deutschnofen</span>
+          <span><del style="color:var(--grau-hell)">156&thinsp;€</del> <b style="color:var(--rot)">78,00&thinsp;€ für 2</b></span>
+        </div>
+      </div>
+      <p class="hero2-sub">Über 600 Erlebnisse in Südtirol, Nordtirol und Salzburg – Therme, Piste, Gastro, Kino.<br>Du zahlst einmal, deine Begleitung kommt gratis mit. Immer.</p>
+      <div class="hero2-cta">
+        <a class="btn btn-rot btn-gross" href="#">Für mich kaufen</a>
+        <button class="btn btn-ghost btn-gross" data-goto="verschenken">Verschenken</button>
+      </div>
+    </div>
+    <div class="hero2-phones">
+      <div class="phone-mini side">
+        <div class="ms">
+          <div style="padding:10px 10px 6px"><div style="background:var(--flaeche);border-radius:8px;padding:6px 10px;font-size:8.5px;color:var(--grau);display:flex;justify-content:space-between"><span><span class="material-symbols-outlined" style="font-size:10px;vertical-align:-1px">arrow_back</span> Südtirol</span><span><span class="material-symbols-outlined" style="font-size:10px">menu</span></span></div></div>
+          <div class="phone-map" style="position:absolute;inset:36px 0 0;border-radius:0">
+            <div class="phone-pin" style="left:28%;top:28%"></div>
+            <div class="phone-pin" style="left:52%;top:50%"></div>
+            <div class="phone-pin" style="left:68%;top:22%"></div>
+            <div class="phone-pin" style="left:40%;top:70%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-mini center">
+        <div class="ms">
+          <div class="ph b" style="height:42%;position:relative">
+            <span style="position:absolute;left:10px;bottom:10px;color:#fff;font-weight:800;font-size:13px;line-height:1.25">Weniger Zahlen,<br>mehr Gaudi.</span>
+          </div>
+          <div style="padding:9px 11px 4px;font-size:9.5px;font-weight:800">Hot Deals <span class="material-symbols-outlined" style="font-size:12px;vertical-align:-2px">local_fire_department</span></div>
+          <div style="display:flex;gap:6px;padding:0 11px">
+            <div class="ph rot" style="width:44%;aspect-ratio:1;border-radius:8px"></div>
+            <div class="ph gruen" style="width:44%;aspect-ratio:1;border-radius:8px"></div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-mini side">
+        <div class="ms">
+          <div style="padding:10px 10px 6px"><div style="background:var(--flaeche);border-radius:8px;padding:6px 10px;font-size:8.5px;color:var(--grau);display:flex;justify-content:space-between"><span><span class="material-symbols-outlined" style="font-size:10px;vertical-align:-1px">arrow_back</span> Nordtirol</span><span><span class="material-symbols-outlined" style="font-size:10px">menu</span></span></div></div>
+          <div class="phone-map" style="position:absolute;inset:36px 0 0;border-radius:0">
+            <div class="phone-pin" style="left:34%;top:36%"></div>
+            <div class="phone-pin" style="left:58%;top:26%"></div>
+            <div class="phone-pin" style="left:46%;top:64%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="hero2-qr">
+        <div class="phone-qr" style="width:70px;height:70px;margin:0 auto 6px"></div>
+        Download App
+      </div>
+    </div>
+  </section>
+
+  <!-- 1.2 Trust-Bar -->
+  <section class="modul eng grau">
+    <div class="wrap stat-bar">
+      <div><div class="stat-zahl">600+</div><div class="stat-label">Erlebnisse</div></div>
+      <div><div class="stat-zahl">3</div><div class="stat-label">Regionen: Süd- und Nordtirol und Salzburg</div></div>
+      <div><div class="stat-zahl">12.400</div><div class="stat-label">Kartenbesitzer:innen</div></div>
+      <div><div class="stat-zahl">wöchentlich</div><div class="stat-label">neue Partner</div></div>
+    </div>
+  </section>
+
+  <!-- 1.3 Das 1+1-Prinzip -->
+  <section class="modul eng">
+    <div class="wrap" style="max-width:960px">
+      <p class="eyebrow">Das Prinzip</p>
+      <h2 style="margin-bottom:28px">Einmal zahlen, zu zweit erleben.</h2>
+      <div class="prinzip2-grid">
+        <div class="prinzip2-karte hi"><div class="prinzip2-icon"><span class="material-symbols-outlined">confirmation_number</span></div><b>Du zahlst 1×</b><span>einen regulären Eintritt</span></div>
+        <div class="prinzip2-op">+</div>
+        <div class="prinzip2-karte"><div class="prinzip2-icon"><span class="material-symbols-outlined">person_add</span></div><b>Begleitung gratis</b><span>Partner, Freund:in, Familie</span></div>
+        <div class="prinzip2-op">=</div>
+        <div class="prinzip2-karte"><div class="prinzip2-icon"><span class="material-symbols-outlined">auto_awesome</span></div><b>Ihr beide dabei</b><span>für den Preis von einem</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1.4 So funktioniert's / Das Herzstück (zusammengeführt) -->
+  <section class="modul grau">
+    <div class="wrap app-preview">
+      <div>
+        <p class="eyebrow">Die App macht's möglich</p>
+        <h2>So funktioniert's – alles läuft über die App.</h2>
+        <p class="sub" style="margin-bottom:24px">Karte kaufen, Erlebnis suchen, auf der Karte finden, mit einem Antippen einlösen. Vier echte Screens zum Ausprobieren.</p>
+        <div class="app-tabs" id="app-tabs">
+          <button class="aktiv" data-tab="kaufen">Kaufen</button>
+          <button data-tab="suche">Suche</button>
+          <button data-tab="karte">Karte</button>
+          <button data-tab="einloesen">Einlösen</button>
+        </div>
+        <p class="sub" id="app-tab-desc" style="font-size:14.5px;min-height:44px"></p>
+        <a class="btn btn-rot" style="margin-top:8px" data-goto="home" data-scrollto="kaufen" href="#">Jetzt kaufen</a>
+      </div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="phone-bar"></div>
+          <div class="phone-content">
+            <div class="phone-view aktiv" data-view="kaufen">
+              <h4 style="margin-top:10px">GaudiCard</h4>
+              <div class="ph b" style="aspect-ratio:1.3/1"></div>
+              <div style="text-align:center;font-size:15px;font-weight:800">122,00&thinsp;€ <span style="font-weight:500;color:var(--grau);font-size:11px">/ Jahr</span></div>
+              <div style="background:var(--schwarz);color:#fff;border-radius:8px;padding:9px;text-align:center;font-size:10.5px;font-weight:700">Jetzt kaufen</div>
+            </div>
+            <div class="phone-view" data-view="suche">
+              <div class="phone-suche"><span class="material-symbols-outlined" style="font-size:12px;vertical-align:-2px">search</span> Aktivitäten finden</div>
+              <div class="phone-card"><div class="ph"></div><div class="phone-card-info"><b>Therme Meran</b><span>Spa · Meran</span><span style="color:var(--rot);font-weight:800">29€ → 14,50€</span></div></div>
+              <div class="phone-card"><div class="ph rot"></div><div class="phone-card-info"><b>Foglium Restaurant</b><span>Kulinarik · Deutschnofen</span><span style="color:var(--rot);font-weight:800">156€ → 78€</span></div></div>
+              <div class="phone-card"><div class="ph gruen"></div><div class="phone-card-info"><b>Taseralm Seilbahn</b><span>Aktiv &amp; Action · Schenna</span><span style="color:var(--rot);font-weight:800">29€ → 14,50€</span></div></div>
+            </div>
+            <div class="phone-view" data-view="karte">
+              <div class="phone-map">
+                <div class="phone-pin" style="left:30%;top:35%"></div>
+                <div class="phone-pin" style="left:55%;top:55%"></div>
+                <div class="phone-pin" style="left:70%;top:30%"></div>
+                <div class="phone-pin" style="left:40%;top:70%"></div>
+              </div>
+              <p style="font-size:10.5px">453+ Aktivitäten auf der Karte</p>
+            </div>
+            <div class="phone-view" data-view="einloesen">
+              <div class="phone-qr"></div>
+              <div class="phone-timer">04:52</div>
+              <h4>Timer läuft</h4>
+              <p>Zeig den Screen an der Kassa vor.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1.5 Erlebnis-Teaser + Hot Deals (zusammengeführt) -->
+  <section class="modul">
+    <div class="wrap-breit">
+      <div class="modul-kopf"><h2>600+ Erlebnisse warten</h2><p>Nach Kategorie und Region kuratiert – inklusive der stärksten Hot Deals <span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">local_fire_department</span> dieser Woche.</p></div>
+      <div class="slider-wrap">
+        <div class="reihe-scroll" id="home-teaser-alle"></div>
+        <button class="slider-pfeil prev" data-slider-prev="home-teaser-alle" aria-label="Zurück">‹</button>
+        <button class="slider-pfeil next" data-slider-next="home-teaser-alle" aria-label="Weiter">›</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1.6 Ersparnisrechner -->
+  <section class="modul">
+    <div class="wrap">
+      <div class="rechner-box">
+        <div>
+          <h2>Rechne selbst.</h2>
+          <p>Tippe an, was ihr dieses Jahr vorhabt. Der zweite Eintritt ist jeweils gratis – das ist deine Ersparnis.</p>
+          <div class="rechner-chips" id="rechner-chips-home"></div>
+        </div>
+        <div class="rechner-summe">
+          <div class="rechner-zeile"><span>GaudiCard</span><span>–&thinsp;122&thinsp;€</span></div>
+          <div class="rechner-zeile"><span id="r-anzahl-home">0 Erlebnisse gewählt</span><span id="r-brutto-home">+&thinsp;0&thinsp;€</span></div>
+          <div class="rechner-zeile total"><span>Dein Ersparnis</span><span id="r-total-home">–&thinsp;122&thinsp;€</span></div>
+          <p class="rechner-fazit" id="r-fazit-home">Wähle Erlebnisse, um deine Ersparnis zu sehen.</p>
+          <a class="btn btn-rot btn-block" href="#">Karte kaufen</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1.7 Beispielrechnung -->
+  <section class="modul grau">
+    <div class="wrap story2">
+      <div>
+        <p class="eyebrow">Ein ganz normales Wochenende</p>
+        <h2>139&thinsp;€ gespart, bevor der Sonntag vorbei ist.</h2>
+        <p class="sub">Wisch durch die Slides und sieh, was Lisa &amp; Jonas gerade erleben.</p>
+        <div class="wochenende-slider-wrap">
+          <div class="wochenende-slider" id="wochenende-slider"></div>
+        </div>
+      </div>
+      <div class="story2-karte" id="story2-karte"></div>
+    </div>
+  </section>
+
+  <!-- 1.8 USP-Block -->
+  <section class="modul">
+    <div class="wrap">
+      <div class="modul-kopf mitte"><h2>Vier Gründe, die zählen</h2></div>
+      <div class="usp-grid">
+        <div class="usp-item"><div class="icon"><span class="material-symbols-outlined">auto_awesome</span></div><h3>Vielfalt</h3><p style="color:var(--grau);font-size:14.5px;margin-top:8px">Von Piste bis Day-Spa, Kulinarik bis Kino – für jede Laune etwas.</p></div>
+        <div class="usp-item"><div class="icon"><span class="material-symbols-outlined">swap_horiz</span></div><h3>Flexible Begleitung</h3><p style="color:var(--grau);font-size:14.5px;margin-top:8px">Wer mitkommt, entscheidest du – jedes Mal aufs Neue.</p></div>
+        <div class="usp-item"><div class="icon"><span class="material-symbols-outlined">schedule</span></div><h3>12 Monate gültig</h3><p style="color:var(--grau);font-size:14.5px;margin-top:8px">Ein Kauf, ein Jahr lang Zugang zu allen Partnern.</p></div>
+        <div class="usp-item"><div class="icon"><span class="material-symbols-outlined">adjust</span></div><h3>Regional verankert</h3><p style="color:var(--grau);font-size:14.5px;margin-top:8px">Süd- und Nordtiroler Betriebe, die du sonst übersiehst.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1.12 Pricing -->
+  <section class="modul">
+    <div class="wrap">
+      <div class="pricing-box">
+        <div>
+          <p class="eyebrow">GaudiCard Jahreskarte</p>
+          <div class="pricing-preis">122&thinsp;€ <span>/ Jahr</span></div>
+          <ul class="pricing-liste">
+            <li>Zugang zu 600+ Partner-Erlebnissen</li>
+            <li>1+1-Prinzip bei jedem Partner</li>
+            <li>12 Monate ab Aktivierung gültig</li>
+            <li>Kreditkarte, Klarna, PayPal, Überweisung</li>
+          </ul>
+        </div>
+        <a class="btn btn-rot btn-gross" href="#">Jetzt kaufen</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1.13 Geschenk-Cross-Sell -->
+  <section class="modul eng grau">
+    <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
+      <div><h3 style="font-size:22px">Nicht für dich, sondern zum Verschenken?</h3><p class="sub" style="margin-top:4px">Als PDF sofort da oder physisch mit der Post.</p></div>
+      <button class="btn btn-schwarz" data-goto="verschenken">Zur Geschenkseite</button>
+    </div>
+  </section>
+
+  <!-- 1.14 FAQ-Auszug -->
+  <section class="modul">
+    <div class="wrap" style="max-width:820px">
+      <div class="modul-kopf"><h2>Die wichtigsten Fragen</h2></div>
+      <div class="accordion" id="faq-auszug"></div>
+      <button class="btn btn-ghost" style="margin-top:20px" data-goto="faq">Alle Fragen ansehen</button>
+    </div>
+  </section>
+
+</section>
+
+
+<!-- =================================================================== -->
+<!-- ============================ 2. ERLEBNISSE ========================= -->
+<!-- =================================================================== -->
+<section class="page fb-zone" data-page="erlebnisse" data-section="page-erlebnisse" data-label="2. Erlebnisse">
+
+  <!-- 2.1 Kompakt-Hero mit Suche -->
+  <section class="modul eng" style="padding-top:128px">
+    <div class="wrap-breit">
+      <p class="eyebrow"><span id="erl-anzahl-hero">453</span>+ Erlebnisse in Süd- &amp; Nordtirol</p>
+      <h1 style="font-size:clamp(30px,4vw,46px)">Was erlebst du als Nächstes?</h1>
+    </div>
+  </section>
+
+  <!-- 2.3 / 2.4 Such- & Filterleiste + Ansichts-Toggle + Split (2.5 Karten / 2.6 Merkliste-Ersatz via Rechner / 2.7 Interrupt) -->
+  <section class="modul eng" id="erlebnisse-anker">
+    <div class="wrap-breit">
+      <div class="modul-kopf-zeile">
+        <div class="modul-kopf"><h2>Erlebnisse durchstöbern</h2><p><span id="anzahl">0</span> Erlebnisse in deiner Auswahl</p></div>
+      </div>
+
+      <div class="filterbar-neu">
+        <div class="filterbar-scroll" id="kat-chips-inline">
+          <button class="chip aktiv" data-kat-inline="alle">Alle Kategorien</button>
+        </div>
+        <div class="filterbar-rechts">
+          <select class="chip" id="bezirk-select">
+            <option value="alle">Alle Bezirke</option>
+          </select>
+          <button class="chip" id="verfuegbar-chip-inline">Aktuell verfügbar</button>
+          <button class="chip chip-mehr" id="mehr-filter-btn">Mehr Filter anzeigen</button>
+          <div class="erl-suche-wrap">
+            <input type="text" id="erl-suche" placeholder="Erlebnis, Ort oder Partner suchen …">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2.3b Filter-Overlay: alle Filter aus gaudicard-filter.json -->
+      <div class="filter-overlay" id="filter-overlay">
+        <div class="filter-overlay-panel">
+          <div class="filter-overlay-kopf">
+            <h3>Filter</h3>
+            <button class="filter-overlay-schliessen" id="filter-overlay-zu"><span class="material-symbols-outlined">close</span></button>
+          </div>
+          <div class="filter-overlay-body">
+            <button class="chip" id="verfuegbar-chip-overlay"><span class="material-symbols-outlined" style="font-size:15px;vertical-align:-3px">check</span> Aktuell verfügbar</button>
+
+            <h4>Kategorien</h4>
+            <div class="filter-grid" id="filter-kategorien"></div>
+
+            <h4>Jahreszeit</h4>
+            <div class="filterbar-scroll wrap-chips" id="filter-jahreszeit"></div>
+
+            <h4>Bezirk</h4>
+            <div class="filterbar-scroll wrap-chips" id="filter-bezirk"></div>
+
+            <h4>Gaudi mit …</h4>
+            <div class="filterbar-scroll wrap-chips" id="filter-gaudimit"></div>
+          </div>
+          <div class="filter-overlay-footer">
+            <button class="chip" id="filter-reset">Zurücksetzen</button>
+            <button class="btn btn-rot" id="filter-apply"><span id="filter-apply-count">0</span> anzeigen</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="split" id="split">
+        <div class="liste" id="liste"></div>
+
+        <div class="map" id="map">
+          <div class="map-inner" id="map-inner">
+            <svg viewBox="0 0 800 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <rect width="800" height="700" fill="#F4F4F5"/>
+              <path d="M0 240 Q180 150 360 210 T800 170 V0 H0 Z" fill="#EDEDEE"/>
+              <path d="M0 520 Q220 430 430 500 T800 440 V700 H0 Z" fill="#E7E7E8"/>
+              <path d="M60 300 Q300 260 520 320 T790 300" fill="none" stroke="#D4D4D8" stroke-width="3"/>
+              <path d="M120 560 Q340 500 560 560 T800 540" fill="none" stroke="#D4D4D8" stroke-width="3"/>
+              <path d="M0 355 Q400 330 800 350" fill="none" stroke="#D4D4D8" stroke-width="2" stroke-dasharray="8 8"/>
+            </svg>
+            <span class="region-label" style="top:12%;left:8%">Nordtirol</span>
+            <span class="region-label" style="bottom:10%;right:8%">Südtirol</span>
+            <div id="pins"></div>
+          </div>
+          <div class="map-hinweis">Mock — final: MapLibre GL, eigener Tile-Style · Karte ziehen zum Verschieben</div>
+          <button class="karte-bereich-btn" id="karte-bereich-btn">In diesem Bereich suchen</button>
+          <div class="pin-kachel" id="pin-kachel"></div>
+        </div>
+
+        <button class="ansicht-toggle" id="toggle">Karte anzeigen</button>
+      </div>
+
+      <!-- 2.7 Conversion-Interrupt -->
+      <div class="card" style="margin-top:28px;text-align:center;background:var(--flaeche);border:none">
+        <h3>All das mit einer Karte – 122&thinsp;€ im Jahr</h3>
+        <p class="sub" style="margin:8px 0 16px">Einmal kaufen, das ganze Jahr sparen.</p>
+        <a class="btn btn-rot" href="#" data-goto="home" data-scrollto="kaufen">Jetzt kaufen</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2.8 App-Hinweis -->
+  <section class="modul eng dunkel" style="text-align:center">
+    <div class="wrap"><h3 style="color:#fff;font-size:22px">In der App findest du alle Erlebnisse — mit Standort, Filter und Einlöse-Funktion.</h3>
+      <div class="store-badges" style="justify-content:center;display:flex;margin-top:20px">
+        <div class="store-badge" style="border-color:#3F3F46;color:#fff"><span class="material-symbols-outlined" style="font-size:14px;vertical-align:-3px">apps</span> App Store</div>
+        <div class="store-badge" style="border-color:#3F3F46;color:#fff"><span class="material-symbols-outlined" style="font-size:14px;vertical-align:-3px">apps</span> Google Play</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2.9 Partner-Logowall -->
+  <section class="modul eng">
+    <div class="wrap"><div class="modul-kopf mitte"><p class="eyebrow">Bekannte Betriebe</p></div>
+      <div class="logowall">
+        <div class="logo-item">Therme Meran</div><div class="logo-item">Cineplexx</div><div class="logo-item">Salewa Cube</div>
+        <div class="logo-item">Aqua Dome</div><div class="logo-item">Adlers Hotel</div><div class="logo-item">Stubaier Gletscher</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2.10 SEO-Textblock -->
+  <section class="modul eng grau">
+    <div class="wrap" style="max-width:820px">
+      <p class="sub" style="font-size:14px;line-height:1.7">Erlebnisse in Südtirol und Nordtirol entdecken: von Skitagen am Schnalstaler und Stubaier Gletscher über Thermenbesuche in Meran und im Aqua Dome bis zu kulinarischen Highlights in Bozen, Deutschnofen und Innsbruck. Mit der GaudiCard ist bei jedem der über 600 Partner ein zweiter Eintritt inklusive.</p>
+    </div>
+  </section>
+
+</section>
+
+
+<!-- =================================================================== -->
+<!-- ==================== 2b. ERLEBNIS-DETAILSEITE ====================== -->
+<!-- =================================================================== -->
+<section class="page fb-zone" data-page="erlebnis-detail" data-section="page-erlebnis-detail" data-label="2b. Erlebnis-Detailseite">
+  <section class="modul eng" style="padding-top:128px">
+    <div class="wrap" style="max-width:960px">
+      <div class="ed-galerie" id="ed-galerie">
+        <button class="ed-zurueck" id="ed-zurueck" data-goto="erlebnisse"><span class="material-symbols-outlined">arrow_back</span></button>
+        <span class="badge" id="ed-badge" style="display:none"></span>
+        <div class="ed-galerie-haupt ph" id="ed-bild-haupt"></div>
+        <div class="ed-galerie-neben" id="ed-bild-neben">
+          <div class="ph"></div><div class="ph"></div><div class="ph"></div><div class="ph"></div>
+        </div>
+        <button class="ed-galerie-alle" id="ed-galerie-alle">⊞ Alle Fotos</button>
+      </div>
+    </div>
+
+    <div class="wrap" style="max-width:760px">
+      <div class="ed-kopf">
+        <p class="erlebnis-kat" id="ed-kat"></p>
+        <h1 style="font-size:clamp(26px,3.6vw,38px)" id="ed-titel"></h1>
+        <p class="erlebnis-ort" id="ed-ort-region"></p>
+      </div>
+
+      <div class="detail-block" style="border-top:none;padding-top:4px">
+        <h4>Beschreibung</h4>
+        <p id="ed-beschreibung" class="ed-text ed-clamp"></p>
+        <button class="chip ed-mehr-lesen" id="ed-mehr-lesen">Mehr lesen</button>
+      </div>
+
+      <div class="detail-block">
+        <button class="ed-acc-kopf" id="ed-funktion-kopf"><h4 style="margin:0">Wie funktioniert's?</h4><span class="ed-acc-chevron">︿</span></button>
+        <ul class="detail-schritte ed-schritte" id="ed-schritte"></ul>
+      </div>
+
+      <div class="detail-block">
+        <h4>Konditionen</h4>
+        <div id="ed-konditionen" class="ed-text"></div>
+      </div>
+
+      <div class="detail-block">
+        <h4>Details zum Preis</h4>
+        <p id="ed-preisdetails" class="ed-text"></p>
+      </div>
+
+      <div class="detail-block">
+        <h4>Wo ist das Erlebnis?</h4>
+        <div class="ed-map ph" style="aspect-ratio:16/9;margin-top:10px;position:relative">
+          <span class="ed-map-pin" id="ed-map-pin"></span>
+        </div>
+      </div>
+
+      <div class="detail-block detail-kontakt ed-kontakt" id="ed-kontakt">
+        <h4 style="margin-bottom:2px">Kontakt</h4>
+      </div>
+    </div>
+  </section>
+
+  <!-- Karten-Kauf-Hinweis am Ende der Detailseite -->
+  <section class="modul eng">
+    <div class="wrap" style="max-width:760px">
+      <div class="card" style="text-align:center;background:var(--flaeche);border:none">
+        <h3>All das mit einer Karte – 122&thinsp;€ im Jahr</h3>
+        <p class="sub" style="margin:8px 0 16px">Einmal kaufen, das ganze Jahr sparen – bei über 600 Partnern in Süd- und Nordtirol.</p>
+        <a class="btn btn-rot" href="#" data-goto="home" data-scrollto="kaufen">Jetzt Karte kaufen</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Andere passende Erlebnisse -->
+  <section class="modul eng grau">
+    <div class="wrap-breit">
+      <div class="modul-kopf"><h2>Andere passende Erlebnisse</h2><p>Ähnliche Erlebnisse in deiner Auswahl</p></div>
+      <div class="reihe-scroll" id="ed-passende"></div>
+    </div>
+  </section>
+</section>
+
+
+<!-- =================================================================== -->
+<!-- ======================= 3. GUTSCHEIN VERSCHENKEN =================== -->
+<!-- =================================================================== -->
+<section class="page fb-zone" data-page="verschenken" data-section="page-verschenken" data-label="3. Gutschein verschenken">
+
+  <!-- 3.1 Hero -->
+  <section class="modul" style="padding-top:132px">
+    <div class="wrap" style="display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center">
+      <div>
+        <p class="eyebrow">Geschenk-Gutschein</p>
+        <h1>Erlebnisse schenken statt Dinge.</h1>
+        <p class="sub" style="max-width:42ch">Die GaudiCard als Gutschein – digital in Sekunden verschickt oder physisch mit der Post. Ein Jahr voller 1+1-Erlebnisse.</p>
+        <div style="display:flex;gap:14px;margin-top:28px;flex-wrap:wrap">
+          <a class="btn btn-rot btn-gross" href="#gs-pricing">Gutschein kaufen</a>
+        </div>
+      </div>
+      <div class="gutschein-mock">
+        <div class="gs-logo">Gaudi<span>Card</span></div>
+        <div><div class="gs-wert">122&thinsp;€ Erlebnisgutschein</div><div class="gs-code">GC-7F3K-92LX</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3.2 Varianten-Auswahl + 3.3 Vorschau -->
+  <section class="modul grau">
+    <div class="wrap">
+      <div class="modul-kopf"><h2>Digital oder physisch?</h2></div>
+      <div class="varianten">
+        <div class="variante aktiv" data-variante="digital">
+          <h3><span class="material-symbols-outlined" style="font-size:20px;vertical-align:-4px">bolt</span> Digital</h3><p class="sub" style="font-size:14px;margin-top:0">Sofort verfügbar</p>
+          <ul><li>Als PDF direkt nach Kauf</li><li>Ideal bei kurzfristigen Anlässen</li><li>Selbst ausdrucken oder weiterleiten</li></ul>
+        </div>
+        <div class="variante" data-variante="physisch">
+          <h3><span class="material-symbols-outlined" style="font-size:20px;vertical-align:-4px">mail</span> Physisch</h3><p class="sub" style="font-size:14px;margin-top:0">Versand per Post</p>
+          <ul><li>Hochwertige Gutscheinkarte</li><li><span class="tooltip-wrap" tabindex="0">2–4 Werktage Lieferzeit<span class="material-symbols-outlined tooltip-icon">info</span><span class="tooltip-box">Innerhalb Süd- und Nordtirols. Für eine Ankunft vor Heiligabend bitte bis zum <b>20. Dezember</b> bestellen — danach empfehlen wir die digitale Variante.</span></span></li><li>Perfekt zum Überreichen</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3.4 So funktioniert Schenken -->
+  <section class="modul">
+    <div class="wrap">
+      <div class="modul-kopf mitte"><h2>So funktioniert Schenken</h2></div>
+      <div class="schritte">
+        <div class="schritt"><div class="schritt-nr">1</div><h3>Kaufen</h3><p>Variante wählen, Zahlung abschließen.</p></div>
+        <div class="schritt"><div class="schritt-nr">2</div><h3>Gutschein erhalten</h3><p>Als PDF im Postfach oder als Karte im Briefkasten.</p></div>
+        <div class="schritt"><div class="schritt-nr">3</div><h3>Beschenkte:r löst ein</h3><p>Code eingeben, App laden, loslegen.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3.5 Anlass-Modul -->
+  <section class="modul grau">
+    <div class="wrap">
+      <div class="modul-kopf"><h2>Für welchen Anlass?</h2></div>
+      <div class="anlass-grid">
+        <div class="anlass"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">cake</span> Geburtstag</div><div class="anlass"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">ac_unit</span> Weihnachten</div>
+        <div class="anlass"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">favorite</span> Hochzeit</div><div class="anlass"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">volunteer_activism</span> Dankeschön</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3.6 Was steckt drin -->
+  <section class="modul">
+    <div class="wrap-breit">
+      <div class="modul-kopf"><h2>Was steckt drin?</h2><p>350+ Erlebnisse · 12 Monate gültig · 1+1-Prinzip bei jedem Partner</p></div>
+      <div class="slider-wrap">
+        <div class="reihe-scroll" id="verschenken-teaser"></div>
+        <button class="slider-pfeil prev" data-slider-prev="verschenken-teaser" aria-label="Zurück">‹</button>
+        <button class="slider-pfeil next" data-slider-next="verschenken-teaser" aria-label="Weiter">›</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3.8 Pricing & Checkout / 3.9 Trust -->
+  <section class="modul" id="gs-pricing">
+    <div class="wrap">
+      <div class="pricing-box">
+        <div>
+          <p class="eyebrow">GaudiCard Erlebnisgutschein</p>
+          <div class="pricing-preis">122&thinsp;€</div>
+          <ul class="pricing-liste">
+            <li>Gültig wie eine reguläre GaudiCard, 12 Monate ab Einlösung</li>
+            <li>Kreditkarte, Klarna, PayPal, Überweisung</li>
+            <li>Sichere Zahlung &amp; Rechnung inklusive</li>
+          </ul>
+        </div>
+        <a class="btn btn-rot btn-gross" href="#">Gutschein kaufen</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3.10 Geschenk-FAQ -->
+  <section class="modul grau">
+    <div class="wrap" style="max-width:820px">
+      <div class="modul-kopf"><h2>Fragen zum Gutschein</h2></div>
+      <div class="accordion" id="faq-geschenk"></div>
+    </div>
+  </section>
+
+  <!-- 3.11 Cross-Sell -->
+  <section class="modul eng" style="text-align:center">
+    <div class="wrap"><h3 style="font-size:22px">Auch für dich selbst?</h3>
+      <button class="btn btn-rot" style="margin-top:16px" data-goto="home" data-scrollto="kaufen">Zur GaudiCard für mich</button>
+    </div>
+  </section>
+
+</section>
+
+
+<!-- =================================================================== -->
+<!-- ======================= 4. GUTSCHEIN EINLÖSEN ====================== -->
+<!-- =================================================================== -->
+<section class="page fb-zone" data-page="einloesen" data-section="page-einloesen" data-label="4. Gutschein einlösen">
+
+  <!-- 4.1 Hero mit Code-Feld -->
+  <section class="modul" style="padding-top:132px">
+    <div class="wrap" style="max-width:640px">
+      <p class="eyebrow">Gutschein einlösen</p>
+      <h1 style="font-size:clamp(32px,4.4vw,52px)">Deinen Code eingeben.</h1>
+      <p class="sub" style="margin-bottom:28px">Trag den Code von deiner Gutscheinkarte oder aus der E-Mail ein — der Rest dauert eine Minute.</p>
+      <div class="code-box">
+        <input type="text" id="redeem-code" placeholder="z. B. GC-7F3K-92LX" maxlength="14">
+        <button class="btn btn-rot" id="redeem-btn">Einlösen</button>
+      </div>
+      <div class="redeem-erfolg" id="redeem-erfolg">
+        <div class="haken"><span class="material-symbols-outlined" style="font-variation-settings:'wght' 700">check</span></div>
+        <div><b>Code erkannt.</b><br><span style="color:var(--grau);font-size:14px">Weiter geht's mit Konto erstellen und App laden.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4.2 Was ist die GaudiCard -->
+  <section class="modul eng grau">
+    <div class="wrap" style="max-width:720px">
+      <h3>Was ist die GaudiCard?</h3>
+      <p class="sub">Eine 1+1-Erlebniskarte für Süd- und Nordtirol: Bei über 600 Partnern — Therme, Piste, Gastro, Kultur — ist der zweite Eintritt gratis. Zwölf Monate gültig, ab sofort einsatzbereit.</p>
+    </div>
+  </section>
+
+  <!-- 4.3 Schritt-für-Schritt / 4.4 App-Download -->
+  <section class="modul">
+    <div class="wrap" style="display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center">
+      <div class="schritte-vertikal">
+        <div class="schritt-v"><div class="schritt-nr">1</div><div><h3>Code eingeben</h3><p>Oben auf dieser Seite oder direkt in der App.</p></div></div>
+        <div class="schritt-v"><div class="schritt-nr">2</div><div><h3>Konto erstellen</h3><p>Name, E-Mail, Passwort — unter einer Minute.</p></div></div>
+        <div class="schritt-v"><div class="schritt-nr">3</div><div><h3>App laden</h3><p>Für iOS und Android verfügbar.</p></div></div>
+        <div class="schritt-v"><div class="schritt-nr">4</div><div><h3>Erstes Erlebnis wählen</h3><p>Und schon kann's losgehen.</p></div></div>
+      </div>
+      <div>
+        <div class="ph b" style="aspect-ratio:4/4"></div>
+        <div class="store-badges" style="margin-top:16px">
+          <div class="store-badge"><span class="material-symbols-outlined" style="font-size:14px;vertical-align:-3px">apps</span> App Store</div><div class="store-badge"><span class="material-symbols-outlined" style="font-size:14px;vertical-align:-3px">apps</span> Google Play</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4.5 Erlebnis-Teaser -->
+  <section class="modul grau">
+    <div class="wrap-breit">
+      <div class="modul-kopf"><h2>Das wird jetzt möglich</h2></div>
+      <div class="slider-wrap">
+        <div class="reihe-scroll" id="einloesen-teaser"></div>
+        <button class="slider-pfeil prev" data-slider-prev="einloesen-teaser" aria-label="Zurück">‹</button>
+        <button class="slider-pfeil next" data-slider-next="einloesen-teaser" aria-label="Weiter">›</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4.6 Troubleshooting & Support -->
+  <section class="modul">
+    <div class="wrap" style="max-width:820px">
+      <div class="modul-kopf"><h2>Code funktioniert nicht?</h2></div>
+      <div class="accordion" id="faq-troubleshoot"></div>
+      <p class="sub" style="margin-top:20px">Weiterhin Probleme? <b style="color:var(--schwarz)">support@gaudi-card.com</b></p>
+    </div>
+  </section>
+
+</section>
+
+
+<!-- =================================================================== -->
+<!-- ============================== 5. FAQ ============================= -->
+<!-- =================================================================== -->
+<section class="page fb-zone" data-page="faq" data-section="page-faq" data-label="5. FAQ">
+
+  <!-- 5.1 Hero mit Suchfeld -->
+  <section class="modul eng" style="padding-top:128px">
+    <div class="wrap" style="max-width:640px">
+      <p class="eyebrow">Hilfe &amp; Antworten</p>
+      <h1 style="font-size:clamp(32px,4.4vw,52px)">Wie können wir helfen?</h1>
+      <input type="text" id="faq-suche" placeholder="Frage suchen …"
+        style="width:100%;margin-top:20px;border:1.5px solid var(--linie);border-radius:8px;padding:15px 22px;font-size:15px">
+    </div>
+  </section>
+
+  <!-- 5.2 Themen-Cluster -->
+  <section class="modul eng grau">
+    <div class="wrap">
+      <div class="kat-grid" id="faq-cluster" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))"></div>
+    </div>
+  </section>
+
+  <!-- 5.3 Top-Fragen -->
+  <section class="modul eng">
+    <div class="wrap" style="max-width:820px">
+      <div class="modul-kopf"><h2>Meistgestellte Fragen</h2></div>
+      <div id="faq-top"></div>
+    </div>
+  </section>
+
+  <!-- 5.4 Accordion-Liste je Kategorie (gruppiert nach den Themen-Clustern oben) -->
+  <section class="modul grau">
+    <div class="wrap" style="max-width:820px">
+      <div class="modul-kopf"><h2>Alle Fragen</h2></div>
+      <div id="faq-alle"></div>
+    </div>
+  </section>
+
+  <!-- 5.5 Kontakt- / Support-Modul -->
+  <section class="modul">
+    <div class="wrap" style="max-width:640px">
+      <div class="modul-kopf"><h2>Noch nicht geklärt?</h2><p>Schreib uns — wir melden uns innerhalb eines Werktags.</p></div>
+      <form class="form-grid" onsubmit="return zeigErfolg(this)">
+        <div class="feld"><label>Vorname</label><input type="text" required></div>
+        <div class="feld"><label>Nachname</label><input type="text" required></div>
+        <div class="feld voll"><label>E-Mail</label><input type="email" required></div>
+        <div class="feld voll"><label>Nachricht</label><textarea required></textarea></div>
+        <div class="voll" style="display:flex;align-items:flex-start;gap:10px">
+          <input type="checkbox" id="faq-datenschutz" required style="margin-top:3px;width:16px;height:16px;flex-shrink:0;accent-color:var(--rot)">
+          <label for="faq-datenschutz" style="font-size:13.5px;font-weight:400;color:var(--grau)">Ich habe die <a href="#" style="color:var(--schwarz);text-decoration:underline">Datenschutzerklärung</a> gelesen und akzeptiere sie.</label>
+        </div>
+        <div class="voll"><button class="btn btn-rot" type="submit">Nachricht senden</button></div>
+      </form>
+      <div class="form-erfolg"><div class="haken"><span class="material-symbols-outlined" style="font-variation-settings:'wght' 700">check</span></div><b>Danke — wir melden uns bald.</b></div>
+    </div>
+  </section>
+
+</section>
+
+
+<!-- =================================================================== -->
+<!-- ======================= 6. PARTNER WERDEN ========================== -->
+<!-- =================================================================== -->
+<section class="page fb-zone" data-page="partner" data-section="page-partner" data-label="6. Partner werden">
+
+  <!-- 6.1 Hero -->
+  <section class="modul" style="padding-top:132px">
+    <div class="wrap" style="display:grid;grid-template-columns:1fr .62fr;gap:56px;align-items:center">
+      <div>
+        <p class="eyebrow">Für Erlebnispartner</p>
+        <h1>Neue Gäste. Ohne Fixkosten.</h1>
+        <p class="sub" style="margin-bottom:28px">Werde GaudiCard-Partner und erreiche 12.400 Kartenbesitzer:innen — ganz ohne Vorabkosten.</p>
+        <a class="btn btn-rot btn-gross" href="#partner-lead">Jetzt Partner werden</a>
+      </div>
+      <div class="ph b" style="aspect-ratio:3/4;border-radius:20px"></div>
+    </div>
+  </section>
+
+  <!-- 6.2 Warum Partner werden -->
+  <section class="modul grau">
+    <div class="wrap">
+      <div class="usp-grid">
+        <div class="usp-item"><div class="icon"><span class="material-symbols-outlined">adjust</span></div><h3>Reichweite</h3><p style="color:var(--grau);font-size:14.5px;margin-top:8px">12.400 aktive Kartenbesitzer:innen sehen dein Angebot.</p></div>
+        <div class="usp-item"><div class="icon"><span class="material-symbols-outlined">auto_awesome</span></div><h3>Neukunden</h3><p style="color:var(--grau);font-size:14.5px;margin-top:8px">Gäste, die sonst nicht auf dich aufmerksam würden.</p></div>
+        <div class="usp-item"><div class="icon"><span class="material-symbols-outlined">schedule</span></div><h3>Kein Risiko</h3><p style="color:var(--grau);font-size:14.5px;margin-top:8px">Keine Fixkosten, keine Grundgebühr.</p></div>
+        <div class="usp-item"><div class="icon"><span class="material-symbols-outlined">swap_horiz</span></div><h3>Planbarer Aufwand</h3><p style="color:var(--grau);font-size:14.5px;margin-top:8px">Einmal einrichten, dann läuft's über die App.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6.4 So funktioniert's -->
+  <section class="modul grau">
+    <div class="wrap">
+      <div class="modul-kopf mitte"><h2>Von der Anfrage bis zur Kassa</h2></div>
+      <div class="schritte">
+        <div class="schritt"><div class="schritt-nr">1</div><h3>Anfrage senden</h3><p>Formular ausfüllen, wir melden uns.</p></div>
+        <div class="schritt"><div class="schritt-nr">2</div><h3>Angebot einrichten</h3><p>Gemeinsam Konditionen und Verfügbarkeit klären.</p></div>
+        <div class="schritt"><div class="schritt-nr">3</div><h3>Listung live</h3><p>Dein Erlebnis erscheint in App und auf der Website.</p></div>
+        <div class="schritt"><div class="schritt-nr">4</div><h3>Einlösung an der Kassa</h3><p>Gäste zeigen den Timer, du bestätigst — fertig.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6.5 Partner-Dashboard-Preview -->
+  <section class="modul">
+    <div class="wrap" style="display:grid;grid-template-columns:.95fr 1.05fr;gap:56px;align-items:center">
+      <div>
+        <p class="eyebrow">Dein Partner-Dashboard</p>
+        <h2>Klicks, Einlösungen, Umsatz — auf einen Blick.</h2>
+        <p class="sub">Kein Rätselraten: Du siehst genau, was deine Listung bringt, je Erlebnis und im Zeitverlauf.</p>
+      </div>
+      <div class="dash-mock">
+        <div class="dash-kopf"><h3>Foglium Restaurant</h3><span class="chip aktiv" style="cursor:default">Letzte 30 Tage</span></div>
+        <div class="dash-stats">
+          <div class="dash-stat"><div class="zahl">2.140</div><div class="label">Aufrufe</div></div>
+          <div class="dash-stat"><div class="zahl">86</div><div class="label">Einlösungen</div></div>
+          <div class="dash-stat"><div class="zahl">6.708&thinsp;€</div><div class="label">generierter Umsatz</div></div>
+        </div>
+        <div class="dash-chart">
+          <div class="dash-bar" style="height:35%"></div><div class="dash-bar" style="height:55%"></div>
+          <div class="dash-bar" style="height:40%"></div><div class="dash-bar" style="height:70%"></div>
+          <div class="dash-bar" style="height:50%"></div><div class="dash-bar" style="height:85%"></div>
+          <div class="dash-bar" style="height:65%"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6.6 Partner-Testimonials -->
+  <section class="modul grau">
+    <div class="wrap">
+      <div class="modul-kopf mitte"><h2>Was Partner sagen</h2></div>
+      <div class="testi-grid">
+        <div class="testi"><div class="testi-logo">FR</div><p>„Seit wir dabei sind, haben wir jedes Wochenende neue Gesichter im Lokal.“</p><small>Foglium Restaurant, Deutschnofen</small></div>
+        <div class="testi"><div class="testi-logo">TS</div><p>„Kein Aufwand, dafür planbar mehr Gäste unter der Woche.“</p><small>Taseralm Seilbahn, Schenna</small></div>
+        <div class="testi"><div class="testi-logo">NA</div><p>„Das Dashboard zeigt uns sofort, welches Erlebnis am besten läuft.“</p><small>NAIL ART by Marina, Meran</small></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6.7 Bestehende Partner -->
+  <section class="modul eng">
+    <div class="wrap"><div class="modul-kopf mitte"><p class="eyebrow">Bereits dabei</p></div>
+      <div class="logowall">
+        <div class="logo-item">Therme Meran</div><div class="logo-item">Cineplexx</div><div class="logo-item">Salewa Cube</div>
+        <div class="logo-item">Aqua Dome</div><div class="logo-item">Adlers Hotel</div><div class="logo-item">Stubaier Gletscher</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6.8 Partner-FAQ -->
+  <section class="modul grau">
+    <div class="wrap" style="max-width:820px">
+      <div class="modul-kopf"><h2>Fragen von Partnern</h2></div>
+      <div class="accordion" id="faq-partner"></div>
+    </div>
+  </section>
+
+  <!-- 6.9 Lead-Formular / 6.10 Ansprechpartner -->
+  <section class="modul" id="partner-lead">
+    <div class="wrap" style="display:grid;grid-template-columns:1fr .7fr;gap:56px;align-items:start">
+      <div>
+        <div class="modul-kopf"><h2>Werde Partner</h2></div>
+        <form class="form-grid" onsubmit="return zeigErfolg(this)">
+          <div class="feld"><label>Betrieb</label><input type="text" required></div>
+          <div class="feld"><label>Kategorie</label>
+            <select><option>Kulinarik</option><option>Aktiv &amp; Action</option><option>Wellness &amp; Spa</option><option>Kultur &amp; Events</option><option>Beauty</option><option>Sonstiges</option></select></div>
+          <div class="feld"><label>Vorname</label><input type="text" required></div>
+          <div class="feld"><label>Nachname</label><input type="text" required></div>
+          <div class="feld"><label>Telefonnummer</label><input type="tel" required></div>
+          <div class="feld"><label>E-Mail-Adresse</label><input type="email" required></div>
+          <div class="feld"><label>Region</label><select><option>Südtirol</option><option>Nordtirol</option></select></div>
+          <div class="feld voll"><label>Nachricht</label><textarea placeholder="Erzähl uns kurz von deinem Erlebnis …"></textarea></div>
+          <div class="voll" style="display:flex;align-items:flex-start;gap:10px">
+            <input type="checkbox" id="partner-privacy" required style="margin-top:3px;accent-color:var(--rot);width:16px;height:16px;flex-shrink:0">
+            <label for="partner-privacy" style="font-size:13.5px;color:var(--grau);font-weight:400">Ich stimme der <a href="#" style="color:var(--schwarz);font-weight:700">Datenschutzerklärung</a> zu.</label>
+          </div>
+          <div class="voll"><button class="btn btn-rot" type="submit">Anfrage senden</button></div>
+        </form>
+        <div class="form-erfolg"><div class="haken"><span class="material-symbols-outlined" style="font-variation-settings:'wght' 700">check</span></div><b>Danke! Wir melden uns innerhalb von zwei Werktagen.</b></div>
+      </div>
+      <div class="card">
+        <div class="ph" style="aspect-ratio:1;margin-bottom:16px"></div>
+        <h3>Marco Gruber</h3><p class="sub" style="margin-top:2px">Partner-Betreuung Südtirol</p>
+        <p class="sub" style="font-size:14px;margin-top:14px">marco@gaudi-card.com<br>+39 0471 123 457</p>
+      </div>
+    </div>
+  </section>
+
+</section>
+
+
+<!-- =================================================================== -->
+<!-- ===================== 7. UNTERNEHMEN / B2B ========================= -->
+<!-- =================================================================== -->
+<section class="page fb-zone" data-page="unternehmen" data-section="page-unternehmen" data-label="7. Unternehmen / B2B">
+
+  <!-- 7.1 Hero -->
+  <section class="modul" style="padding-top:132px">
+    <div class="wrap" style="display:grid;grid-template-columns:1fr .62fr;gap:56px;align-items:center">
+      <div>
+        <p class="eyebrow">Für Unternehmen</p>
+        <h1>Ein Benefit, den Mitarbeitende wirklich nutzen.</h1>
+        <p class="sub" style="margin-bottom:28px">Die GaudiCard als Mitarbeitergeschenk — regional, flexibel und spürbar mehr wert als die reinen Kosten.</p>
+        <a class="btn btn-rot btn-gross" href="#b2b-anfrage">Angebot anfragen</a>
+      </div>
+      <div class="ph b" style="aspect-ratio:3/4;border-radius:20px"></div>
+    </div>
+  </section>
+
+  <!-- 7.2 Warum als Benefit -->
+  <section class="modul grau">
+    <div class="wrap">
+      <div class="usp-grid">
+        <div class="usp-item"><div class="icon"><span class="material-symbols-outlined">favorite</span></div><h3>Wertschätzung</h3><p style="color:var(--grau);font-size:14.5px;margin-top:8px">Ein Geschenk, das nach echter Freizeit aussieht — weil es das ist.</p></div>
+        <div class="usp-item"><div class="icon"><span class="material-symbols-outlined">swap_horiz</span></div><h3>Mitarbeiterbindung</h3><p style="color:var(--grau);font-size:14.5px;margin-top:8px">Ein Benefit, über den im Team tatsächlich gesprochen wird.</p></div>
+        <div class="usp-item"><div class="icon"><span class="material-symbols-outlined">adjust</span></div><h3>Steuerlich absetzbar</h3><p style="color:var(--grau);font-size:14.5px;margin-top:8px">Die erworbene GaudiCard ist auch für Unternehmen entsprechend steuerlich absetzbar.</p></div>
+        <div class="usp-item"><div class="icon"><span class="material-symbols-outlined">auto_awesome</span></div><h3>Regional verankert</h3><p style="color:var(--grau);font-size:14.5px;margin-top:8px">Sichtbare Unterstützung für Südtiroler und Nordtiroler Betriebe.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7.3 Use Cases -->
+  <section class="modul">
+    <div class="wrap">
+      <div class="modul-kopf mitte"><h2>Typische Anlässe</h2></div>
+      <div class="anlass-grid">
+        <div class="anlass"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">redeem</span> Weihnachtsgeschenk</div><div class="anlass"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">military_tech</span> Jubiläum</div>
+        <div class="anlass"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">waving_hand</span> Onboarding</div><div class="anlass"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">emoji_events</span> Leistungsprämie</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7.4 Wert-Argumentation -->
+  <section class="modul grau">
+    <div class="wrap">
+      <div class="modul-kopf mitte"><h2>Was kostet das pro Mitarbeiter:in?</h2><p>Bewege den Regler und sieh, wie sich Kosten und Gesamtwert verhalten.</p></div>
+      <div class="mini-rechner">
+        <div class="card">
+          <div class="range-zeile"><span>Mitarbeiterzahl</span><b id="mr-anzahl">25</b></div>
+          <input type="range" id="mr-range" min="5" max="200" value="25" step="5">
+        </div>
+        <div class="rechner-summe" style="position:static">
+          <div class="rechner-zeile"><span>Kosten gesamt (122&thinsp;€ / Karte, ab 20 Stk. –10&thinsp;%)</span><span id="mr-kosten">2.745&thinsp;€</span></div>
+          <div class="rechner-zeile"><span>Ø Ersparnis pro Karte / Jahr</span><span>480&thinsp;€</span></div>
+          <div class="rechner-zeile total"><span>Wahrgenommener Gesamtwert</span><span id="mr-wert">12.000&thinsp;€</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7.5 Ablauf für Firmen -->
+  <section class="modul">
+    <div class="wrap">
+      <div class="modul-kopf mitte"><h2>Ablauf für Firmen</h2></div>
+      <div class="schritte">
+        <div class="schritt"><div class="schritt-nr">1</div><h3>Anfrage</h3><p>Formular ausfüllen, Mitarbeiterzahl angeben.</p></div>
+        <div class="schritt"><div class="schritt-nr">2</div><h3>Angebot</h3><p>Individuelles Angebot innerhalb von zwei Werktagen.</p></div>
+        <div class="schritt"><div class="schritt-nr">3</div><h3>Codes</h3><p>Ihr erhaltet Gutscheincodes als Liste oder Einzel-PDFs.</p></div>
+        <div class="schritt"><div class="schritt-nr">4</div><h3>Verteilung</h3><p>Codes an Mitarbeitende ausgeben — fertig.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7.6 Mengen-/Staffelmodul -->
+  <section class="modul grau">
+    <div class="wrap">
+      <div class="modul-kopf"><h2>Preisstaffeln</h2></div>
+      <div class="tabelle-wrap">
+        <table class="staffel-tabelle">
+          <thead><tr><th>Menge</th><th>Preis pro Karte</th><th>Rabatt</th></tr></thead>
+          <tbody>
+            <tr><td>5 – 19 Karten</td><td>122&thinsp;€</td><td>—</td></tr>
+            <tr><td>20 – 49 Karten</td><td>109,80&thinsp;€</td><td>–10&thinsp;%</td></tr>
+            <tr><td>50 – 99 Karten</td><td>97,60&thinsp;€</td><td>–20&thinsp;%</td></tr>
+            <tr><td>100+ Karten</td><td>auf Anfrage</td><td>individuell</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7.7 Was Mitarbeitende bekommen -->
+  <section class="modul">
+    <div class="wrap-breit">
+      <div class="modul-kopf"><h2>Was Mitarbeitende bekommen</h2><p>Zugang zu über 600 Erlebnissen — das Endprodukt, direkt sichtbar.</p></div>
+      <div class="slider-wrap">
+        <div class="reihe-scroll" id="unternehmen-teaser"></div>
+        <button class="slider-pfeil prev" data-slider-prev="unternehmen-teaser" aria-label="Zurück">‹</button>
+        <button class="slider-pfeil next" data-slider-next="unternehmen-teaser" aria-label="Weiter">›</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7.8 Referenzen -->
+  <section class="modul grau">
+    <div class="wrap">
+      <div class="modul-kopf mitte"><h2>Was Unternehmen sagen</h2></div>
+      <div class="testi-grid">
+        <div class="testi">
+          <p>„Unsere Mitarbeitenden reden noch Monate später über ihre GaudiCard.“</p>
+          <div class="testi-person">
+            <div class="ph" style="width:44px;height:44px;border-radius:50%;flex-shrink:0"></div>
+            <div><b>Sabine Egger</b><small>HR-Leitung, mittelständisches Unternehmen Bozen</small></div>
+          </div>
+        </div>
+        <div class="testi">
+          <p>„Einfach zu verteilen, kein Verwaltungsaufwand für uns.“</p>
+          <div class="testi-person">
+            <div class="ph" style="width:44px;height:44px;border-radius:50%;flex-shrink:0"></div>
+            <div><b>Julia Mair</b><small>HR-Verantwortliche, Hotelgruppe Meran</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7.9 B2B-FAQ -->
+  <section class="modul">
+    <div class="wrap" style="max-width:820px">
+      <div class="modul-kopf"><h2>Fragen von Unternehmen</h2></div>
+      <div class="accordion" id="faq-b2b"></div>
+    </div>
+  </section>
+
+  <!-- 7.10 Download Info-PDF -->
+  <section class="modul eng grau" style="text-align:center">
+    <div class="wrap"><h3 style="font-size:22px">Einseiter zur internen Weitergabe</h3>
+      <p class="sub" style="margin:8px 0 16px">Alle Eckdaten kompakt für Entscheider:innen.</p>
+      <button class="btn btn-ghost"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">download</span> Info-PDF herunterladen</button>
+    </div>
+  </section>
+
+  <!-- 7.11 Angebotsanfrage -->
+  <section class="modul" id="b2b-anfrage">
+    <div class="wrap" style="max-width:640px">
+      <div class="modul-kopf"><h2>Angebot anfragen</h2></div>
+      <form class="form-grid" onsubmit="return zeigErfolg(this)">
+        <div class="feld"><label>Vorname</label><input type="text" required></div>
+        <div class="feld"><label>Nachname</label><input type="text" required></div>
+        <div class="feld"><label>Firma</label><input type="text" required></div>
+        <div class="feld"><label>Mitarbeiterzahl</label><input type="number" min="1"></div>
+        <div class="feld"><label>E-Mail-Adresse</label><input type="email" required></div>
+        <div class="feld"><label>Telefonnummer</label><input type="tel"></div>
+        <div class="voll" style="display:flex;align-items:flex-start;gap:10px">
+          <input type="checkbox" id="b2b-privacy" required style="margin-top:3px;accent-color:var(--rot);width:16px;height:16px;flex-shrink:0">
+          <label for="b2b-privacy" style="font-size:13.5px;color:var(--grau);font-weight:400">Ich stimme der <a href="#" style="color:var(--schwarz);font-weight:700">Datenschutzerklärung</a> zu.</label>
+        </div>
+        <div class="voll"><button class="btn btn-rot" type="submit">Angebot anfragen</button></div>
+      </form>
+      <div class="form-erfolg"><div class="haken"><span class="material-symbols-outlined" style="font-variation-settings:'wght' 700">check</span></div><b>Danke — wir melden uns mit einem Angebot.</b></div>
+    </div>
+  </section>
+
+</section>
+
+</main>
+
+<!-- ======= FOOTER ======= -->
+<footer>
+  <div class="wrap">
+    <div class="footer-newsletter">
+      <div>
+        <h3>Jetzt zum Newsletter anmelden</h3>
+        <p>Neue Erlebnisse, Hot Deals und Insider-Tipps direkt in dein Postfach.</p>
+      </div>
+      <form class="footer-newsletter-form" onsubmit="return zeigErfolg(this)">
+        <div class="footer-newsletter-zeile">
+          <input type="email" id="newsletter-email" placeholder="E-Mail-Adresse" required>
+          <button class="btn btn-schwarz" type="submit">Jetzt anmelden</button>
+        </div>
+        <label class="footer-newsletter-datenschutz">
+          <input type="checkbox" required>
+          <span>Ich habe die <a href="#">Datenschutzerklärung</a> gelesen und bin mit dem Erhalt des Newsletters einverstanden.</span>
+        </label>
+      </form>
+      <div class="form-erfolg" style="flex:0 1 420px;min-width:280px"><div class="haken"><span class="material-symbols-outlined" style="font-variation-settings:'wght' 700">check</span></div><b>Danke — schau bald in dein Postfach.</b></div>
+    </div>
+    <div class="footer-grid">
+      <div>
+        <a class="logo" style="color:var(--schwarz)" href="#">Gaudi<span>Card</span></a>
+        <p class="sub" style="font-size:13.5px;margin-top:12px;max-width:26ch">Zu zweit erleben. Einmal zahlen. Süd- &amp; Nordtirol.</p>
+      </div>
+      <div class="footer-col"><h4>Produkt</h4>
+        <a data-goto="home">Karte kaufen</a><a data-goto="erlebnisse">Erlebnisse</a>
+        <a data-goto="verschenken">Verschenken</a><a data-goto="einloesen">Gutschein einlösen</a>
+      </div>
+      <div class="footer-col"><h4>Business</h4>
+        <a data-goto="partner">Partner werden</a><a data-goto="unternehmen">Mitarbeitergeschenk</a>
+      </div>
+      <div class="footer-col"><h4>Hilfe</h4>
+        <a data-goto="faq">FAQ</a>
+      </div>
+      <div class="footer-col"><h4>Rechtliches</h4>
+        <a href="#">AGB</a><a href="#">Datenschutz</a><a href="#">Impressum</a><a href="#">Cookie-Einstellungen</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 GaudiCard</span>
+      <div class="lang-toggle lang-toggle-footer">
+        <button class="aktiv" data-lang="DE">DE</button>
+        <button data-lang="IT">IT</button>
+      </div>
+      <div class="store-badges">
+        <div class="store-badge"><span class="material-symbols-outlined" style="font-size:14px;vertical-align:-3px">apps</span> App Store</div><div class="store-badge"><span class="material-symbols-outlined" style="font-size:14px;vertical-align:-3px">apps</span> Google Play</div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ===================== Daten ===================== */
+const KAT_FARBEN = {ski:"#3F3F46", spa:"#71717A", gastro:"#52525B", sport:"#27272A", events:"#18181B", kino:"#09090B", beauty:"#A1A1AA"};
+const KAT_NAMEN  = {ski:"Ski & Wandern", spa:"Wellness & Spa", gastro:"Kulinarik", sport:"Aktiv & Action", events:"Kultur & Events", kino:"Kino", beauty:"Beauty"};
+const KAT_ICON   = {ski:"downhill_skiing", spa:"spa", gastro:"restaurant", sport:"sports_gymnastics", events:"theater_comedy", kino:"movie", beauty:"face_retouching_natural"};
+
+const ERLEBNISSE = [
+  {id:1, titel:"Therme Meran – Tageskarte", kat:"spa", ort:"Meran", region:"sued", eignung:["paar"], preis:29, ersparnis:14.5, neu:false, reservierung:false, x:62, y:66, partner:"Therme Meran AG", text:"Tageseintritt für zwei, einer geht aufs Haus. Pools, Sauna, Park inklusive."},
+  {id:2, titel:"Skitag Schnalstaler Gletscher", kat:"ski", ort:"Schnals", region:"sued", eignung:["familie","paar"], preis:62, ersparnis:31, neu:true, reservierung:false, x:44, y:58, partner:"Schnalstaler Gletscherbahnen", text:"Tagesskipass 1+1 – von Oktober bis Mai auf 3.200 m."},
+  {id:3, titel:"4-Gänge-Menü Gasthaus Ploner", kat:"gastro", ort:"Bozen", region:"sued", eignung:["paar"], preis:48, ersparnis:24, neu:false, reservierung:true, x:70, y:78, partner:"Gasthaus Ploner", text:"Zweites Menü gratis – regionale Küche, mittags und abends."},
+  {id:4, titel:"Kletterhalle Salewa Cube", kat:"sport", ort:"Bozen", region:"sued", eignung:["familie"], preis:14, ersparnis:7, neu:false, reservierung:false, x:73, y:82, partner:"Salewa Cube", text:"Zwei klettern, einer zahlt. Leihausrüstung vor Ort."},
+  {id:5, titel:"Areal Bach Open Air", kat:"events", ort:"Brixen", region:"sued", eignung:["paar"], preis:35, ersparnis:17.5, neu:true, reservierung:false, x:60, y:50, partner:"Areal Bach Kulturverein", text:"Konzertticket 1+1 für alle Termine der Sommersaison."},
+  {id:6, titel:"Cineplexx Bozen", kat:"kino", ort:"Bozen", region:"sued", eignung:["familie","paar"], preis:12, ersparnis:6, neu:false, reservierung:false, x:68, y:84, partner:"Cineplexx", text:"Kinoabend zu zweit – zweites Ticket gratis, jeden Tag."},
+  {id:7, titel:"Skitag Stubaier Gletscher", kat:"ski", ort:"Stubaital", region:"nord", eignung:["familie","paar"], preis:68, ersparnis:34, neu:false, reservierung:false, x:33, y:26, partner:"Stubaier Gletscherbahn", text:"Tagesskipass 1+1 – Österreichs größtes Gletscherskigebiet."},
+  {id:8, titel:"Aqua Dome Längenfeld", kat:"spa", ort:"Längenfeld", region:"nord", eignung:["paar"], preis:34, ersparnis:17, neu:false, reservierung:false, x:18, y:32, partner:"Aqua Dome", text:"Thermeneintritt für zwei – schwebende Schalenbecken inklusive."},
+  {id:9, titel:"Genussabend Adlers Innsbruck", kat:"gastro", ort:"Innsbruck", region:"nord", eignung:["paar"], preis:52, ersparnis:26, neu:true, reservierung:true, x:42, y:16, partner:"Adlers Hotel", text:"Menü über den Dächern Innsbrucks – zweites Gedeck gratis."},
+  {id:10,titel:"Metropol Kino Innsbruck", kat:"kino", ort:"Innsbruck", region:"nord", eignung:["familie","paar"], preis:11, ersparnis:5.5, neu:false, reservierung:false, x:45, y:20, partner:"Metropol Kino", text:"Zweites Kinoticket gratis – auch für Premieren."},
+  {id:11,titel:"NAIL ART by Marina", kat:"beauty", ort:"Meran", region:"sued", eignung:["paar"], preis:30, ersparnis:15, neu:false, reservierung:true, x:58, y:70, partner:"NAIL ART by Marina", text:"Maniküre zu zweit – zweite Behandlung gratis."},
+  {id:12,titel:"Taseralm Seilbahn", kat:"sport", ort:"Schenna", region:"sued", eignung:["familie"], preis:29, ersparnis:14.5, neu:false, reservierung:false, x:56, y:64, partner:"Taseralm Seilbahnen", text:"Bergfahrt für zwei – Panoramablick über Meran."},
+  {id:13,titel:"Reifensteiner Rittertage", kat:"events", ort:"Freienfeld", region:"sued", eignung:["familie"], preis:36, ersparnis:18, neu:false, reservierung:false, x:52, y:44, partner:"Burg Reifenstein", text:"Mittelalter-Erlebnistag für die ganze Familie."},
+  {id:14,titel:"Bistro X-Camping", kat:"gastro", ort:"Deutschnofen", region:"sued", eignung:["familie","paar"], preis:72, ersparnis:38, neu:true, reservierung:false, x:64, y:60, partner:"Bistro X-Camping", text:"Brunch für zwei – deine Begleitung isst gratis mit."},
+  {id:15,titel:"Foglium Restaurant", kat:"gastro", ort:"Deutschnofen", region:"sued", eignung:["paar"], preis:156, ersparnis:78, neu:false, reservierung:true, x:65, y:61, partner:"Foglium Restaurant", text:"4-Gänge-Überraschungsmenü – zweites Gedeck kostenlos."},
+  {id:16,titel:"Pilates Studio Brixen", kat:"beauty", ort:"Brixen", region:"sued", eignung:["paar"], preis:90, ersparnis:45, neu:false, reservierung:true, x:59, y:49, partner:"Pilates Studio Brixen", text:"5er-Karte Pilates – für zwei zum Preis von einer Person."},
+];
+
+/* ===================== Filter-Konfiguration (aus gaudicard-filter.json) ===================== */
+const FILTER_CONFIG = {
+  "aktuellVerfuegbar": { "label": "Aktuell verfügbar", "type": "toggle", "default": false },
+  "kategorien": { "label": "Kategorien", "type": "multi-select", "options": [
+    { "id": "familie", "label": "Familie", "icon": "group" },
+    { "id": "dayspa", "label": "DaySpa", "icon": "spa" },
+    { "id": "uebernachtung", "label": "Übernachtung", "icon": "hotel" },
+    { "id": "ski_wandern", "label": "Ski & Wandern", "icon": "downhill_skiing" },
+    { "id": "kulinarik", "label": "Kulinarik", "icon": "restaurant" },
+    { "id": "aktiv_action", "label": "Aktiv & Action", "icon": "sports_gymnastics" },
+    { "id": "eintritte", "label": "Eintritte", "icon": "confirmation_number" },
+    { "id": "beauty", "label": "Beauty", "icon": "face_retouching_natural" }
+  ]},
+  "jahreszeit": { "label": "Jahreszeit", "type": "multi-select", "options": [
+    { "id": "fruehling", "label": "Frühling" }, { "id": "sommer", "label": "Sommer" },
+    { "id": "herbst", "label": "Herbst" }, { "id": "winter", "label": "Winter" }
+  ]},
+  "bezirk": { "label": "Bezirk", "type": "multi-select", "options": [
+    { "id": "bozen_umgebung", "label": "Bozen & Umgebung" }, { "id": "burggrafenamt", "label": "Burggrafenamt" },
+    { "id": "eisacktal", "label": "Eisacktal" }, { "id": "groeden_gadertal", "label": "Gröden & Gadertal" },
+    { "id": "ueberetsch_unterland", "label": "Überetsch & Unterland" }, { "id": "pustertal", "label": "Pustertal" },
+    { "id": "trentino", "label": "Trentino" }, { "id": "vinschgau", "label": "Vinschgau" },
+    { "id": "wipptal", "label": "Wipptal" },
+    { "id": "nordtirol", "label": "Nordtirol" }
+  ]},
+  "gaudiMit": { "label": "Gaudi mit ...", "type": "multi-select", "options": [
+    { "id": "partner", "label": "Partner" }, { "id": "gruppe", "label": "Gruppe" },
+    { "id": "familie", "label": "Familie" }, { "id": "freunden", "label": "Freunden" }
+  ]},
+  "actions": { "reset": { "label": "Zurücksetzen" }, "toggleView": { "label": "Karte", "icon": "map" }, "apply": { "label": "{count} anzeigen" } }
+};
+
+/* Daten aus ERLEBNISSE auf die Filterfelder aus gaudicard-filter.json abbilden */
+const KAT_ZU_KATEGORIEN = {ski:["ski_wandern"], spa:["dayspa"], gastro:["kulinarik"], sport:["aktiv_action"], events:["eintritte"], kino:["eintritte"], beauty:["beauty"]};
+const ORT_ZU_BEZIRK = {Meran:"burggrafenamt", Schnals:"vinschgau", Bozen:"bozen_umgebung", Brixen:"eisacktal",
+  Schenna:"burggrafenamt", Freienfeld:"wipptal", Deutschnofen:"ueberetsch_unterland",
+  Stubaital:"nordtirol", "Längenfeld":"nordtirol", Innsbruck:"nordtirol"};
+const KAT_ZU_JAHRESZEIT = {ski:["winter"], spa:["fruehling","sommer","herbst","winter"], gastro:["fruehling","sommer","herbst","winter"],
+  sport:["fruehling","sommer","herbst"], events:["sommer","herbst"], kino:["fruehling","sommer","herbst","winter"], beauty:["fruehling","sommer","herbst","winter"]};
+ERLEBNISSE.forEach(e => {
+  e.kategorien = [...KAT_ZU_KATEGORIEN[e.kat]];
+  if(e.eignung.includes("familie") && !e.kategorien.includes("familie")) e.kategorien.push("familie");
+  e.bezirk = ORT_ZU_BEZIRK[e.ort] || "bozen_umgebung";
+  e.jahreszeit = KAT_ZU_JAHRESZEIT[e.kat];
+  e.gaudiMit = [...e.eignung];
+  if(["sport","events"].includes(e.kat)){ if(!e.gaudiMit.includes("gruppe")) e.gaudiMit.push("gruppe"); if(!e.gaudiMit.includes("freunden")) e.gaudiMit.push("freunden"); }
+  e.aktuellVerfuegbar = e.jahreszeit.includes("sommer");
+});
+
+/* ===================== Detail-Zusatzdaten (aus detailseite.json / Screenshots) ===================== */
+const DETAIL_EXTRA = {
+  15: { // Foglium Restaurant — 1:1 aus detailseite.json
+    beschreibung: "Im Foglium Restaurant erwartet dich ein kulinarisches Highlight: ein liebevoll komponiertes 4-Gänge-Überraschungsmenü, bei dem jede Speise eine geschmackliche Überraschung bietet.",
+    wie_funktionierts: [
+      {schritt:"Reservieren", beschreibung:"Anrufen oder online buchen", aktion:"Reservieren"},
+      {schritt:"Hinfahren", beschreibung:"App griffbereit halten"},
+      {schritt:"„Einlösen“ drücken", beschreibung:"Erst vor Ort – nicht schon zuhause.", hinweis:"5-Minuten-Timer startet"},
+      {schritt:"Timer vorzeigen", beschreibung:"Zeig den laufenden Screen an der Kasse."},
+      {schritt:"Genießen", beschreibung:"Deine Begleitperson ist gratis. Viel Spaß!"},
+    ],
+    konditionen: [
+      "Um das 1+1-Erlebnis einzulösen, klicke vor Ort auf „Einlösen“ und zeige den laufenden Timer an der Kasse vor! Telefonische Voranmeldung notwendig.",
+      "Bei Buchung eines 4-Gänge-Überraschungsmenüs am Abend ist das Menü für deine Begleitperson kostenlos. Einlösezeitraum: Montag, Dienstag, Mittwoch & Sonntag, abends. Ausgenommen: August & 20.12. - 06.01."
+    ],
+    details_zum_preis: "Der Preis kann abweichen.",
+    kontakt: {adresse:"Forastraße, 14, 39050, Deutschnofen", email:"restaurant@foglium.com", telefon:"+39 329 031 3956", webseite:"Zur Webseite"},
+    badge: "Reservierung notwendig", eingeloest:0, total:1,
+  },
+  14: { // Bistro X-Camping — laut Screenshot
+    beschreibung: "Im Bistro X-Camping erwartet dich ein liebevoll zusammengestelltes 6-Gänge-Brunchmenü in entspannter Atmosphäre. Freu dich auf eine abwechslungsreiche Auswahl an herzhaften und süßen Köstlichkeiten.",
+    wie_funktionierts: [
+      {schritt:"Hinfahren", beschreibung:"App griffbereit halten"},
+      {schritt:"„Einlösen“ drücken", beschreibung:"Erst vor Ort – nicht schon zuhause.", hinweis:"5-Minuten-Timer startet"},
+      {schritt:"Timer vorzeigen", beschreibung:"Zeig den laufenden Screen an der Kasse."},
+      {schritt:"Genießen", beschreibung:"Deine Begleitperson ist gratis. Viel Spaß!"},
+    ],
+    konditionen: ["Um das 1+1-Erlebnis einzulösen, klicke vor Ort auf „Einlösen“ und zeige den laufenden Timer an der Kasse vor! Bitte beachte die Öffnungszeiten."],
+    details_zum_preis: "Der Preis kann abweichen.",
+    kontakt: {adresse:"Wildbachweg 5, 39050, Deutschnofen", email:"info@x-camping.com", telefon:"+39 329 000 0000", webseite:"Zur Webseite"},
+    eingeloest:0, total:1,
+  },
+};
+function holeDetail(e){
+  const extra = DETAIL_EXTRA[e.id];
+  const standard = {
+    beschreibung: e.text + " Freu dich auf ein unvergessliches Erlebnis für dich und deine Begleitung.",
+    wie_funktionierts: e.reservierung ? [
+      {schritt:"Reservieren", beschreibung:"Anrufen oder online buchen", aktion:"Reservieren"},
+      {schritt:"Hinfahren", beschreibung:"App griffbereit halten"},
+      {schritt:"„Einlösen“ drücken", beschreibung:"Erst vor Ort – nicht schon zuhause.", hinweis:"5-Minuten-Timer startet"},
+      {schritt:"Timer vorzeigen", beschreibung:"Zeig den laufenden Screen an der Kasse."},
+      {schritt:"Genießen", beschreibung:"Deine Begleitperson ist gratis. Viel Spaß!"},
+    ] : [
+      {schritt:"App öffnen", beschreibung:"Erlebnis auswählen"},
+      {schritt:"„Einlösen“ drücken", beschreibung:"Erst vor Ort – nicht schon zuhause.", hinweis:"5-Minuten-Timer startet"},
+      {schritt:"Timer vorzeigen", beschreibung:"Zeig den laufenden Screen an der Kasse."},
+      {schritt:"Genießen", beschreibung:"Deine Begleitperson ist gratis. Viel Spaß!"},
+    ],
+    konditionen: ["Um das 1+1-Erlebnis einzulösen, klicke vor Ort auf „Einlösen“ und zeige den laufenden Timer an der Kasse vor!" + (e.reservierung ? " Telefonische Voranmeldung notwendig." : "")],
+    details_zum_preis: "Der Preis kann abweichen.",
+    kontakt: {adresse: e.ort + ", Südtirol", email: e.partner.toLowerCase().replace(/[^a-z0-9]+/g,"") + "@partner-gaudicard.com", telefon:"+39 0471 000 000", webseite:"Zur Webseite"},
+    badge: e.reservierung ? "Reservierung notwendig" : null,
+    eingeloest:0, total:1,
+  };
+  return Object.assign({}, standard, extra || {});
+}
+
+const FAQ = [
+  {cluster:"karte", top:true, q:"Was kostet die GaudiCard?", a:"122 € pro Jahr für dich und eine Begleitperson deiner Wahl bei jedem Erlebnis."},
+  {cluster:"karte", top:true, q:"Wie lange ist die Karte gültig?", a:"12 Monate ab dem Tag der Aktivierung in der App."},
+  {cluster:"kauf", top:true, q:"Welche Zahlungsarten gibt es?", a:"Kreditkarte, Klarna, PayPal und klassische Überweisung."},
+  {cluster:"app", top:true, q:"Brauche ich die App zwingend?", a:"Ja — die Erlebnisse werden ausschließlich über die App gesucht und eingelöst."},
+  {cluster:"einloesen", top:true, q:"Wie löse ich ein Erlebnis ein?", a:"In der App auf „Einlösen“ tippen, den 5-Minuten-Timer an der Kassa vorzeigen."},
+  {cluster:"gutschein", top:false, q:"Ist der Gutschein übertragbar?", a:"Ja, der Code kann an jede beliebige Person weitergegeben werden."},
+  {cluster:"gutschein", top:false, q:"Wie lange dauert der Versand?", a:"Digital: sofort. Physisch: 2–4 Werktage innerhalb Süd- und Nordtirols."},
+  {cluster:"konto", top:false, q:"Kann ich mein Konto löschen?", a:"Jederzeit über die Kontoeinstellungen in der App oder per Mail an den Support."},
+  {cluster:"karte", top:false, q:"Was, wenn ein Partner ausfällt?", a:"Wir aktualisieren die Erlebnisliste laufend — bereits gebuchte Reservierungen bleiben unberührt."},
+  {cluster:"kauf", top:false, q:"Bekomme ich eine Rechnung?", a:"Ja, automatisch per E-Mail direkt nach dem Kauf."},
+];
+
+/* ===================== Router / Navigation ===================== */
+const pages = document.querySelectorAll(".page");
+function gehZu(name, scrollTarget){
+  pages.forEach(p => p.classList.toggle("aktiv", p.dataset.page === name));
+  document.querySelectorAll("[data-goto]").forEach(el => el.classList.remove("aktuell"));
+  document.querySelectorAll('[data-goto="'+name+'"]').forEach(el => el.classList.add("aktuell"));
+  document.querySelectorAll(".proto-bar button").forEach(b => b.classList.toggle("aktiv", b.dataset.goto === name));
+  window.scrollTo({top:0, behavior:"instant" in document.documentElement.style ? "instant" : "auto"});
+  if(scrollTarget){
+    requestAnimationFrame(() => {
+      const el = document.getElementById(scrollTarget);
+      if(el) el.scrollIntoView({behavior:"smooth", block:"start"});
+    });
+  }
+  location.hash = name;
+}
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-goto]");
+  if(!el) return;
+  e.preventDefault();
+  gehZu(el.dataset.goto, el.dataset.scrollto);
+});
+window.addEventListener("DOMContentLoaded", () => {
+  const initial = location.hash.replace("#","");
+  if(initial && document.querySelector('[data-page="'+initial+'"]')) gehZu(initial);
+});
+
+/* ===================== Header: Scroll-Shrink + Sprachumschaltung ===================== */
+const headerEl = document.getElementById("header");
+addEventListener("scroll", () => headerEl.classList.toggle("gescrollt", scrollY > 24), {passive:true});
+document.querySelectorAll(".lang-toggle button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".lang-toggle button").forEach(x => x.classList.remove("aktiv"));
+  b.classList.add("aktiv");
+}));
+
+
+/* ===================== Erlebnisse: Filter-Status (aus gaudicard-filter.json) ===================== */
+let filterKategorien = new Set(), filterBezirk = new Set(), filterJahreszeit = new Set(), filterGaudiMit = new Set();
+let filterVerfuegbar = false, sucheText = "";
+
+const liste = document.getElementById("liste");
+const pins  = document.getElementById("pins");
+const anzahl = document.getElementById("anzahl");
+const split  = document.getElementById("split");
+
+function gefiltert(){
+  return ERLEBNISSE.filter(e =>
+    (filterKategorien.size === 0 || e.kategorien.some(k => filterKategorien.has(k))) &&
+    (filterBezirk.size === 0 || filterBezirk.has(e.bezirk)) &&
+    (filterJahreszeit.size === 0 || e.jahreszeit.some(j => filterJahreszeit.has(j))) &&
+    (filterGaudiMit.size === 0 || e.gaudiMit.some(g => filterGaudiMit.has(g))) &&
+    (!filterVerfuegbar || e.aktuellVerfuegbar) &&
+    (sucheText === "" || (e.titel + e.ort + e.partner).toLowerCase().includes(sucheText))
+  );
+}
+
+const KATEGORIE_ICON_MAP = Object.fromEntries(FILTER_CONFIG.kategorien.options.map(o => [o.id, o]));
+function erlebnisKategorieIconsHTML(e){
+  return e.kategorien.map(k => {
+    const info = KATEGORIE_ICON_MAP[k]; if(!info) return "";
+    return `<span class="erlebnis-icon" title="${info.label}"><span class="material-symbols-outlined">${info.icon}</span></span>`;
+  }).join("");
+}
+function erlebnisKachelHTML(e, klasse){
+  return `
+    <article class="${klasse || 'erlebnis'}" data-id="${e.id}">
+      <div class="erlebnis-bild">${e.neu ? '<span class="badge neu">Neu</span>' : ''}</div>
+      <div class="erlebnis-info">
+        <span class="erlebnis-kat" style="color:${KAT_FARBEN[e.kat]}">${KAT_NAMEN[e.kat]}</span>
+        <span class="erlebnis-titel">${e.titel}</span>
+        <span class="erlebnis-ort">${e.ort}</span>
+        <span class="erlebnis-icons">${erlebnisKategorieIconsHTML(e)}</span>
+      </div>
+    </article>`;
+}
+
+function renderErlebnisse(){
+  const items = gefiltert();
+  anzahl.textContent = items.length;
+  document.getElementById("erl-anzahl-hero").textContent = ERLEBNISSE.length > 12 ? "453" : ERLEBNISSE.length;
+  document.getElementById("filter-apply-count").textContent = items.length;
+
+  liste.innerHTML = items.length ? items.map(e => erlebnisKachelHTML(e)).join("")
+    : `<div class="liste-leer">Keine Erlebnisse mit diesen Filtern.<br>Setz einen Filter zurück – es gibt genug zu entdecken.</div>`;
+
+  pins.innerHTML = items.map(e => `
+    <button class="pin" data-id="${e.id}" style="left:${e.x}%;top:${e.y}%">
+      <span class="dot" style="background:${KAT_FARBEN[e.kat]}"></span>–&thinsp;${e.ersparnis}&thinsp;€
+    </button>`).join("");
+
+  document.querySelectorAll("#liste [data-id]").forEach(el => {
+    const id = el.dataset.id;
+    el.addEventListener("mouseenter", () => syncHi(id, true));
+    el.addEventListener("mouseleave", () => syncHi(id, false));
+    el.addEventListener("click", () => oeffneErlebnisDetail(+id));
+  });
+  document.querySelectorAll("#pins [data-id]").forEach(el => {
+    const id = el.dataset.id;
+    el.addEventListener("mouseenter", () => syncHi(id, true));
+    el.addEventListener("mouseleave", () => syncHi(id, false));
+    el.addEventListener("click", ev => { ev.stopPropagation(); zeigPinKachel(+id, el); });
+  });
+  schliessPinKachel();
+}
+function syncHi(id, an){
+  document.querySelectorAll(`[data-id="${id}"]`).forEach(el => el.classList.toggle("hi", an));
+}
+
+/* ---------- Pin-Klick: Kachel des Erlebnisses über dem Pin anzeigen ---------- */
+const pinKachel = document.getElementById("pin-kachel");
+function zeigPinKachel(id, pinEl){
+  const e = ERLEBNISSE.find(x => x.id === id);
+  pinKachel.innerHTML = `<button class="pin-kachel-schliessen" id="pin-kachel-zu"><span class="material-symbols-outlined">close</span></button>` + erlebnisKachelHTML(e, "erlebnis");
+  pinKachel.style.left = pinEl.style.left;
+  pinKachel.style.top = pinEl.style.top;
+  pinKachel.classList.add("zeig");
+  pinKachel.querySelector("[data-id]").addEventListener("click", () => oeffneErlebnisDetail(id));
+  document.getElementById("pin-kachel-zu").addEventListener("click", ev => { ev.stopPropagation(); schliessPinKachel(); });
+}
+function schliessPinKachel(){ pinKachel.classList.remove("zeig"); pinKachel.innerHTML = ""; }
+document.getElementById("map").addEventListener("click", e => { if(!e.target.closest(".pin, .pin-kachel")) schliessPinKachel(); });
+
+/* ---------- Karte: ziehen + "In diesem Bereich suchen" ---------- */
+const mapEl = document.getElementById("map");
+const mapInner = document.getElementById("map-inner");
+const bereichBtn = document.getElementById("karte-bereich-btn");
+let mapZiehen = false, mapStart = {x:0,y:0}, mapVersatz = {x:0,y:0}, mapBewegt = false;
+function mapPointerDown(e){
+  mapZiehen = true; mapBewegt = false;
+  mapStart = {x:e.clientX - mapVersatz.x, y:e.clientY - mapVersatz.y};
+  mapEl.classList.add("ziehen");
+}
+function mapPointerMove(e){
+  if(!mapZiehen) return;
+  const nx = e.clientX - mapStart.x, ny = e.clientY - mapStart.y;
+  if(Math.abs(nx - mapVersatz.x) + Math.abs(ny - mapVersatz.y) > 4) mapBewegt = true;
+  mapVersatz = {x:nx, y:ny};
+  mapInner.style.transform = `translate(${mapVersatz.x}px, ${mapVersatz.y}px)`;
+}
+function mapPointerUp(){
+  if(!mapZiehen) return;
+  mapZiehen = false;
+  mapEl.classList.remove("ziehen");
+  if(mapBewegt){ bereichBtn.classList.add("zeig"); schliessPinKachel(); }
+}
+mapEl.addEventListener("pointerdown", e => { if(e.target.closest(".pin, .pin-kachel, .karte-bereich-btn")) return; mapPointerDown(e); });
+window.addEventListener("pointermove", mapPointerMove);
+window.addEventListener("pointerup", mapPointerUp);
+bereichBtn.addEventListener("click", e => {
+  e.stopPropagation();
+  bereichBtn.innerHTML = 'Suche eingegrenzt <span class="material-symbols-outlined" style="font-size:15px;vertical-align:-3px">check</span>';
+  renderErlebnisse();
+  setTimeout(() => {
+    bereichBtn.classList.remove("zeig");
+    bereichBtn.textContent = "In diesem Bereich suchen";
+    mapVersatz = {x:0,y:0};
+    mapInner.style.transform = "translate(0,0)";
+  }, 1200);
+});
+
+/* ---------- Filterleiste: Bezirk-Select + Aktuell-verfügbar (inline) ---------- */
+document.getElementById("bezirk-select").innerHTML = '<option value="alle">Alle Bezirke</option>' +
+  FILTER_CONFIG.bezirk.options.filter(o => o.id !== "nordtirol").map(o => `<option value="${o.id}">${o.label}</option>`).join("");
+document.getElementById("bezirk-select").addEventListener("change", e => {
+  filterBezirk = e.target.value === "alle" ? new Set() : new Set([e.target.value]);
+  renderFilterUI(); renderErlebnisse();
+});
+function toggleVerfuegbar(){
+  filterVerfuegbar = !filterVerfuegbar;
+  renderFilterUI(); renderErlebnisse();
+}
+document.getElementById("verfuegbar-chip-inline").addEventListener("click", toggleVerfuegbar);
+document.getElementById("verfuegbar-chip-overlay").addEventListener("click", toggleVerfuegbar);
+
+/* ---------- Kategorie-Chips (inline, 3-4 wichtigste Filter) ---------- */
+const katChipsInline = document.getElementById("kat-chips-inline");
+katChipsInline.innerHTML += FILTER_CONFIG.kategorien.options.map(o =>
+  `<button class="chip" data-kat-inline="${o.id}">${o.icon ? `<span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">${o.icon}</span> ` : ""}${o.label}</button>`).join("");
+katChipsInline.addEventListener("click", e => {
+  const btn = e.target.closest("[data-kat-inline]"); if(!btn) return;
+  const val = btn.dataset.katInline;
+  if(val === "alle") filterKategorien = new Set();
+  else { filterKategorien.has(val) ? filterKategorien.delete(val) : filterKategorien.add(val); }
+  renderFilterUI(); renderErlebnisse();
+});
+
+/* ---------- Suche (Hero + Filterleiste synchron) ---------- */
+function setSuche(val){
+  sucheText = val.toLowerCase();
+  document.getElementById("erl-suche").value = val;
+  renderErlebnisse();
+}
+document.getElementById("erl-suche").addEventListener("input", e => setSuche(e.target.value));
+
+document.getElementById("toggle").addEventListener("click", e => {
+  split.classList.toggle("zeige-karte");
+  e.target.textContent = split.classList.contains("zeige-karte") ? "Liste anzeigen" : "Karte anzeigen";
+});
+
+/* ===================== Filter-Overlay: alle Filter aus gaudicard-filter.json ===================== */
+const filterOverlay = document.getElementById("filter-overlay");
+function baueOverlayGruppe(containerId, feld, setRef, klasse){
+  document.getElementById(containerId).innerHTML = FILTER_CONFIG[feld].options.map(o =>
+    `<button class="${klasse || 'chip'}" data-ov="${feld}" data-val="${o.id}">${o.icon ? `<span class="material-symbols-outlined" style="font-size:17px;vertical-align:-4px">${o.icon}</span> ` : ""}${o.label}</button>`).join("");
+}
+baueOverlayGruppe("filter-kategorien", "kategorien", filterKategorien, "chip");
+baueOverlayGruppe("filter-jahreszeit", "jahreszeit", filterJahreszeit, "chip");
+baueOverlayGruppe("filter-bezirk", "bezirk", filterBezirk, "chip");
+baueOverlayGruppe("filter-gaudimit", "gaudiMit", filterGaudiMit, "chip");
+
+const FELD_ZU_SET = () => ({kategorien: filterKategorien, jahreszeit: filterJahreszeit, bezirk: filterBezirk, gaudiMit: filterGaudiMit});
+document.querySelector(".filter-overlay-body").addEventListener("click", e => {
+  const btn = e.target.closest("[data-ov]"); if(!btn) return;
+  const set = FELD_ZU_SET()[btn.dataset.ov];
+  set.has(btn.dataset.val) ? set.delete(btn.dataset.val) : set.add(btn.dataset.val);
+  renderFilterUI(); renderErlebnisse();
+});
+function renderFilterUI(){
+  document.querySelectorAll("#kat-chips-inline [data-kat-inline]").forEach(b => {
+    b.classList.toggle("aktiv", b.dataset.katInline === "alle" ? filterKategorien.size === 0 : filterKategorien.has(b.dataset.katInline));
+  });
+  document.getElementById("bezirk-select").value = filterBezirk.size === 1 ? [...filterBezirk][0] : "alle";
+  document.getElementById("verfuegbar-chip-inline").classList.toggle("aktiv", filterVerfuegbar);
+  document.getElementById("verfuegbar-chip-overlay").classList.toggle("aktiv", filterVerfuegbar);
+  document.querySelectorAll(".filter-overlay-body [data-ov]").forEach(b => {
+    b.classList.toggle("aktiv", FELD_ZU_SET()[b.dataset.ov].has(b.dataset.val));
+  });
+}
+document.getElementById("mehr-filter-btn").addEventListener("click", () => filterOverlay.classList.add("offen"));
+document.getElementById("filter-overlay-zu").addEventListener("click", () => filterOverlay.classList.remove("offen"));
+document.getElementById("filter-apply").addEventListener("click", () => filterOverlay.classList.remove("offen"));
+filterOverlay.addEventListener("click", e => { if(e.target === filterOverlay) filterOverlay.classList.remove("offen"); });
+document.getElementById("filter-reset").addEventListener("click", () => {
+  filterKategorien = new Set(); filterBezirk = new Set(); filterJahreszeit = new Set(); filterGaudiMit = new Set();
+  filterVerfuegbar = false; setSuche("");
+  renderFilterUI(); renderErlebnisse();
+});
+
+renderFilterUI();
+renderErlebnisse();
+
+/* ===================== Erlebnis-Detailseite (eigene Page) ===================== */
+function oeffneErlebnisDetail(id){
+  const e = ERLEBNISSE.find(x => x.id === id);
+  const d = holeDetail(e);
+  gehZu("erlebnis-detail");
+
+  const bildFarben = ["", "b", "gruen", "blau", "rot"];
+  document.getElementById("ed-bild-haupt").className = "ed-galerie-haupt ph " + bildFarben[e.id % bildFarben.length];
+  document.querySelectorAll("#ed-bild-neben .ph").forEach((el, i) => {
+    el.className = "ph " + bildFarben[(e.id + i + 1) % bildFarben.length];
+  });
+  document.getElementById("ed-badge").style.display = d.badge ? "inline-block" : "none";
+  document.getElementById("ed-badge").textContent = d.badge || "";
+
+  document.getElementById("ed-kat").textContent = KAT_NAMEN[e.kat];
+  document.getElementById("ed-kat").style.color = KAT_FARBEN[e.kat];
+  document.getElementById("ed-titel").textContent = e.titel;
+  document.getElementById("ed-ort-region").textContent = KAT_NAMEN[e.kat] + " · " + e.ort;
+
+  const beschrEl = document.getElementById("ed-beschreibung");
+  beschrEl.textContent = d.beschreibung;
+  beschrEl.classList.add("ed-clamp");
+  const mehrBtn = document.getElementById("ed-mehr-lesen");
+  mehrBtn.textContent = "Mehr lesen";
+  mehrBtn.onclick = () => { beschrEl.classList.toggle("offen"); mehrBtn.textContent = beschrEl.classList.contains("offen") ? "Weniger lesen" : "Mehr lesen"; };
+
+  document.getElementById("ed-schritte").innerHTML = d.wie_funktionierts.map(s => `
+    <li class="ed-schritt">
+      <span class="punkt"></span>
+      <span><b>${s.schritt}</b>${s.beschreibung}${s.hinweis ? `<span class="ed-schritt-hinweis"><span class="material-symbols-outlined" style="font-size:14px">schedule</span> ${s.hinweis}</span>` : ""}</span>
+      ${s.aktion ? `<button class="ed-schritt-btn">${s.aktion}</button>` : ""}
+    </li>`).join("");
+
+  document.getElementById("ed-konditionen").innerHTML = d.konditionen.map(k => `<p>${k}</p>`).join("");
+  document.getElementById("ed-preisdetails").textContent = d.details_zum_preis;
+
+  document.getElementById("ed-kontakt").innerHTML = `<h4 style="margin-bottom:2px">Kontakt</h4>
+    <div class="ed-kontakt-zeile"><span class="material-symbols-outlined" style="font-size:18px">location_on</span> ${d.kontakt.adresse}</div>
+    <div class="ed-kontakt-zeile"><span class="material-symbols-outlined" style="font-size:18px">mail</span> ${d.kontakt.email}</div>
+    <div class="ed-kontakt-zeile"><span class="material-symbols-outlined" style="font-size:18px">call</span> ${d.kontakt.telefon}</div>
+    <div class="ed-kontakt-zeile"><span class="material-symbols-outlined" style="font-size:18px">language</span> ${d.kontakt.webseite}</div>`;
+
+  const passende = ERLEBNISSE.filter(x => x.id !== e.id && x.kat === e.kat).slice(0,4);
+  const auffuellen = passende.length < 4 ? ERLEBNISSE.filter(x => x.id !== e.id && !passende.includes(x)).slice(0, 4 - passende.length) : [];
+  document.getElementById("ed-passende").innerHTML = teaserHTML([...passende, ...auffuellen]);
+  document.querySelectorAll("#ed-passende .teaser-karte[data-id]").forEach(el =>
+    el.addEventListener("click", () => oeffneErlebnisDetail(+el.dataset.id)));
+
+  window.scrollTo({top:0, behavior:"instant" in document.documentElement.style ? "instant" : "auto"});
+}
+document.getElementById("ed-funktion-kopf").addEventListener("click", () => {
+  document.getElementById("ed-funktion-kopf").classList.toggle("zu");
+  document.getElementById("ed-schritte").classList.toggle("zu");
+});
+
+/* ===================== Teaser-Reihen (Home / Verschenken / Einlösen / Unternehmen) ===================== */
+function teaserHTML(items, hotIds){
+  hotIds = hotIds || new Set();
+  return items.map(e => `
+    <div class="teaser-karte" data-id="${e.id}">
+      <div class="teaser-bild ph">
+        ${hotIds.has(e.id) ? '<span class="badge dunkel"><span class="material-symbols-outlined" style="font-size:13px;vertical-align:-2px">local_fire_department</span> Hot Deal</span>' : (e.neu ? '<span class="badge neu">Neu</span>' : (e.reservierung ? '<span class="badge">Reservierung nötig</span>' : ''))}
+      </div>
+      <div class="teaser-kat" style="color:${KAT_FARBEN[e.kat]}">${KAT_NAMEN[e.kat]}</div>
+      <div class="teaser-titel">${e.titel}</div>
+      <div class="teaser-ort">${e.ort}</div>
+      <div class="teaser-preis"><del>${e.preis}&thinsp;€</del> <b>${(e.preis - e.ersparnis).toFixed(2).replace(/\\.00$/,"")}&thinsp;€ für 2</b></div>
+    </div>`).join("");
+}
+function alleAnsehenKachel(){
+  return `<div class="teaser-karte alle-karte" data-goto="erlebnisse">
+    <div class="teaser-bild ph b"><span>Alle Erlebnisse<br>ansehen <span class="material-symbols-outlined" style="font-size:15px;vertical-align:-3px">arrow_forward</span></span></div>
+  </div>`;
+}
+const hotIdsHome = new Set([...ERLEBNISSE].sort((a,b) => b.ersparnis - a.ersparnis).slice(0,3).map(e => e.id));
+const homeAuswahl = [...ERLEBNISSE.filter(e => ["ski","spa","sport"].includes(e.kat)).slice(0,7),
+  ...ERLEBNISSE.filter(e => hotIdsHome.has(e.id))].filter((e,i,arr) => arr.findIndex(x=>x.id===e.id)===i).slice(0,9);
+document.getElementById("home-teaser-alle").innerHTML = teaserHTML(homeAuswahl, hotIdsHome) + alleAnsehenKachel();
+document.getElementById("verschenken-teaser").innerHTML = teaserHTML(ERLEBNISSE.slice(0,8)) + alleAnsehenKachel();
+document.getElementById("einloesen-teaser").innerHTML = teaserHTML(ERLEBNISSE.slice(4,10)) + alleAnsehenKachel();
+document.getElementById("unternehmen-teaser").innerHTML = teaserHTML(ERLEBNISSE.filter(e => ["gastro","spa","events"].includes(e.kat)).slice(0,6)) + alleAnsehenKachel();
+document.querySelectorAll("[data-slider-prev]").forEach(btn => btn.addEventListener("click", () => {
+  const el = document.getElementById(btn.dataset.sliderPrev);
+  el.scrollBy({left:-(el.clientWidth * .85), behavior:"smooth"});
+}));
+document.querySelectorAll("[data-slider-next]").forEach(btn => btn.addEventListener("click", () => {
+  const el = document.getElementById(btn.dataset.sliderNext);
+  el.scrollBy({left:el.clientWidth * .85, behavior:"smooth"});
+}));
+document.querySelectorAll(".teaser-karte[data-id]").forEach(el => el.addEventListener("click", () => {
+  oeffneErlebnisDetail(+el.dataset.id);
+}));
+
+/* ===================== Ersparnisrechner (Home) ===================== */
+const rcHome = document.getElementById("rechner-chips-home");
+rcHome.innerHTML = ERLEBNISSE.slice(0,10).map(e =>
+  `<button class="chip" data-r="${e.id}">${e.titel.split(" – ")[0]} · –${e.ersparnis}&thinsp;€</button>`).join("");
+const gewaehltHome = new Set();
+rcHome.querySelectorAll("[data-r]").forEach(btn => btn.addEventListener("click", () => {
+  const id = +btn.dataset.r;
+  gewaehltHome.has(id) ? gewaehltHome.delete(id) : gewaehltHome.add(id);
+  btn.classList.toggle("aktiv");
+  const brutto = [...gewaehltHome].reduce((s,i) => s + ERLEBNISSE.find(e => e.id === i).ersparnis, 0);
+  const total = brutto - 122;
+  document.getElementById("r-anzahl-home").textContent = gewaehltHome.size + (gewaehltHome.size === 1 ? " Erlebnis gewählt" : " Erlebnisse gewählt");
+  document.getElementById("r-brutto-home").textContent = "+ " + brutto.toFixed(0) + " €";
+  document.getElementById("r-total-home").textContent = (total >= 0 ? "+ " : "– ") + Math.abs(total).toFixed(0) + " €";
+  document.getElementById("r-fazit-home").textContent =
+    total >= 0 ? "Die Karte hat sich bezahlt gemacht – alles Weitere ist Gewinn."
+    : gewaehltHome.size ? "Noch " + Math.abs(total).toFixed(0) + " € bis die Karte sich rechnet."
+    : "Wähle Erlebnisse, um deine Ersparnis zu sehen.";
+}));
+
+/* ===================== App-Preview Tabs (Home) ===================== */
+const APP_TAB_TEXTE = {
+  kaufen: "In der App abschließen: Zahlungsart wählen, Karte aktivieren – unter zwei Minuten.",
+  suche: "Über 600 Partner durchstöbern und nach Kategorie oder Ort filtern.",
+  karte: "Alle Erlebnisse auf der Karte finden – gefiltert nach deiner Umgebung.",
+  einloesen: "Vor Ort auf „Einlösen“ tippen, Timer an der Kassa vorzeigen – Begleitung kommt gratis mit.",
+};
+function setAppTab(tab){
+  document.querySelectorAll("#app-tabs button").forEach(b => b.classList.toggle("aktiv", b.dataset.tab === tab));
+  document.querySelectorAll(".phone-view").forEach(v => v.classList.toggle("aktiv", v.dataset.view === tab));
+  document.getElementById("app-tab-desc").textContent = APP_TAB_TEXTE[tab];
+}
+document.getElementById("app-tabs").addEventListener("click", e => {
+  const btn = e.target.closest("button"); if(!btn) return;
+  setAppTab(btn.dataset.tab);
+});
+setAppTab("kaufen");
+
+/* ===================== Wochenende: Uhr-Steuerung (Home) ===================== */
+const WOCHENENDE = [
+  {zeit:"Sa · 9:00", winkel:270, titel:"Skitag Schnalstaler Gletscher", ort:"Schnals", kat:"ski", ersparnis:62, farbe:"gruen"},
+  {zeit:"Sa · 18:30", winkel:195, titel:"4-Gänge-Menü Gasthaus Ploner", ort:"Bozen", kat:"gastro", ersparnis:48, farbe:"rot"},
+  {zeit:"So · 15:00", winkel:90, titel:"Therme Meran – Tageskarte", ort:"Meran", kat:"spa", ersparnis:29, farbe:"blau"},
+];
+const WOCHENENDE_GESAMT = WOCHENENDE.reduce((s,a) => s + a.ersparnis, 0);
+let aktivWochenende = 0;
+function renderStory2(){
+  const gesamtAktiv = aktivWochenende === WOCHENENDE.length;
+  document.getElementById("wochenende-slider").innerHTML = WOCHENENDE.map((a,i) => `
+    <div class="wochenende-slide${i === aktivWochenende ? ' aktiv' : ''}" data-i="${i}">
+      <div class="wochenende-slide-bild ph ${a.farbe}"></div>
+      <div class="wochenende-slide-zeit">${a.zeit}</div>
+    </div>`).join("") + `
+    <div class="wochenende-slide${gesamtAktiv ? ' aktiv' : ''}" data-i="${WOCHENENDE.length}">
+      <div class="wochenende-stapel">${WOCHENENDE.map(a => `<div class="ph ${a.farbe}"></div>`).join("")}</div>
+      <div class="wochenende-slide-zeit">Gesamt</div>
+    </div>`;
+
+  if(gesamtAktiv){
+    document.getElementById("story2-karte").innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:16px">
+        <div><b style="font-size:15px">Gesamt an einem Wochenende</b><br><span class="sub" style="font-size:13px;margin-top:2px">3 Erlebnisse, ein Ticket jeweils gespart</span></div>
+        <b style="font-size:30px;color:var(--rot);flex-shrink:0">${WOCHENENDE_GESAMT}&thinsp;€</b>
+      </div>`;
+  } else {
+    const a = WOCHENENDE[aktivWochenende];
+    document.getElementById("story2-karte").innerHTML = `
+      <div style="display:flex;gap:16px;align-items:center">
+        <div class="ph ${a.farbe}" style="width:84px;aspect-ratio:1;border-radius:12px;flex-shrink:0"></div>
+        <div>
+          <span class="erlebnis-kat" style="color:${KAT_FARBEN[a.kat]}">${KAT_NAMEN[a.kat]} · ${a.zeit}</span><br>
+          <b style="font-size:16px">${a.titel}</b><br><span class="sub" style="font-size:13px;margin-top:0">${a.ort}</span>
+        </div>
+      </div>
+      <div class="detail-ersparnis"><span>Gespart</span><b>${a.ersparnis}&thinsp;€</b></div>`;
+  }
+}
+document.getElementById("wochenende-slider").addEventListener("click", e => {
+  const slide = e.target.closest("[data-i]"); if(!slide) return;
+  aktivWochenende = +slide.dataset.i;
+  renderStory2();
+  document.querySelector(`.wochenende-slide[data-i="${aktivWochenende}"]`)
+    ?.scrollIntoView({behavior:"smooth", inline:"center", block:"nearest"});
+});
+renderStory2();
+
+/* ===================== Accordion (generisch) ===================== */
+function baueAccordion(container, items){
+  container.innerHTML = items.map((f,i) => `
+    <div class="acc-item">
+      <button class="acc-frage" data-i="${i}"><span>${f.q}</span><span class="plus"></span></button>
+      <div class="acc-antwort"><p>${f.a}</p></div>
+    </div>`).join("");
+  container.querySelectorAll(".acc-frage").forEach(btn => btn.addEventListener("click", () => {
+    btn.closest(".acc-item").classList.toggle("offen");
+  }));
+}
+baueAccordion(document.getElementById("faq-auszug"), FAQ.filter(f=>f.top));
+baueAccordion(document.getElementById("faq-geschenk"), [
+  {q:"Verfällt der Gutschein?", a:"Nein, der Gutscheincode selbst ist unbefristet einlösbar. Nach Einlösung gilt die GaudiCard 12 Monate."},
+  {q:"Kann ich den Gutschein übertragen?", a:"Ja, jede Person kann den Code einlösen — ideal zum Weiterverschenken."},
+  {q:"Wie schnell kommt die digitale Variante an?", a:"Als PDF direkt nach dem Kauf per E-Mail."},
+  {q:"Kann ich den physischen Gutschein persönlich anpassen?", a:"Eine kurze persönliche Nachricht kann beim Kauf ergänzt werden."},
+]);
+baueAccordion(document.getElementById("faq-troubleshoot"), [
+  {q:"Mein Code funktioniert nicht", a:"Prüfe die Schreibweise (keine Verwechslung von 0 und O). Funktioniert es weiterhin nicht, meld dich beim Support."},
+  {q:"Mein Code ist bereits eingelöst", a:"Jeder Code kann nur einmal aktiviert werden. Kontaktiere den Support, falls du ihn nicht selbst eingelöst hast."},
+  {q:"Mein Code ist abgelaufen", a:"Gutscheincodes verfallen nicht von selbst — wende dich an unseren Support, falls eine Fehlermeldung erscheint."},
+]);
+baueAccordion(document.getElementById("faq-partner"), [
+  {q:"Was kostet die Partnerschaft?", a:"Keine Fixkosten — wir sprechen die Konditionen individuell mit dir ab."},
+  {q:"Wie viel Aufwand entsteht?", a:"Einmaliges Einrichten der Listung, danach läuft die Einlösung über die App."},
+  {q:"Wie wird abgerechnet?", a:"Je nach vereinbartem Modell — Details klären wir im persönlichen Gespräch."},
+  {q:"Kann ich Zeiträume ausschließen?", a:"Ja, Stoßzeiten oder Feiertage lassen sich im Dashboard ausschließen."},
+  {q:"Wie kündige ich die Partnerschaft?", a:"Formlos per E-Mail, mit einer Frist von 30 Tagen zum Monatsende."},
+]);
+baueAccordion(document.getElementById("faq-b2b"), [
+  {q:"Wie wird das abgerechnet?", a:"Über eine Sammelrechnung an das Unternehmen, unabhängig von der Kartenzahl."},
+  {q:"Wie lange sind die Codes gültig?", a:"Die Codes selbst verfallen nicht — die GaudiCard läuft 12 Monate ab Einlösung durch die Mitarbeitenden."},
+  {q:"Gibt es steuerliche Aspekte zu beachten?", a:"Das hängt vom jeweiligen Freibetrag für Sachzuwendungen ab — wir stellen dafür gerne alle nötigen Belege bereit."},
+]);
+
+/* FAQ-Seite: Cluster + Suche + Top-Fragen */
+const CLUSTER_NAMEN = {karte:"Karte & Mitgliedschaft", kauf:"Kauf & Zahlung", app:"App", einloesen:"Einlösen", gutschein:"Gutscheine", konto:"Konto"};
+const CLUSTER_ICONS = {karte:"credit_card", kauf:"payments", app:"smartphone", einloesen:"qr_code_scanner", gutschein:"redeem", konto:"person"};
+document.getElementById("faq-cluster").innerHTML = Object.keys(CLUSTER_NAMEN).map(c => `
+  <button class="kat-kachel" data-cluster="${c}"><div class="kat-icon" style="background:#18181B10"><span class="material-symbols-outlined">${CLUSTER_ICONS[c]}</span></div><span>${CLUSTER_NAMEN[c]}</span></button>`).join("");
+document.getElementById("faq-top").innerHTML = FAQ.filter(f=>f.top).map(f => `<div class="top-frage"><span>${f.q}</span><span class="material-symbols-outlined" style="font-size:18px">arrow_forward</span></div>`).join("");
+
+let faqCluster = "alle", faqSuche = "";
+function renderFaqAlle(){
+  const container = document.getElementById("faq-alle");
+  const clusterListe = faqCluster === "alle" ? Object.keys(CLUSTER_NAMEN) : [faqCluster];
+  const gruppen = clusterListe
+    .map(c => ({c, items: FAQ.filter(f => f.cluster === c && (faqSuche === "" || f.q.toLowerCase().includes(faqSuche)))}))
+    .filter(g => g.items.length);
+
+  if(!gruppen.length){
+    container.innerHTML = `<div class="liste-leer">Keine Treffer. Versuch es mit einem anderen Suchbegriff oder wähle ein anderes Thema.</div>`;
+    return;
+  }
+
+  container.innerHTML = gruppen.map(g => `
+    <div class="faq-gruppe">
+      <h3 class="faq-gruppe-titel">${CLUSTER_NAMEN[g.c]}</h3>
+      <div class="accordion" data-cluster-gruppe="${g.c}"></div>
+    </div>`).join("");
+
+  gruppen.forEach(g => baueAccordion(container.querySelector(`[data-cluster-gruppe="${g.c}"]`), g.items));
+}
+document.getElementById("faq-cluster").addEventListener("click", e => {
+  const btn = e.target.closest("[data-cluster]"); if(!btn) return;
+  faqCluster = faqCluster === btn.dataset.cluster ? "alle" : btn.dataset.cluster;
+  renderFaqAlle();
+});
+document.getElementById("faq-suche").addEventListener("input", e => { faqSuche = e.target.value.toLowerCase(); renderFaqAlle(); });
+renderFaqAlle();
+
+/* ===================== Verschenken: Varianten-Toggle ===================== */
+document.querySelectorAll("[data-variante]").forEach(el => el.addEventListener("click", () => {
+  document.querySelectorAll("[data-variante]").forEach(x => x.classList.remove("aktiv"));
+  el.classList.add("aktiv");
+}));
+
+/* ===================== Gutschein einlösen: Code-Simulation ===================== */
+document.getElementById("redeem-btn").addEventListener("click", () => {
+  const val = document.getElementById("redeem-code").value.trim();
+  if(val.length > 2) document.getElementById("redeem-erfolg").classList.add("zeig");
+});
+
+/* ===================== B2B Mini-Rechner ===================== */
+const mrRange = document.getElementById("mr-range");
+function updateMiniRechner(){
+  const n = +mrRange.value;
+  document.getElementById("mr-anzahl").textContent = n;
+  let preis = 122;
+  if(n >= 100) preis = 122 * .8;
+  else if(n >= 50) preis = 122 * .8;
+  else if(n >= 20) preis = 122 * .9;
+  const kosten = Math.round(n * preis);
+  const wert = n * 480;
+  document.getElementById("mr-kosten").textContent = kosten.toLocaleString("de-DE") + " €";
+  document.getElementById("mr-wert").textContent = wert.toLocaleString("de-DE") + " €";
+}
+mrRange.addEventListener("input", updateMiniRechner);
+updateMiniRechner();
+
+/* ===================== Formulare (Demo-Erfolg) ===================== */
+function zeigErfolg(form){
+  form.style.display = "none";
+  form.parentElement.querySelector(".form-erfolg").classList.add("zeig");
+  return false;
+}
+</script>
+<!-- ══════════════════════════════ FEEDBACK SYSTEM v4 — DO NOT EDIT BELOW THIS LINE ══════════════════════════════ -->
+<style>
+:root{--fb-ink:#1a1714;--fb-paper:#f5f1eb;--fb-cream:#ede8df;--fb-acc:#d94f2b;--fb-acc-s:rgba(217,79,43,.10);--fb-acc-b:rgba(217,79,43,.50);--fb-green:#2e7d5e;--fb-muted:#8c8580;--fb-muted2:#b5b0ab;--fb-r:4px;--fb-sw:360px}
+.fb-zone{position:relative;cursor:crosshair;transition:outline .12s,background .12s;outline:2px dashed transparent}.fb-zone:hover{outline:2px dashed var(--fb-acc-b)}.fb-zone:hover .fb-hint{opacity:1}.fb-hint{position:absolute;top:6px;right:8px;font-size:10px;font-family:monospace;color:var(--fb-acc);background:#fff;border:1px solid var(--fb-acc-b);padding:2px 8px;border-radius:20px;pointer-events:none;opacity:0;transition:opacity .12s;white-space:nowrap;z-index:10}.fb-has-comment::after{content:attr(data-count);position:absolute;top:6px;left:8px;background:var(--fb-acc);color:#fff;font-size:9px;font-family:monospace;padding:1px 7px;border-radius:20px;z-index:10}
+#fb-panel{display:none;position:fixed;bottom:24px;right:24px;width:320px;background:#fff;border:1.5px solid var(--fb-ink);border-radius:8px;box-shadow:4px 4px 0 var(--fb-ink);z-index:1100;font-family:monospace;overflow:hidden}#fb-panel.open{display:block;animation:fbUp .18s ease}@keyframes fbUp{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}.fb-panel-hd{background:var(--fb-ink);color:var(--fb-paper);padding:10px 14px;display:flex;justify-content:space-between;align-items:flex-start;font-size:11px;letter-spacing:.08em;text-transform:uppercase}#fb-panel-section{color:var(--fb-acc);font-size:10px;margin-top:2px}.fb-panel-hd button{background:none;border:none;color:var(--fb-paper);cursor:pointer;font-size:18px;line-height:1}.fb-panel-bd{padding:14px}.fb-panel-bd label{display:block;font-size:10px;color:var(--fb-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}.fb-inp{width:100%;font-family:monospace;font-size:13px;border:1.5px solid var(--fb-cream);border-radius:var(--fb-r);padding:8px 10px;background:var(--fb-paper);color:var(--fb-ink);margin-bottom:10px;resize:none;transition:border-color .12s}.fb-inp:focus{outline:none;border-color:var(--fb-ink)}.fb-btn-p{width:100%;background:var(--fb-acc);color:#fff;border:none;border-radius:var(--fb-r);padding:9px;font-family:monospace;font-size:12px;font-weight:500;letter-spacing:.06em;cursor:pointer;text-transform:uppercase}.fb-btn-p:hover{opacity:.85}#fb-ok{display:none;text-align:center;padding:20px 14px;font-size:12px;color:var(--fb-muted)}#fb-ok span{display:block;font-size:24px;margin-bottom:6px}
+#fb-sb{position:fixed;top:0;right:0;width:var(--fb-sw);height:100vh;background:#fff;border-left:1.5px solid var(--fb-ink);z-index:999;font-family:monospace;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s cubic-bezier(.4,0,.2,1);box-shadow:-4px 0 24px rgba(0,0,0,.08)}#fb-sb.open{transform:translateX(0)}.sb-hd{background:var(--fb-ink);color:var(--fb-paper);padding:14px 16px;display:flex;justify-content:space-between;align-items:flex-start;flex-shrink:0}.sb-hd h3{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:500}.sb-hd-meta{font-size:10px;color:var(--fb-muted2);margin-top:3px}.sb-hd button{background:none;border:none;color:var(--fb-paper);cursor:pointer;font-size:18px}.sb-tabs{display:flex;border-bottom:1.5px solid var(--fb-cream);flex-shrink:0;background:var(--fb-paper)}.sb-tab{flex:1;padding:8px 6px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;text-align:center;cursor:pointer;border:none;background:none;color:var(--fb-muted);border-bottom:2px solid transparent;transition:color .12s,border-color .12s;font-family:monospace}.sb-tab.active{color:var(--fb-ink);border-bottom-color:var(--fb-acc)}#sb-scroll{flex:1;overflow-y:auto;padding:12px}
+.sb-grp{margin-bottom:8px}.sb-grp-hd{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--fb-cream);border-radius:var(--fb-r);cursor:pointer;border:1.5px solid transparent;transition:border-color .12s;user-select:none}.sb-grp-hd:hover{border-color:var(--fb-ink)}.sb-grp-title{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--fb-ink);font-weight:500}.sb-grp-right{display:flex;align-items:center;gap:8px}.sb-grp-badge{background:var(--fb-acc);color:#fff;font-size:9px;padding:1px 7px;border-radius:20px}.sb-chev{font-size:10px;color:var(--fb-muted);transition:transform .18s;display:inline-block}.sb-grp.collapsed .sb-chev{transform:rotate(-90deg)}.sb-grp-body{padding-top:6px}.sb-grp.collapsed .sb-grp-body{display:none}
+.sb-card{background:var(--fb-paper);border:1.5px solid var(--fb-cream);border-radius:var(--fb-r);margin-bottom:6px;overflow:hidden;transition:border-color .12s}.sb-card:hover{border-color:var(--fb-muted2)}.sb-card.editing{border-color:var(--fb-ink)}.sb-card.resolved{opacity:.6}.sb-cm{padding:10px 12px 8px}.sb-ct{font-size:13px;line-height:1.55;color:var(--fb-ink);margin-bottom:6px;white-space:pre-wrap}.sb-meta{font-size:10px;color:var(--fb-muted);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px}.sb-author{font-weight:500}.sb-res-badge{color:var(--fb-green)}
+.sb-acts{display:flex;border-top:1px solid var(--fb-cream)}.sb-act{flex:1;padding:6px 2px;font-family:monospace;font-size:9px;letter-spacing:.05em;text-transform:uppercase;border:none;background:none;cursor:pointer;color:var(--fb-muted);transition:background .1s,color .1s;border-right:1px solid var(--fb-cream)}.sb-act:last-child{border-right:none}.sb-act:hover{background:var(--fb-cream);color:var(--fb-ink)}.sb-act.del:hover{background:rgba(217,79,43,.08);color:var(--fb-acc)}
+.sb-edit{display:none;padding:10px 12px;border-top:1px solid var(--fb-cream);background:#fff}.sb-edit.open{display:block}.sb-edit textarea{width:100%;font-family:monospace;font-size:13px;border:1.5px solid var(--fb-cream);border-radius:var(--fb-r);padding:7px 9px;resize:none;background:var(--fb-paper);color:var(--fb-ink);margin-bottom:8px}.sb-edit textarea:focus{outline:none;border-color:var(--fb-ink)}.sb-edit-acts{display:flex;gap:6px}.sb-save{flex:1;background:var(--fb-ink);color:var(--fb-paper);border:none;border-radius:var(--fb-r);padding:6px;font-family:monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}.sb-cancel{flex:1;background:none;color:var(--fb-muted);border:1.5px solid var(--fb-cream);border-radius:var(--fb-r);padding:6px;font-family:monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.sb-replies{border-top:1px solid var(--fb-cream)}.sb-reply{padding:8px 12px 8px 20px;border-bottom:1px solid var(--fb-cream);position:relative}.sb-reply:last-child{border-bottom:none}.sb-reply::before{content:'';position:absolute;left:10px;top:0;bottom:0;width:2px;background:var(--fb-cream)}.sb-rtext{font-size:12px;color:var(--fb-ink);line-height:1.5;margin-bottom:4px;white-space:pre-wrap}.sb-rmeta{font-size:10px;color:var(--fb-muted);display:flex;justify-content:space-between}.sb-rdel{background:none;border:none;color:var(--fb-muted2);cursor:pointer;font-size:10px;font-family:monospace}.sb-rdel:hover{color:var(--fb-acc)}
+.sb-rf{display:none;padding:8px 12px;border-top:1px solid var(--fb-cream);background:rgba(46,125,94,.04)}.sb-rf.open{display:block}.sb-rf textarea,.sb-rf input{width:100%;font-family:monospace;border:1.5px solid var(--fb-cream);border-radius:var(--fb-r);padding:6px 8px;background:#fff;color:var(--fb-ink);margin-bottom:6px}.sb-rf textarea{font-size:12px;resize:none}.sb-rf input{font-size:11px}.sb-rf textarea:focus,.sb-rf input:focus{outline:none;border-color:var(--fb-green)}.sb-rsub{width:100%;background:var(--fb-green);color:#fff;border:none;border-radius:var(--fb-r);padding:7px;font-family:monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}.sb-rsub:hover{opacity:.88}
+.sb-empty{text-align:center;color:var(--fb-muted);font-size:12px;padding:48px 20px;line-height:2.2}.sb-ft{flex-shrink:0;padding:12px;border-top:1.5px solid var(--fb-cream);display:flex;flex-direction:column;gap:8px}.sb-ftb{display:block;width:100%;padding:10px;font-family:monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-radius:var(--fb-r);text-align:center}.sb-ftb.dk{background:var(--fb-ink);color:var(--fb-paper);border:none}.sb-ftb.lt{background:#fff;color:var(--fb-ink);border:1.5px solid var(--fb-ink)}.sb-ftb:hover{opacity:.85}
+#fb-tb{position:fixed;bottom:24px;left:24px;display:flex;gap:8px;z-index:1000}.tb-b{font-family:monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:8px 14px;border-radius:20px;border:1.5px solid var(--fb-ink);cursor:pointer;background:#fff;color:var(--fb-ink);box-shadow:2px 2px 0 var(--fb-ink);transition:transform .1s,box-shadow .1s}.tb-b:hover{transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--fb-ink)}.tb-b:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--fb-ink)}#tb-cnt{background:var(--fb-acc);color:#fff;border-color:var(--fb-acc);box-shadow:2px 2px 0 rgba(217,79,43,.35);display:none}
+#pw-gate{position:fixed;inset:0;background:var(--fb-paper);display:flex;align-items:center;justify-content:center;z-index:9999;font-family:monospace}#pw-gate.unlocked{display:none}.pw-box{width:100%;max-width:360px;padding:0 24px;display:flex;flex-direction:column;align-items:center}.pw-logo{font-family:serif;font-size:28px;font-weight:300;color:var(--fb-ink);margin-bottom:8px}.pw-logo em{font-style:italic;color:var(--fb-acc)}.pw-label{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--fb-muted);margin-bottom:24px}.pw-field-wrap{width:100%;position:relative;margin-bottom:10px}#pw-input{width:100%;font-family:monospace;font-size:15px;border:1.5px solid var(--fb-ink);border-radius:var(--fb-r);padding:12px 44px 12px 14px;background:#fff;color:var(--fb-ink);letter-spacing:.06em;transition:border-color .12s,box-shadow .12s}#pw-input:focus{outline:none;border-color:var(--fb-acc);box-shadow:3px 3px 0 var(--fb-acc)}#pw-input.error{border-color:var(--fb-acc);animation:pw-shake .3s ease}@keyframes pw-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}#pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--fb-muted);font-size:16px;padding:0;line-height:1}#pw-toggle:hover{color:var(--fb-ink)}#pw-submit{width:100%;background:var(--fb-ink);color:var(--fb-paper);border:none;border-radius:var(--fb-r);padding:12px;font-family:monospace;font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:3px 3px 0 rgba(0,0,0,.15);transition:transform .1s,box-shadow .1s;margin-bottom:10px}#pw-submit:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 rgba(0,0,0,.15)}#pw-submit:active{transform:translate(1px,1px);box-shadow:1px 1px 0 rgba(0,0,0,.15)}#pw-error{font-size:11px;color:var(--fb-acc);letter-spacing:.06em;min-height:16px;opacity:0;transition:opacity .15s}#pw-error.visible{opacity:1}
+</style>
+
+<div id="pw-gate"><div class="pw-box"><div class="pw-logo">studio <em>hug</em></div><div class="pw-label">Enter password to view wireframe</div><div class="pw-field-wrap"><input id="pw-input" type="password" placeholder="Password" autocomplete="off"/><button id="pw-toggle" type="button">&#128065;</button></div><button id="pw-submit">Enter</button><div id="pw-error">Incorrect password &mdash; try again</div></div></div>
+<div id="fb-panel"><div class="fb-panel-hd"><div><div style="font-weight:500">Leave feedback</div><div id="fb-panel-section"></div></div><button id="fb-close">×</button></div><div class="fb-panel-bd"><div id="fb-form"><label>Your name</label><input id="fb-ni" class="fb-inp" type="text" placeholder="e.g. Maria Muster"/><label>Your feedback</label><textarea id="fb-ti" class="fb-inp" rows="4" placeholder="What should change here?"></textarea><button class="fb-btn-p" id="fb-submit">Save feedback</button></div><div id="fb-ok"><span>✓</span>Feedback saved!</div></div></div>
+<div id="fb-sb"><div class="sb-hd"><div><h3>Feedback</h3><div class="sb-hd-meta" id="sb-meta">—</div></div><button id="fb-sb-close">×</button></div><div class="sb-tabs"><button class="sb-tab active" data-filter="all">All</button><button class="sb-tab" data-filter="open">Open</button><button class="sb-tab" data-filter="resolved">Resolved</button></div><div id="sb-scroll"></div><div class="sb-ft"><div id="sb-sync-status" style="font-size:10px;text-align:center;padding:4px 0 2px;letter-spacing:0.06em;"></div><button class="sb-ftb dk" id="fb-exp">⬇ Export as CSV</button><button class="sb-ftb lt" id="fb-cp">Copy HTML + Feedback</button></div></div>
+<div id="fb-tb"><button class="tb-b" id="tb-view">View feedback</button><button class="tb-b" id="tb-cnt"></button></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  SUPABASE CONFIG — fill in your 3 values, then save the file
+// ══════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://ahzqpvhpogizrkxqxpgb.supabase.co';   // https://xxxxxxxxxx.supabase.co
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFoenFwdmhwb2dpenJreHF4cGdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2OTg3NDcsImV4cCI6MjA5NDI3NDc0N30.txFNtp9SwN8UZIcFf0x7M6M8PjH6hj4CkQadc73Vwpk';      // eyJh... (long string)
+const PROJECT_NAME = 'gaudi-wf';  // e.g. 'HGV — BI Tool v1'
+const PASSWORD     = 'vergelli';      // e.g. 'hgv2025' — share this with your client
+// ══════════════════════════════════════════════════════════════
+// Lines below are automatic — do NOT edit them
+const SB_READY = SUPABASE_URL !== 'YOUR_PROJECT_URL_HERE' && SUPABASE_KEY !== 'YOUR_ANON_KEY_HERE';
+
+const SB_HDR=()=>({'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`});
+async function sbIF(row){if(!SB_READY)return null;try{const r=await fetch(`${SUPABASE_URL}/rest/v1/feedback`,{method:'POST',headers:{...SB_HDR(),'Prefer':'return=representation'},body:JSON.stringify({section_id:row.section,section_label:row.label,reviewer_name:row.name,feedback_text:row.text,resolved:false,page_url:location.href,project_name:PROJECT_NAME})});const d=await r.json();return Array.isArray(d)?d[0]:d;}catch(e){console.warn('[SB] insert feedback',e);return null;}}
+async function sbUF(sbId,fields){if(!SB_READY||!sbId)return;try{await fetch(`${SUPABASE_URL}/rest/v1/feedback?id=eq.${sbId}`,{method:'PATCH',headers:SB_HDR(),body:JSON.stringify(fields)});}catch(e){console.warn('[SB] update feedback',e);}}
+async function sbDF(sbId){if(!SB_READY||!sbId)return;try{await fetch(`${SUPABASE_URL}/rest/v1/feedback?id=eq.${sbId}`,{method:'DELETE',headers:SB_HDR()});}catch(e){console.warn('[SB] delete feedback',e);}}
+async function sbIR(fsbId,row){if(!SB_READY||!fsbId)return null;try{const r=await fetch(`${SUPABASE_URL}/rest/v1/replies`,{method:'POST',headers:{...SB_HDR(),'Prefer':'return=representation'},body:JSON.stringify({feedback_id:fsbId,author_name:row.name,reply_text:row.text})});const d=await r.json();return Array.isArray(d)?d[0]:d;}catch(e){console.warn('[SB] insert reply',e);return null;}}
+async function sbDR(sbId){if(!SB_READY||!sbId)return;try{await fetch(`${SUPABASE_URL}/rest/v1/replies?id=eq.${sbId}`,{method:'DELETE',headers:SB_HDR()});}catch(e){console.warn('[SB] delete reply',e);}}
+async function sbFetch(){if(!SB_READY)return null;_sss('syncing');try{const fr=await fetch(`${SUPABASE_URL}/rest/v1/feedback?project_name=eq.${encodeURIComponent(PROJECT_NAME)}&order=created_at.asc`,{headers:SB_HDR()});const fb=await fr.json();if(!Array.isArray(fb)){_sss('error');return null;}if(!fb.length){_sss('idle');return[];}const ids=fb.map(r=>r.id).join(',');const rr=await fetch(`${SUPABASE_URL}/rest/v1/replies?feedback_id=in.(${ids})&order=created_at.asc`,{headers:SB_HDR()});const rep=await rr.json();_sss('idle');return fb.map(row=>({id:row.id,sbId:row.id,section:row.section_id,label:row.section_label,name:row.reviewer_name,text:row.feedback_text,resolved:row.resolved||false,ts:row.created_at,replies:(Array.isArray(rep)?rep:[]).filter(r=>r.feedback_id===row.id).map(r=>({id:r.id,sbId:r.id,name:r.author_name,text:r.reply_text,ts:r.created_at}))}));}catch(e){console.warn('[SB] fetch',e);_sss('error');return null;}}
+function _sss(s){const el=document.getElementById('sb-sync-status');if(!el)return;if(!SB_READY){el.textContent='⚠ local only — add Supabase config';el.style.color='var(--fb-acc)';return;}if(s==='syncing'){el.textContent='↻ syncing…';el.style.color='var(--fb-muted)';}if(s==='idle'){el.textContent='☁ synced';el.style.color='var(--fb-green)';}if(s==='error'){el.textContent='✕ sync failed — check console';el.style.color='var(--fb-acc)';}}
+
+const _DB='wf_fb_v2';let _as=null,_cf='all';
+const _ld=()=>{try{return JSON.parse(localStorage.getItem(_DB))||[];}catch{return[];}};
+const _sv=d=>localStorage.setItem(_DB,JSON.stringify(d));
+const _e=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const _f=iso=>new Date(iso).toLocaleDateString('de-DE',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+const FB_INTERACTIVE_TAGS=["BUTTON","A","INPUT","TEXTAREA","SELECT","DIALOG"];function fbIsInteractive(node){if(!node||!node.tagName)return false;if(FB_INTERACTIVE_TAGS.indexOf(node.tagName)!==-1)return true;if(node.getAttribute&&node.getAttribute("role")==="button")return true;if(node.classList&&(node.classList.contains("navitem")||node.classList.contains("pill-btn")||node.classList.contains("cmp-iframe-box")))return true;return false;}
+document.querySelectorAll('.fb-zone').forEach(z=>{z.addEventListener('click',e=>{let node=e.target,interactive=false;while(node&&node!==z){if(fbIsInteractive(node)){interactive=true;break;}node=node.parentElement;}if(interactive)return;e.stopPropagation();_op(z.dataset.section,z.dataset.label);});});
+const _pan=document.getElementById('fb-panel'),_ps=document.getElementById('fb-panel-section'),_ff=document.getElementById('fb-form'),_fok=document.getElementById('fb-ok'),_ni=document.getElementById('fb-ni'),_ti=document.getElementById('fb-ti');
+function _op(sid,label){_as={id:sid,label};_ps.textContent=label;_ff.style.display='block';_fok.style.display='none';_ti.value='';_pan.classList.add('open');setTimeout(()=>_ti.focus(),120);}
+function _cp(){_pan.classList.remove('open');_as=null;}
+document.getElementById('fb-close').addEventListener('click',_cp);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){_cp();_csb();}});
+document.getElementById('fb-submit').addEventListener('click',async()=>{const t=_ti.value.trim();if(!t){_ti.style.borderColor='var(--fb-acc)';return;}_ti.style.borderColor='';const nc={id:Date.now(),section:_as.id,label:_as.label,name:_ni.value.trim()||'Anonymous',text:t,resolved:false,ts:new Date().toISOString(),replies:[]};const a=_ld();a.push(nc);_sv(a);_ra();_ff.style.display='none';_fok.style.display='block';setTimeout(_cp,1600);_sss('syncing');const sb=await sbIF(nc);if(sb){const u=_ld();const c=u.find(x=>x.id===nc.id);if(c){c.sbId=sb.id;_sv(u);}_sss('idle');}});
+const _sb=document.getElementById('fb-sb'),_sc=document.getElementById('sb-scroll'),_sm=document.getElementById('sb-meta');
+function _osb(){_sb.classList.add('open');_rs();}
+function _csb(){_sb.classList.remove('open');}
+document.getElementById('tb-view').addEventListener('click',_osb);
+document.getElementById('fb-sb-close').addEventListener('click',_csb);
+document.getElementById('tb-cnt').addEventListener('click',_osb);
+document.querySelectorAll('.sb-tab').forEach(t=>{t.addEventListener('click',()=>{document.querySelectorAll('.sb-tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');_cf=t.dataset.filter;_rs();});});
+function _rs(){const all=_ld();const on=all.filter(c=>!c.resolved).length;_sm.textContent=`${all.length} comment${all.length!==1?'s':''} · ${on} open`;let list=all;if(_cf==='open')list=all.filter(c=>!c.resolved);if(_cf==='resolved')list=all.filter(c=>c.resolved);if(!list.length){const m={all:'No feedback yet.<br/>Hover a section and click to add.',open:'No open feedback.',resolved:'No resolved feedback yet.'};_sc.innerHTML=`<div class="sb-empty">${m[_cf]}</div>`;return;}const g={};list.forEach(c=>{if(!g[c.section])g[c.section]={label:c.label,items:[]};g[c.section].items.push(c);});_sc.innerHTML=Object.entries(g).map(([sid,gd])=>`<div class="sb-grp" id="grp-${sid}"><div class="sb-grp-hd" onclick="fbTG('${sid}')"><span class="sb-grp-title">${_e(gd.label)}</span><span class="sb-grp-right"><span class="sb-grp-badge">${gd.items.length}</span><span class="sb-chev">▾</span></span></div><div class="sb-grp-body">${gd.items.map(_rc).join('')}</div></div>`).join('');}
+function _rc(c){const rh=(c.replies||[]).length?`<div class="sb-replies">${(c.replies||[]).map(r=>`<div class="sb-reply"><div class="sb-rtext">${_e(r.text)}</div><div class="sb-rmeta"><span>${_e(r.name)} · ${_f(r.ts)}</span><button class="sb-rdel" onclick="fbDR(${c.id},${r.id})">✕ Remove</button></div></div>`).join('')}</div>`:'';return `<div class="sb-card${c.resolved?' resolved':''}" id="card-${c.id}"><div class="sb-cm"><div class="sb-ct">${_e(c.text)}</div><div class="sb-meta"><span class="sb-author">${_e(c.name)}</span><span>${_f(c.ts)}${c.resolved?' &nbsp;<span class="sb-res-badge">✓ resolved</span>':''}</span></div></div><div class="sb-acts"><button class="sb-act" onclick="fbE(${c.id})">✎ Edit</button><button class="sb-act" onclick="fbTR(${c.id})">↩ Reply</button><button class="sb-act" onclick="fbRV(${c.id})">${c.resolved?'↺ Reopen':'✓ Resolve'}</button><button class="sb-act del" onclick="fbD(${c.id})">✕ Delete</button></div><div class="sb-edit" id="ed-${c.id}"><textarea rows="3" id="eta-${c.id}">${_e(c.text)}</textarea><div class="sb-edit-acts"><button class="sb-save" onclick="fbSE(${c.id})">Save</button><button class="sb-cancel" onclick="fbCE(${c.id})">Cancel</button></div></div>${rh}<div class="sb-rf" id="rf-${c.id}"><textarea rows="2" id="rta-${c.id}" placeholder="Write a reply…"></textarea><input id="rn-${c.id}" placeholder="Your name (optional)"/><button class="sb-rsub" onclick="fbSR(${c.id})">Send reply</button></div></div>`;}
+function fbTG(sid){document.getElementById(`grp-${sid}`)?.classList.toggle('collapsed');}
+function fbE(id){document.getElementById(`ed-${id}`).classList.add('open');document.getElementById(`card-${id}`).classList.add('editing');const t=document.getElementById(`eta-${id}`);t.focus();t.select();}
+function fbCE(id){document.getElementById(`ed-${id}`).classList.remove('open');document.getElementById(`card-${id}`).classList.remove('editing');}
+async function fbSE(id){const t=document.getElementById(`eta-${id}`).value.trim();if(!t)return;const a=_ld();const c=a.find(x=>x.id===id);if(c){c.text=t;_sv(a);_ra();_rs();await sbUF(c.sbId,{feedback_text:t});}}
+async function fbD(id){if(!confirm('Delete this comment?'))return;const a=_ld();const c=a.find(x=>x.id===id);_sv(a.filter(x=>x.id!==id));_ra();_rs();if(c)await sbDF(c.sbId);}
+async function fbRV(id){const a=_ld();const c=a.find(x=>x.id===id);if(c){c.resolved=!c.resolved;_sv(a);_ra();_rs();await sbUF(c.sbId,{resolved:c.resolved});}}
+function fbTR(id){const f=document.getElementById(`rf-${id}`);if(f.classList.toggle('open'))setTimeout(()=>document.getElementById(`rta-${id}`).focus(),80);}
+async function fbSR(id){const t=document.getElementById(`rta-${id}`).value.trim();if(!t)return;const n=document.getElementById(`rn-${id}`).value.trim()||'studio hug';const nr={id:Date.now(),name:n,text:t,ts:new Date().toISOString()};const a=_ld();const c=a.find(x=>x.id===id);if(c){(c.replies=c.replies||[]).push(nr);_sv(a);_rs();const sb=await sbIR(c.sbId,nr);if(sb){const u=_ld();const uc=u.find(x=>x.id===id);const ur=uc?.replies?.find(r=>r.id===nr.id);if(ur){ur.sbId=sb.id;_sv(u);}}}}
+async function fbDR(cid,rid){const a=_ld();const c=a.find(x=>x.id===cid);if(c){const r=(c.replies||[]).find(x=>x.id===rid);c.replies=(c.replies||[]).filter(x=>x.id!==rid);_sv(a);_rs();if(r)await sbDR(r.sbId);}}
+const _cb=document.getElementById('tb-cnt');
+function _ra(){const a=_ld();const on=a.filter(c=>!c.resolved).length;_cb.style.display=a.length?'inline-block':'none';_cb.textContent=`${on} open · ${a.length} total`;document.querySelectorAll('.fb-zone').forEach(z=>{const n=a.filter(c=>c.section===z.dataset.section).length;z.classList.toggle('fb-has-comment',n>0);if(n>0)z.dataset.count=n;else delete z.dataset.count;});}
+document.getElementById('fb-exp').addEventListener('click',()=>{const a=_ld();if(!a.length){alert('No feedback yet.');return;}const rows=[['Section ID','Section Label','Name','Feedback','Status','Timestamp','Replies']];a.forEach(c=>{const r=(c.replies||[]).map(r=>`${r.name}: ${r.text}`).join(' | ');rows.push([c.section,c.label,c.name,c.text,c.resolved?'resolved':'open',c.ts,r]);});const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');const el=document.createElement('a');el.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));el.download='wireframe-feedback.csv';el.click();});
+document.getElementById('fb-cp').addEventListener('click',()=>{const a=_ld();if(!a.length){alert('No feedback yet.');return;}const bs={};a.forEach(c=>{(bs[c.section]=bs[c.section]||[]).push(c);});let html=document.documentElement.outerHTML;Object.entries(bs).forEach(([sid,cs])=>{const bl=cs.map(c=>{const st=c.resolved?'RESOLVED':'OPEN';const rs=(c.replies||[]).map(r=>`\n     REPLY by ${r.name}: ${r.text}`).join('');return `<!-- FEEDBACK [${st}] [${c.label}] by ${c.name}: ${c.text}${rs} -->`;}).join('\n      ');html=html.replace(new RegExp(`(data-section="${sid}"[^>]*>)`),`$1\n      ${bl}`);});const hdr=`<!--\nCLAUDE INSTRUCTIONS — Process only OPEN feedback.\nFor each: update that section, add <!-- UPDATED: ... --> note, remove the FEEDBACK comment.\nLeave RESOLVED untouched. Return full updated HTML.\n-->`;navigator.clipboard.writeText(hdr+'\n'+html).then(()=>{const b=document.getElementById('fb-cp');b.textContent='✓ Copied!';setTimeout(()=>b.textContent='Copy HTML + Feedback',2200);});});
+async function init(){_sss('idle');if(SB_READY){const d=await sbFetch();if(d!==null)_sv(d);}_ra();}
+init();
+// Password Gate
+(function(){var SK='wf_pw_'+location.pathname;var gate=document.getElementById('pw-gate');var inp=document.getElementById('pw-input');var btn=document.getElementById('pw-submit');var err=document.getElementById('pw-error');var tog=document.getElementById('pw-toggle');if(sessionStorage.getItem(SK)==='1'){gate.classList.add('unlocked');return;}setTimeout(function(){inp.focus();},80);function attempt(){if(inp.value===PASSWORD){sessionStorage.setItem(SK,'1');gate.style.transition='opacity 0.3s';gate.style.opacity='0';setTimeout(function(){gate.classList.add('unlocked');},300);}else{inp.classList.add('error');err.classList.add('visible');inp.value='';setTimeout(function(){inp.classList.remove('error');},400);setTimeout(function(){inp.focus();},100);}}btn.addEventListener('click',attempt);inp.addEventListener('keydown',function(e){if(e.key==='Enter')attempt();});tog.addEventListener('click',function(){inp.type=inp.type==='password'?'text':'password';tog.innerHTML=inp.type==='password'?'&#128065;':'&#128584;';inp.focus();});inp.addEventListener('input',function(){err.classList.remove('visible');});})();
+</script>
+<!-- ══════════════════════════════ END FEEDBACK SYSTEM v4 ══════════════════════════════ -->
+</body>
+</html>
